@@ -18,7 +18,8 @@ If you user another location than you need to adjust this value.
 
 2. Call the Makefile supplied in the "unix" directory:
 
-> make -f unix/Makefile
+> cd unix
+> make
 
 This will create the "OSD_CA01.sys" menu binary ready to be installed on a SD card. 
 
