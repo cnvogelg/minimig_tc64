@@ -26,8 +26,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //#include "stdio.h"
 #include "errors.h"
 #include "hardware.h"
-#include "FAT.h"
-#include "FDD.h"
+#include "fat.h"
+#include "fdd.h"
 
 #define CMD_HDRID 0xAACA
 

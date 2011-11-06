@@ -28,8 +28,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //#include "stdio.h"
 //#include "string.h"
 #include "hardware.h"
-#include "MMC.h"
-#include "FAT.h"
+#include "mmc.h"
+#include "fat.h"
 //#include "firmware.h"
 
 // variables

@@ -40,8 +40,8 @@ JB:
 //#include <stdio.h>
 #include <string.h>
 //#include <ctype.h>
-#include "MMC.h"
-#include "FAT.h"
+#include "mmc.h"
+#include "fat.h"
 
 unsigned short directory_cluster;       // first cluster of directory (0 if root)
 unsigned short entries_per_cluster;     // number of directory entries per cluster

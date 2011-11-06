@@ -28,8 +28,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //#include "string.h"
 #include "errors.h"
 #include "hardware.h"
-#include "FAT.h"
-#include "FDD.h"
+#include "fat.h"
+#include "fdd.h"
 
 unsigned char DEBUG = 0;
 
