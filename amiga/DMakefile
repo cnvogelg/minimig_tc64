@@ -1,0 +1,36 @@
+# amiga DICE dmake file for minimig code
+#
+# define assign DCC: to point to your DICE 3.15/3.16 install
+
+DBIN=DCC:bin
+DCCOPTS=-// -D ROM
+DCCLINK=-rom -l rom.lib
+ROM_ADDR=0x2000
+
+C_ASM=start.asm
+C_SRC=main.c fdd.c fat.c osd.c hardware.c fpga.c mmc.c hdd.c menu.c
+C_HDR=config.h errors.h fat.h fdd.h firmware.h fpga.h hardware.h hdd.h menu.h mmc.h osd.h
+C_ALL= $(C_ASM) $(C_SRC)
+ALL_SRC=$(C_ALL:*:"/src/*")
+ALL_HDR=$(C_HDR:*:"/src/*")
+
+REL_BIN=menu
+ABS_BIN=OSD_CA01.sys
+
+all: setup build
+
+setup:
+	assign DCC: dice_mini
+	assign DINCLUDE: DCC:include
+	assign DLIB: DCC:dlib
+
+clean:
+	Delete $(REL_BIN) $(ABS_BIN)
+
+build: $(ABS_BIN)
+
+$(REL_BIN): $(ALL_SRC) $(ALL_HDR)
+	$(DBIN)/dcc $(DCCOPTS) $(ALL_SRC) -o $(REL_BIN) $(DCCLINK)
+
+$(ABS_BIN): $(REL_BIN)
+	$(DBIN)/romable $(REL_BIN) -o $(ABS_BIN) -DC -C $(ROM_ADDR)

@@ -26,8 +26,19 @@ This will create the "OSD_CA01.sys" menu binary ready to be installed on a SD ca
 B) On an Amiga System
 ---------------------
 
-TBD
+1. This distribution already ships a mini distribution of DICE 3.16 [1]. So
+everything is setup to compile the code.
+
+2. Enter the "amiga" directory and call "dmake" there from the the
+"dice_mini/bin" directory:
+
+ cd amiga
+ dice_mini/bin/dmake
+
+This will create the "OSD_CA01.sys" menu binary ready to be installed on a SD card. 
 
 
 [1] http://www.obviously.com/dice/
 [2] http://lallafa.de/blog/2011/06/dice-3-15-revisited-on-mac/
+[3] http://aminet.net/dev/c/dice-3.16.lha
+
