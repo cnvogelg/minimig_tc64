@@ -1,0 +1,33 @@
+INSTALL
+
+Preface:
+
+The controller m68k CPU code is written in C and compiled using DICE [1].
+You do not need any target specific libraries or headers (e.g. Amiga).
+
+
+A) On a UNIX System (Linux, Mac OS X, ...)
+------------------------------------------
+
+1. First you need to compile and setup DICE from source as a cross-compiler on
+your host machine. I have written a How To on my Blog [2]. This describes the
+Mac setup but it will work on Linux and other *nixes, too.
+
+I use the install location /opt/dice defined in DHOME in the Makefile.
+If you user another location than you need to adjust this value.
+
+2. Call the Makefile supplied in the "unix" directory:
+
+> make -f unix/Makefile
+
+This will create the "OSD_CA01.sys" menu binary ready to be installed on a SD card. 
+
+
+B) On an Amiga System
+---------------------
+
+TBD
+
+
+[1] http://www.obviously.com/dice/
+[2] http://lallafa.de/blog/2011/06/dice-3-15-revisited-on-mac/
