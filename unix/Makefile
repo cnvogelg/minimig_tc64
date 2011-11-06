@@ -21,10 +21,10 @@ DCCLINK=-rom -l rom.lib
 ROMABLE=$(DBIN)/romable
 ROM_ADDR=0x2000
 
-C_SRC=main.c fdd.c fat.c osd.c hardware.c fpga.c mmc.c hdd.c menu.c
 C_ASM=start.asm
+C_SRC=main.c fdd.c fat.c osd.c hardware.c fpga.c mmc.c hdd.c menu.c
 C_HDR=config.h errors.h fat.h fdd.h firmware.h fpga.h hardware.h hdd.h menu.h mmc.h osd.h
-ALL_SRC=$(patsubst %,src/%,$(C_SRC) $(C_ASM))
+ALL_SRC=$(patsubst %,src/%,$(C_ASM) $(C_SRC))
 ALL_HDR=$(patsubst %,src/%,$(C_HDR))
 
 REL_BIN=menu
