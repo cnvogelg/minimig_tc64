@@ -13,13 +13,20 @@ compiler to build the menu code.
 
 See the INSTALL file for more details.
 
+Run
+---
+
+You need a Chameleon cartridge to run the MiniMig menu code. Install the
+latest Core from [4] and set up a SD card with the provided files and a
+Kickstart ROM image. Finally replace the "OSD_CA01.sys" menu code with your
+newly build one and run the core.
 
 Contribute
 ----------
 
 I'll keep updates to the menu code in this repository. If you have fixes,
-extension, or other contributions then drop me an email or a push request to
-include them here.
+extension, or other contributions then drop me an email or a GitHub push
+request to include them here.
 
 
 Have Fun,
@@ -30,3 +37,4 @@ chris@vogelgsang.org
 [1] http://code.google.com/p/minimig/
 [2] http://www.icomp.de/products/chameleon_e.htm
 [3] http://www.obviously.com/dice/
+[4] http://beta.icomp.de/

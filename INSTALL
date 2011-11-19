@@ -27,6 +27,12 @@ This will create the "OSD_CA01.sys" menu binary ready to be installed on a SD ca
 B) On an Amiga System
 ---------------------
 
+0. Make this code tree including "amiga" and "src" folders available on your
+Amiga. 
+   a.) You can create a Disk (image) and copy both directories there.
+   b.) Copy them to a SD Card
+   c.) Use a virtual drive with host directory in an emulator like UAE
+
 1. This distribution already ships a mini distribution of DICE 3.16 [1]. So
 everything is setup to compile the code.
 
