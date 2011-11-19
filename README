@@ -1,3 +1,32 @@
-Chameleon Port of Minimig
--------------------------
+TurboChameleon64 Port of Minimig
+--------------------------------
 
+This repository hosts the MiniMig[1] menu controller code ported to a Motorola
+68000 SoftCore by Tobias Gubener (TobiFlexx) for the TurboChameleon64[2] FPGA
+cartridge by Individual Computers.
+
+Build
+-----
+
+You will need the DICE[3] Amiga C compiler either as a native or a cross
+compiler to build the menu code.
+
+See the INSTALL file for more details.
+
+
+Contribute
+----------
+
+I'll keep updates to the menu code in this repository. If you have fixes,
+extension, or other contributions then drop me an email or a push request to
+include them here.
+
+
+Have Fun,
+Christian Vogelgsang / lallafa
+chris@vogelgsang.org
+
+
+[1] http://code.google.com/p/minimig/
+[2] http://www.icomp.de/products/chameleon_e.htm
+[3] http://www.obviously.com/dice/
