@@ -36,6 +36,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 2010-08-15   - support for joystick emulation
 // 2010-08-18   - clean-up
 
+// FIXME - detect number of partitions on the SD card, and allow that many to be selected as hard files.
+
 //#include "AT91SAM7S256.h"
 //#include "stdio.h"
 //#include "string.h"

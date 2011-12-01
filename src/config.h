@@ -19,7 +19,7 @@ typedef struct
 
 typedef struct
 {
-    unsigned char enabled;
+    unsigned char enabled;	// 0: Disabled, 1: Hard file, 2: MMC (entire card), 3: 2nd Partition of MMC card
     unsigned char present;
     char name[8];
     char long_name[16];

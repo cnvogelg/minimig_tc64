@@ -23,13 +23,20 @@
 #define ACMD_WRITE_MULTIPLE 0xC5
 #define ACMD_SET_MULTIPLE_MODE 0xC6
 
+#define HDF_DISABLED 0
+#define HDF_FILE 1
+#define HDF_CARD 2
+#define HDF_CARDPART 3
+
 typedef struct
 {
+	int			   type;	// Are we using a file, the entire SD card or a partition on the SD card?
     fileTYPE       file;
     unsigned short cylinders;
     unsigned short heads;
     unsigned short sectors;
     unsigned short sectors_per_block;
+	unsigned long  offset;	// If a partition, the lba offset of the partition.
     unsigned long  index[1024];
     unsigned long  index_size;
 } hdfTYPE;

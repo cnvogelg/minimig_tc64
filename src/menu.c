@@ -39,7 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "menu.h"
 
 // time delay after which file/dir name starts to scroll
-#define SCROLL_DELAY 500
+#define SCROLL_DELAY 5000
 
 unsigned long scroll_offset; // file/dir name scrolling position
 unsigned long scroll_timer;  // file/dir name scrolling timer
@@ -78,6 +78,7 @@ const char *config_memory_slow_msg[] = {"none  ", "0.5 MB", "1.0 MB", "1.5 MB"};
 const char *config_scanlines_msg[] = {"off", "dim", "blk"};
 const char *config_memory_fast_msg[] = {"none  ", "2.0 MB", "4.0 MB", "8.0 MB"};
 const char *config_cpu_msg[] = {"68000 ", "68010", "-----","020 alpha"};
+const char *config_hdf_msg[] = {"Disabled", "Enabled", "MMC card", "MMC partition"};
 
 const char *config_chipset_msg[] = {"OCS-A500", "OCS-A1000", "ECS", "---"};
 
@@ -963,7 +964,7 @@ void HandleUI(void)
         OsdWrite(0, "            HARDFILES", 0);
         OsdWrite(1, "", 0);
         strcpy(s, "     Master : ");
-        strcat(s, config.hardfile[0].present ? config.hardfile[0].enabled ? "enabled" : "disabled" : "n/a");
+        strcat(s, config_hdf_msg[config.hardfile[0].enabled]);
         OsdWrite(2, s, menusub == 0);
         if (config.hardfile[0].present)
         {
@@ -978,7 +979,7 @@ void HandleUI(void)
             OsdWrite(3, "       ** file not found **", menusub == 1);
 
         strcpy(s, "      Slave : ");
-        strcat(s, config.hardfile[1].present ? config.hardfile[1].enabled ? "enabled" : "disabled" : "n/a");
+        strcat(s, config_hdf_msg[config.hardfile[1].enabled]);
         OsdWrite(4, s, menusub == 2);
         if (config.hardfile[1].present)
         {
@@ -1016,11 +1017,16 @@ void HandleUI(void)
         {
             if (menusub == 0)
             {
-                if (config.hardfile[0].present)
-                {
-                   config.hardfile[0].enabled ^= 0x01;
+//                if (config.hardfile[0].present)
+//                {
+
+                   config.hardfile[0].enabled +=1;
+				   config.hardfile[0].enabled &=3;
+				   if(config.hardfile[0].enabled && !config.hardfile[0].present)
+					  config.hardfile[0].enabled+=1;	// Disallow hardfile mode if there's no filename set
                    menustate = MENU_SETTINGS_HARDFILE1;
-                }
+//                }
+//
             }
             else if (menusub == 1)
             {
@@ -1028,11 +1034,15 @@ void HandleUI(void)
             }
             else if (menusub == 2)
             {
-                if (config.hardfile[1].present)
-                {
-                   config.hardfile[1].enabled ^= 0x01;
+//                if (config.hardfile[1].present)
+//                {
+                   config.hardfile[1].enabled +=1;
+				   config.hardfile[1].enabled &=3;
+				   if(config.hardfile[1].enabled && !config.hardfile[0].present)
+					  config.hardfile[1].enabled+=1;	// Disallow hardfile mode if there's no filename set
                    menustate = MENU_SETTINGS_HARDFILE1;
-                }
+                   menustate = MENU_SETTINGS_HARDFILE1;
+//                }
             }
             else if (menusub == 3)
             {

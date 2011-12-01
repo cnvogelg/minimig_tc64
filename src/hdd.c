@@ -219,24 +219,42 @@ void HandleHDD(unsigned char c1, unsigned char c2)
             if (sector_count == 0)
                sector_count = 0x100;
 
-            if (hdf[unit].file.size)
-                HardFileSeek(&hdf[unit], chs2lba(cylinder, head, sector, unit));
+			switch(config.hardfile[unit].enabled)
+			{
+				case HDF_FILE:
+				    if (hdf[unit].file.size)
+				        HardFileSeek(&hdf[unit], chs2lba(cylinder, head, sector, unit));
 
-            while (sector_count)
-            {
-                while (!(GetFPGAStatus() & CMD_IDECMD)); // wait for empty sector buffer
+				    while (sector_count)
+				    {
+				        while (!(GetFPGAStatus() & CMD_IDECMD)); // wait for empty sector buffer
 
-                WriteStatus(IDE_STATUS_IRQ);
+				        WriteStatus(IDE_STATUS_IRQ);
 
-                if (hdf[unit].file.size)
-                {
-//                    FileRead(&hdf[unit].file, NULL);
-                    FileRead(&hdf[unit].file, 0);
-                    FileSeek(&hdf[unit].file, 1, SEEK_CUR);
-                }
+				        if (hdf[unit].file.size)
+				        {
+		//                    FileRead(&hdf[unit].file, NULL);
+				            FileRead(&hdf[unit].file, 0);
+				            FileSeek(&hdf[unit].file, 1, SEEK_CUR);
+				        }
 
-                sector_count--; // decrease sector count
-            }
+				        sector_count--; // decrease sector count
+				    }
+					break;
+				case HDF_CARD:
+					{
+				        long lba=chs2lba(cylinder, head, sector, unit);
+					    while (sector_count)
+					    {
+					        while (!(GetFPGAStatus() & CMD_IDECMD)); // wait for empty sector buffer
+							MMC_Read(lba,0);
+							++lba;
+							--sector_count;
+						}
+					}
+					break;
+			}
+				// FIXME - implement partition read here...
         }
         else if (tfr[7] == ACMD_SET_MULTIPLE_MODE) // Set Multiple Mode
         {
@@ -261,25 +279,41 @@ void HandleHDD(unsigned char c1, unsigned char c2)
             if (sector_count == 0)
                sector_count = 0x100;
 
-            if (hdf[unit].file.size)
-                HardFileSeek(&hdf[unit], chs2lba(cylinder, head, sector, unit));
+			switch(config.hardfile[unit].enabled)
+			{
+				case HDF_FILE:
+		        if (hdf[unit].file.size)
+		            HardFileSeek(&hdf[unit], chs2lba(cylinder, head, sector, unit));
 
-            while (sector_count)
-            {
-                while (!(GetFPGAStatus() & CMD_IDECMD)); // wait for empty sector buffer
+		        while (sector_count)
+		        {
+		            while (!(GetFPGAStatus() & CMD_IDECMD)); // wait for empty sector buffer
 
-                block_count = sector_count;
-                if (block_count > hdf[unit].sectors_per_block)
-                    block_count = hdf[unit].sectors_per_block;
+		            block_count = sector_count;
+		            if (block_count > hdf[unit].sectors_per_block)
+		                block_count = hdf[unit].sectors_per_block;
 
-                WriteStatus(IDE_STATUS_IRQ);
+		            WriteStatus(IDE_STATUS_IRQ);
 
-                if (hdf[unit].file.size)
-//                    FileReadEx(&hdf[unit].file, NULL, block_count); // NULL enables direct transfer to the FPGA
-                    FileReadEx(&hdf[unit].file, 0, block_count); // NULL enables direct transfer to the FPGA
+		            if (hdf[unit].file.size)
+	//                    FileReadEx(&hdf[unit].file, NULL, block_count); // NULL enables direct transfer to the FPGA
+		                FileReadEx(&hdf[unit].file, 0, block_count); // NULL enables direct transfer to the FPGA
 
-                sector_count -= block_count; // decrease sector count
-            }
+		            sector_count -= block_count; // decrease sector count
+		        }
+				case HDF_CARD:
+					{
+				        long lba=chs2lba(cylinder, head, sector, unit);
+					    while (sector_count)
+					    {
+					        while (!(GetFPGAStatus() & CMD_IDECMD)); // wait for empty sector buffer
+							MMC_Read(lba,0);
+							++lba;
+							--sector_count;
+						}
+					}
+					break;
+			}
         }
         else if (tfr[7] == ACMD_WRITE_SECTORS) // write sectors
         {
