@@ -252,7 +252,7 @@ __geta4 void main(void)
 
     if (!MMC_Init())
         FatalError(1);
-        
+
     BootPrint("Init done again...\n");
 
     spiclk = 7;//MCLK / ((AT91C_SPI_CSR[0] & AT91C_SPI_SCBR) >> 8) / 1000000;
@@ -383,6 +383,40 @@ __geta4 void main(void)
         BootPrint(  "*   using 32 KB clusters to improve performance   *");
         BootPrint(  "***************************************************");
     }
+
+    // save CSD data.
+    memset((void*)&sector_buffer, 0, sizeof(sector_buffer));
+
+	long cap=MMC_GetCapacity();
+
+    if (FileOpen(&file, "CSDData"))
+    {
+	    sprintf(&sector_buffer[16],"Cap: %ld\r",cap);
+	    memcpy((void*)&sector_buffer, (void*)&CSDData, 16);
+        FileWrite(&file, sector_buffer);
+    }
+    else
+    {
+        strncpy(file.name, "CSDData", 8);
+        file.attributes = 0;
+        file.size = 32;
+        if (FileCreate(0, &file))
+        {
+		    sprintf(&sector_buffer[16],"Cap: %ld\r",cap);
+		    memcpy((void*)&sector_buffer, (void*)&CSDData, 16);
+            if (FileWrite(&file, sector_buffer))
+            {
+                printf("File written successfully.\r");
+            }
+            else
+                printf("File write failed!\r");
+        }
+        else
+            printf("File creation failed!\r");
+    }
+
+	//
+
 
     ConfigIDE(config.enable_ide, config.hardfile[0].present && config.hardfile[0].enabled, config.hardfile[1].present && config.hardfile[1].enabled);
     WaitTimer(1000);
