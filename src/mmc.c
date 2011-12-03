@@ -308,13 +308,12 @@ unsigned long MMC_GetCapacity()
 			return(result);
 			break;
 		default:
-			int blocksize=CSDData[5]&7;	// READ_BL_LEN
-			blocksize=1<<(blocksize-9);	// Now a scalar:  physical block size / 512.
-			result=(CSDData[6]&3)<<8;
-			result|=CSDData[7];
-			result<<=2;
-			result|=(CSDData[8]>>6)&3;	// result now contains C_SIZE
-			int cmult=(CSDData[9]&3)<<2;
+			int blocksize=CSDData[5]&15;	// READ_BL_LEN
+			blocksize=1<<(blocksize-9);		// Now a scalar:  physical block size / 512.
+			result=(CSDData[6]&3)<<10;
+			result|=CSDData[7]<<2;
+ 			result|=(CSDData[8]>>6)&3;		// result now contains C_SIZE
+			int cmult=(CSDData[9]&3)<<1;
 			cmult|=(CSDData[10]>>7) & 1;
 			++result;
 			result<<=cmult+2;

@@ -232,7 +232,6 @@ __geta4 void main(void)
     unsigned char key;
 //    unsigned long time;
     unsigned short spiclk;
-    //unsigned char CSD[16];
         BootPrint("OSD_CA01.SYS is here...\n");
 
     DISKLED_ON;
