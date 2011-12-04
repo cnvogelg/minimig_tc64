@@ -36,6 +36,7 @@ typedef struct
     unsigned short heads;
     unsigned short sectors;
     unsigned short sectors_per_block;
+	unsigned short partition;	// Partition no.
 	unsigned long  offset;	// If a partition, the lba offset of the partition.
     unsigned long  index[1024];
     unsigned long  index_size;

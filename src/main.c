@@ -73,19 +73,20 @@ void FatalError(unsigned long error)
 {
     unsigned long i;
 
-    printf("Fatal error: %lu\r", error);
+    sprintf(s,"Fatal error: %lu\n", error);
     BootPrint("FatalError...\n");
+	BootPrint(s);
 
     while (1)
     {
         for (i = 0; i < error; i++)
         {
             DISKLED_ON;
-            WaitTimer(250);
+            WaitTimer(25000);
             DISKLED_OFF;
-            WaitTimer(250);
+            WaitTimer(25000);
         }
-        WaitTimer(1000);
+        WaitTimer(100000);
     }
 }
 
@@ -254,7 +255,7 @@ __geta4 void main(void)
     if (!MMC_Init())
         FatalError(1);
 
-    BootPrint("Init done again...\n");
+    BootPrint("Init done again - hunting for drive...\n");
 
     spiclk = 7;//MCLK / ((AT91C_SPI_CSR[0] & AT91C_SPI_SCBR) >> 8) / 1000000;
     printf("spiclk: %u MHz\r", spiclk);
