@@ -86,16 +86,26 @@ unsigned char t_sort_table[MAXDIRENTRIES];
 extern unsigned long GetTimer(unsigned long);
 extern void ErrorMessage(const char *message, unsigned char code);
 
-void SwapBytes(char *ptr, unsigned long len);	// Borrowed from hdd.c - should really live in a util.c file.
+unsigned long SwapEndianL(unsigned long l)
+{
+  unsigned char *c=(unsigned char *)&l;
+  return((c[3]<<24)+(c[2]<<16)+(c[1]<<8)+c[0]);
+}
 
 void SwapPartitionBytes(int i)
 {
 	// We don't bother to byteswap the CHS geometry fields since we don't use them.
-	SwapBytes((char *)&partitions[0].startlba,4);
-	SwapBytes((char *)&partitions[0].sectors,4);
+	partitions[i].startlba=SwapEndianL(partitions[i].startlba);
+	partitions[i].sectors=SwapEndianL(partitions[i].sectors);
 }
 
 extern char BootPrint(const char *s);
+void bprintfl(const char *fmt,unsigned long l)
+{
+	char s[64];
+	sprintf(s,fmt,l);
+	BootPrint(s);
+}
 
 // FindDrive() checks if a card is present and contains FAT formatted primary partition
 unsigned char FindDrive(void)
@@ -117,23 +127,26 @@ unsigned char FindDrive(void)
 	{
 		case 0x55aa:	// Little-endian MBR on a big-endian system
 			BootPrint("Swapping byte order of partition entries");
-			SwapPartitionBytes[0];
-			SwapPartitionBytes[1];
-			SwapPartitionBytes[2];
-			SwapPartitionBytes[3];
+			SwapPartitionBytes(0);
+			SwapPartitionBytes(1);
+			SwapPartitionBytes(2);
+			SwapPartitionBytes(3);
 			// fall through...
 		case 0xaa55:
 			// get start of first partition
 			boot_sector = partitions[0].startlba;
-			{
-				char s[20];
-				sprintf(s,"Start: %ld\n",partitions[0].startlba);
-				BootPrint(s);
-			}
+			bprintfl("Start: %ld\n",partitions[0].startlba);
 			for(partitioncount=4;(partitions[partitioncount-1].sectors==0) && (partitioncount>1); --partitioncount)
 				;
-			printf("Have %d partitions\r",partitioncount);
-
+			bprintfl("PartitionCount: %ld\n",partitioncount);
+			int i;
+			for(i=0;i<partitioncount;++i)
+			{
+				bprintfl("Partition: %ld",i);
+				bprintfl("  Start: %ld",partitions[i].startlba);
+				bprintfl("  Size: %ld\n",partitions[i].sectors);
+			}
+			WaitTimer(500000);
 		    if (!MMC_Read(boot_sector, sector_buffer)) // read discriptor
 		        return(0);
 			BootPrint("Read boot sector from first partition\n");

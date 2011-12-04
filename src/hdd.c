@@ -371,7 +371,6 @@ void HandleHDD(unsigned char c1, unsigned char c2)
         }
         else if (tfr[7] == ACMD_WRITE_SECTORS) // write sectors
         {
-			DEBUG("Write Sectors");
             WriteStatus(IDE_STATUS_REQ); // pio out (class 2) command type
 
             sector = tfr[3];
@@ -384,6 +383,8 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 		    long lba=chs2lba(cylinder, head, sector, unit);
 			if(hdf[unit].type==HDF_CARDPART)
 				lba+=hdf[unit].offset;
+
+			DEBUG22("Write lba %ld",lba);
 
             if (hdf[unit].file.size)	// File size will be 0 in direct card modes
                 HardFileSeek(&hdf[unit], lba);
@@ -445,7 +446,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 		    long lba=chs2lba(cylinder, head, sector, unit);
 			if(hdf[unit].type==HDF_CARDPART)
 				lba+=hdf[unit].offset;
-			DEBUG22("WriteM lbd %ld",lba);
+			DEBUG22("WriteM lba %ld",lba);
 
             if (hdf[unit].file.size)	// File size will be 0 in direct card modes
                 HardFileSeek(&hdf[unit], lba);
@@ -533,7 +534,6 @@ void GetHardfileGeometry(hdfTYPE *pHDF)
 			break;
 		case HDF_CARDPART:
 		    total = partitions[pHDF->partition].sectors;
-			// FIXME - use the partition size
 			break;
 		default:
 			break;
@@ -545,7 +545,7 @@ void GetHardfileGeometry(hdfTYPE *pHDF)
         for (head = 4; head <= 16; head++)
         {
             cyl = total / (head * spt);
-            if (pHDF->file.size <= 512 * 1024 * 1024)
+            if (total <= 1024 * 1024)
             {
                 if (cyl <= 1023)
                     break;
@@ -556,7 +556,7 @@ void GetHardfileGeometry(hdfTYPE *pHDF)
                     break;
                 if (cyl < 32767 && head >= 5)
                     break;
-                if (cyl <= 65535)
+                if (cyl <= 65535)	// Should there some head constraint here?
                     break;
             }
         }
@@ -655,12 +655,9 @@ unsigned char OpenHardfile(unsigned char unit)
 			{
 			    config.hardfile[unit].present = 1;
 				hdf[unit].file.size=0;
-				hdf[unit].offset=partitions[1].startlba;
+				hdf[unit].offset=partitions[hdf[unit].partition].startlba;
 			    GetHardfileGeometry(&hdf[unit]);
 			}
-			return 1;
-//		    config.hardfile[unit].present = 1;
-			// Fixme - need to figure out partition offsets, etc.
 			return 1;
 			break;
 	}
