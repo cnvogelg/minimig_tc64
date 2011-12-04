@@ -228,6 +228,8 @@ void HandleFpga(void)
 
 __geta4 void main(void)
 {
+	debugmsg[0]=0;
+	debugmsg2[0]=0;
     unsigned char rc;
     unsigned char key;
 //    unsigned long time;
@@ -383,6 +385,7 @@ __geta4 void main(void)
         BootPrint(  "***************************************************");
     }
 
+/*
     // save CSD data.
     memset((void*)&sector_buffer, 0, sizeof(sector_buffer));
 
@@ -415,7 +418,7 @@ __geta4 void main(void)
     }
 
 	//
-
+*/
 
     ConfigIDE(config.enable_ide, config.hardfile[0].present && config.hardfile[0].enabled, config.hardfile[1].present && config.hardfile[1].enabled);
     WaitTimer(1000);

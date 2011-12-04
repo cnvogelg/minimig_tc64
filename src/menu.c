@@ -39,7 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "menu.h"
 
 // time delay after which file/dir name starts to scroll
-#define SCROLL_DELAY 5000
+#define SCROLL_DELAY 50000
 
 unsigned long scroll_offset; // file/dir name scrolling position
 unsigned long scroll_timer;  // file/dir name scrolling timer
@@ -78,7 +78,7 @@ const char *config_memory_slow_msg[] = {"none  ", "0.5 MB", "1.0 MB", "1.5 MB"};
 const char *config_scanlines_msg[] = {"off", "dim", "blk"};
 const char *config_memory_fast_msg[] = {"none  ", "2.0 MB", "4.0 MB", "8.0 MB"};
 const char *config_cpu_msg[] = {"68000 ", "68010", "-----","020 alpha"};
-const char *config_hdf_msg[] = {"Disabled", "Enabled", "MMC card", "MMC partition"};
+const char *config_hdf_msg[] = {"Disabled", "Hardfile", "MMC/SD card", "MMC/SD partition"};
 
 const char *config_chipset_msg[] = {"OCS-A500", "OCS-A1000", "ECS", "---"};
 
@@ -236,7 +236,7 @@ void HandleUI(void)
     case MENU_MAIN1 :
 
         OsdWrite(0, "      *** MINIMIG MENU ***   \x15\x11 ", 0);
-        OsdWrite(1, "", 0);
+        OsdWrite(1, debugmsg, 0);
 
         // floppy drive info
         for (i = 0; i < 4; i++)
@@ -259,7 +259,7 @@ void HandleUI(void)
                 OsdWrite(2 + i, "", 0);
         }
 
-        OsdWrite(6, "", 0);
+        OsdWrite(6, debugmsg2, 0);
         OsdWrite(7, "              exit", menusub == 4);
 
         menustate = MENU_MAIN2;
@@ -1022,8 +1022,8 @@ void HandleUI(void)
 
                    config.hardfile[0].enabled +=1;
 				   config.hardfile[0].enabled &=3;
-				   if(config.hardfile[0].enabled && !config.hardfile[0].present)
-					  config.hardfile[0].enabled+=1;	// Disallow hardfile mode if there's no filename set
+//				   if(config.hardfile[0].enabled && !config.hardfile[0].present)
+//					  config.hardfile[0].enabled+=1;	// Disallow hardfile mode if there's no filename set
                    menustate = MENU_SETTINGS_HARDFILE1;
 //                }
 //
@@ -1038,9 +1038,8 @@ void HandleUI(void)
 //                {
                    config.hardfile[1].enabled +=1;
 				   config.hardfile[1].enabled &=3;
-				   if(config.hardfile[1].enabled && !config.hardfile[0].present)
-					  config.hardfile[1].enabled+=1;	// Disallow hardfile mode if there's no filename set
-                   menustate = MENU_SETTINGS_HARDFILE1;
+//				   if(config.hardfile[1].enabled && !config.hardfile[0].present)
+//					  config.hardfile[1].enabled+=1;	// Disallow hardfile mode if there's no filename set
                    menustate = MENU_SETTINGS_HARDFILE1;
 //                }
             }
@@ -1726,6 +1725,7 @@ char* GetDiskInfo(char* lfn, long len)
             if (!cmp) // match found
             {
                 k = i - 1; // no need to check if k is valid since i is greater than zero
+
                 c = lfn[k]; // get the first character to the left of the matched template substring
                 if (c >= '0' && c <= '9') // check if a digit
                 {

@@ -33,6 +33,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // hardfile structure
 hdfTYPE hdf[2];
 
+char debugmsg[40];
+char debugmsg2[40];
+
+#define DEBUG(x) sprintf(debugmsg,x)
+#define DEBUG2(x) sprintf(debugmsg2,x)
+#define DEBUG3(x,y) sprintf(debugmsg2,x,y)
+
 //unsigned char DIRECT_TRANSFER_MODE = 0;
 // helper function for byte swapping
 void SwapBytes(char *ptr, unsigned long len)
@@ -49,31 +56,55 @@ void SwapBytes(char *ptr, unsigned long len)
 
 void IdentifyDevice(unsigned short *pBuffer, unsigned char unit)
 { // builds Identify Device struct
-
+	sprintf(debugmsg,"Identify device");
     char *p, i, x;
     unsigned long total_sectors = hdf[unit].cylinders * hdf[unit].heads * hdf[unit].sectors;
 
     memset(pBuffer, 0, 512);
 
-    pBuffer[0] = 1 << 6; // hard disk
-    pBuffer[1] = hdf[unit].cylinders; // cyl count
-    pBuffer[3] = hdf[unit].heads; // head count
-    pBuffer[6] = hdf[unit].sectors; // sectors per track
-    memcpy((char*)&pBuffer[10], "1234567890ABCDEFGHIJ", 20); // serial number - byte swapped
-    memcpy((char*)&pBuffer[23], ".100    ", 8); // firmware version - byte swapped
-    p = (char*)&pBuffer[27];
-    memcpy(p, "YAQUBE                                  ", 40); // model name - byte swapped
-    p += 8;
-    if (config.hardfile[unit].long_name[0])
-    {
-        for (i = 0; (x = config.hardfile[unit].long_name[i]) && i < 16; i++) // copy file name as model name
-            p[i] = x;
-    }
-    else
-    {
-        memcpy(p, config.hardfile[unit].name, 8); // copy file name as model name
-    }
-//    SwapBytes((char*)&pBuffer[27], 40); //not for 68000
+	switch(hdf[unit].type)
+	{
+		case HDF_FILE:
+			sprintf(debugmsg2,"Type: HDF_FILE");
+			pBuffer[0] = 1 << 6; // hard disk
+			pBuffer[1] = hdf[unit].cylinders; // cyl count
+			pBuffer[3] = hdf[unit].heads; // head count
+			pBuffer[6] = hdf[unit].sectors; // sectors per track
+			// FIXME - can get serial no from card itself.
+			memcpy((char*)&pBuffer[10], "1234567890ABCDEFGHIJ", 20); // serial number - byte swapped
+			memcpy((char*)&pBuffer[23], ".100    ", 8); // firmware version - byte swapped
+			p = (char*)&pBuffer[27];
+			// FIXME - likewise the model name can be fetched from the card.
+			memcpy(p, "YAQUBE                                  ", 40); // model name - byte swapped
+			p += 8;
+			if (config.hardfile[unit].long_name[0])
+			{
+				for (i = 0; (x = config.hardfile[unit].long_name[i]) && i < 16; i++) // copy file name as model name
+				    p[i] = x;
+			}
+			else
+			{
+				memcpy(p, config.hardfile[unit].name, 8); // copy file name as model name
+			}
+		//    SwapBytes((char*)&pBuffer[27], 40); //not for 68000
+			break;
+		case HDF_CARD:
+			sprintf(debugmsg2,"Type: HDF_CARD");
+			pBuffer[0] = 1 << 6; // hard disk
+			pBuffer[1] = hdf[unit].cylinders; // cyl count
+			pBuffer[3] = hdf[unit].heads; // head count
+			pBuffer[6] = hdf[unit].sectors; // sectors per track
+			// FIXME - can get serial no from card itself.
+			memcpy((char*)&pBuffer[10], "24682468246824682468", 20); // serial number - byte swapped
+			memcpy((char*)&pBuffer[23], ".100    ", 8); // firmware version - byte swapped
+			p = (char*)&pBuffer[27];
+			// FIXME - likewise the model name can be fetched from the card.
+			memcpy(p, "YAQUBE                                  ", 40); // model name - byte swapped
+			p += 8;
+			memcpy(p, "SD/MMC Card", 11); // copy file name as model name
+			//    SwapBytes((char*)&pBuffer[27], 40); //not for 68000
+			break;
+	}
 
     pBuffer[47] = 0x8010; //maximum sectors per block in Read/Write Multiple command
     pBuffer[53] = 1;
@@ -210,6 +241,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
         }
         else if (tfr[7] == ACMD_READ_SECTORS) // Read Sectors
         {
+			sprintf(debugmsg,"Read Sectors");
             WriteStatus(IDE_STATUS_RDY); // pio in (class 1) command type
 
             sector = tfr[3];
@@ -222,6 +254,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 			switch(config.hardfile[unit].enabled)
 			{
 				case HDF_FILE:
+					DEBUG2("Read HDF_File");
 				    if (hdf[unit].file.size)
 				        HardFileSeek(&hdf[unit], chs2lba(cylinder, head, sector, unit));
 
@@ -242,11 +275,14 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 				    }
 					break;
 				case HDF_CARD:
+					DEBUG2("Read HDF_Card");
 					{
 				        long lba=chs2lba(cylinder, head, sector, unit);
 					    while (sector_count)
 					    {
+							DEBUG3("LBA: %ld",lba);
 					        while (!(GetFPGAStatus() & CMD_IDECMD)); // wait for empty sector buffer
+					        WriteStatus(IDE_STATUS_IRQ);
 							MMC_Read(lba,0);
 							++lba;
 							--sector_count;
@@ -270,6 +306,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
         }
         else if (tfr[7] == ACMD_READ_MULTIPLE) // Read Multiple Sectors (multiple sector transfer per IRQ)
         {
+			DEBUG("Read Multiple");
             WriteStatus(IDE_STATUS_RDY); // pio in (class 1) command type
 
             sector = tfr[3];
@@ -282,31 +319,36 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 			switch(config.hardfile[unit].enabled)
 			{
 				case HDF_FILE:
-		        if (hdf[unit].file.size)
-		            HardFileSeek(&hdf[unit], chs2lba(cylinder, head, sector, unit));
+					DEBUG2("ReadM HDF_File");
+				    if (hdf[unit].file.size)
+				        HardFileSeek(&hdf[unit], chs2lba(cylinder, head, sector, unit));
 
-		        while (sector_count)
-		        {
-		            while (!(GetFPGAStatus() & CMD_IDECMD)); // wait for empty sector buffer
+				    while (sector_count)
+				    {
+				        while (!(GetFPGAStatus() & CMD_IDECMD)); // wait for empty sector buffer
 
-		            block_count = sector_count;
-		            if (block_count > hdf[unit].sectors_per_block)
-		                block_count = hdf[unit].sectors_per_block;
+				        block_count = sector_count;
+				        if (block_count > hdf[unit].sectors_per_block)
+				            block_count = hdf[unit].sectors_per_block;
 
-		            WriteStatus(IDE_STATUS_IRQ);
+				        WriteStatus(IDE_STATUS_IRQ);
 
-		            if (hdf[unit].file.size)
-	//                    FileReadEx(&hdf[unit].file, NULL, block_count); // NULL enables direct transfer to the FPGA
-		                FileReadEx(&hdf[unit].file, 0, block_count); // NULL enables direct transfer to the FPGA
+				        if (hdf[unit].file.size)
+		//                    FileReadEx(&hdf[unit].file, NULL, block_count); // NULL enables direct transfer to the FPGA
+				            FileReadEx(&hdf[unit].file, 0, block_count); // NULL enables direct transfer to the FPGA
 
-		            sector_count -= block_count; // decrease sector count
-		        }
+				        sector_count -= block_count; // decrease sector count
+				    }
+					break;
 				case HDF_CARD:
+					DEBUG2("ReadM HDF_Card");
 					{
 				        long lba=chs2lba(cylinder, head, sector, unit);
+						DEBUG3("LBA: %ld",lba);
 					    while (sector_count)
 					    {
 					        while (!(GetFPGAStatus() & CMD_IDECMD)); // wait for empty sector buffer
+					        WriteStatus(IDE_STATUS_IRQ);
 							MMC_Read(lba,0);
 							++lba;
 							--sector_count;
@@ -317,6 +359,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
         }
         else if (tfr[7] == ACMD_WRITE_SECTORS) // write sectors
         {
+			DEBUG("Write Sectors");
             WriteStatus(IDE_STATUS_REQ); // pio out (class 2) command type
 
             sector = tfr[3];
@@ -351,15 +394,22 @@ void HandleHDD(unsigned char c1, unsigned char c2)
                 else
                     WriteStatus(IDE_STATUS_END | IDE_STATUS_IRQ);
 
-                if (hdf[unit].file.size)
-                {
-                    FileWrite(&hdf[unit].file, sector_buffer);
-                    FileSeek(&hdf[unit].file, 1, SEEK_CUR);
-                }
+				switch(hdf[unit].type)
+				{
+					case HDF_FILE:
+				        if (hdf[unit].file.size)
+				        {
+				            FileWrite(&hdf[unit].file, sector_buffer);
+				            FileSeek(&hdf[unit].file, 1, SEEK_CUR);
+				        }
+						break;
+					// FIXME - CARD mode
+				}
             }
         }
         else if (tfr[7] == ACMD_WRITE_MULTIPLE) // write sectors
         {
+			DEBUG("Write Multiple");
             WriteStatus(IDE_STATUS_REQ); // pio out (class 2) command type
 
             sector = tfr[3];
@@ -382,23 +432,27 @@ void HandleHDD(unsigned char c1, unsigned char c2)
                 {
                     while (!(GetFPGAStatus() & CMD_IDEDAT)); // wait for full write buffer
 
-                    EnableFpga();
-                    SPI(CMD_IDE_DATA_RD); // read data command
-                    SPI(0x00);
-                    SPI(0x00);
-                    SPI(0x00);
-                    SPI(0x00);
-                    SPI(0x00);
-                    for (i = 0; i < 512; i++)
-                        sector_buffer[i] = SPI(0xFF);
-                    DisableFpga();
-
-                    if (hdf[unit].file.size)
-                    {
-                        FileWrite(&hdf[unit].file, sector_buffer);
-                        FileSeek(&hdf[unit].file, 1, SEEK_CUR);
-                    }
-
+		            EnableFpga();
+		            SPI(CMD_IDE_DATA_RD); // read data command
+		            SPI(0x00);
+			        SPI(0x00);
+		            SPI(0x00);
+		            SPI(0x00);
+		            SPI(0x00);
+		            for (i = 0; i < 512; i++)
+		                sector_buffer[i] = SPI(0xFF);
+		            DisableFpga();
+					switch(hdf[unit].type)
+					{
+						case HDF_FILE:
+					        if (hdf[unit].file.size)
+					        {
+					            FileWrite(&hdf[unit].file, sector_buffer);
+					            FileSeek(&hdf[unit].file, 1, SEEK_CUR);
+					        }
+							break;
+					// FIXME - CARD mode
+					}
                     block_count--;  // decrease block count
                     sector_count--; // decrease sector count
                 }
@@ -431,10 +485,22 @@ void GetHardfileGeometry(hdfTYPE *pHDF)
     unsigned long i, head, cyl, spt;
     unsigned long sptt[] = { 63, 127, 255, -1 };
 
-    if (pHDF->file.size == 0)
-        return;
-
-    total = pHDF->file.size / 512;
+	switch(pHDF->type)
+	{
+		case HDF_FILE:
+		    if (pHDF->file.size == 0)
+    		    return;
+		    total = pHDF->file.size / 512;
+			break;
+		case HDF_CARD:
+		    total = MMC_GetCapacity();	// GetCapacity returns number of blocks, not bytes.
+			break;
+		case HDF_CARDPART:
+			// FIXME - use the partition size
+			break;
+		default:
+			break;
+	}
 
     for (i = 0; sptt[i] >= 0; i++)
     {
@@ -508,31 +574,49 @@ unsigned char OpenHardfile(unsigned char unit)
     unsigned long time;
     char filename[12];
 
-    strncpy(filename, config.hardfile[unit].name, 8);
-    strcpy(&filename[8], "HDF");
+	switch(config.hardfile[unit].enabled)
+	{
+		case HDF_FILE:
+			hdf[unit].type=HDF_FILE;
+			strncpy(filename, config.hardfile[unit].name, 8);
+			strcpy(&filename[8], "HDF");
 
-    if (filename[0])
-    {
-        if (FileOpen(&hdf[unit].file, filename))
-        {
-            GetHardfileGeometry(&hdf[unit]);
+			if (filename[0])
+			{
+				if (FileOpen(&hdf[unit].file, filename))
+				{
+				    GetHardfileGeometry(&hdf[unit]);
 
-            printf("HARDFILE %d:\r", unit);
-            printf("file: \"%.8s.%.3s\"\r", hdf[unit].file.name, &hdf[unit].file.name[8]);
-            printf("size: %lu (%lu MB)\r", hdf[unit].file.size, hdf[unit].file.size >> 20);
-            printf("CHS: %u.%u.%u", hdf[unit].cylinders, hdf[unit].heads, hdf[unit].sectors);
-            printf(" (%lu MB)\r", ((((unsigned long) hdf[unit].cylinders) * hdf[unit].heads * hdf[unit].sectors) >> 11));
+				    printf("HARDFILE %d:\r", unit);
+				    printf("file: \"%.8s.%.3s\"\r", hdf[unit].file.name, &hdf[unit].file.name[8]);
+				    printf("size: %lu (%lu MB)\r", hdf[unit].file.size, hdf[unit].file.size >> 20);
+				    printf("CHS: %u.%u.%u", hdf[unit].cylinders, hdf[unit].heads, hdf[unit].sectors);
+				    printf(" (%lu MB)\r", ((((unsigned long) hdf[unit].cylinders) * hdf[unit].heads * hdf[unit].sectors) >> 11));
 
-            time = GetTimer(0);
-            BuildHardfileIndex(&hdf[unit]);
-            time = GetTimer(0) - time;
-            printf("Hardfile indexed in %lu ms\r", time >> 20);
+				    time = GetTimer(0);
+				    BuildHardfileIndex(&hdf[unit]);
+				    time = GetTimer(0) - time;
+				    printf("Hardfile indexed in %lu ms\r", time >> 20);
 
-            config.hardfile[unit].present = 1;
-            return 1;
-        }
-    }
-
+				    config.hardfile[unit].present = 1;
+				    return 1;
+				}
+			}
+			break;
+		case HDF_CARD:
+			hdf[unit].type=HDF_CARD;
+		    config.hardfile[unit].present = 1;
+			hdf[unit].file.size=0;
+		    GetHardfileGeometry(&hdf[unit]);
+			return 1;
+			break;
+		case HDF_CARDPART:
+			hdf[unit].type=HDF_CARDPART;
+//		    config.hardfile[unit].present = 1;
+			// Fixme - need to figure out partition offsets, etc.
+			return 1;
+			break;
+	}
     config.hardfile[unit].present = 0;
     return 0;
 }

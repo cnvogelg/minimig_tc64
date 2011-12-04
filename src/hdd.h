@@ -51,4 +51,6 @@ void BuildHardfileIndex(hdfTYPE *hdf);
 unsigned char HardFileSeek(hdfTYPE *hdf, unsigned long lba);
 unsigned char OpenHardfile(unsigned char unit);
 
+extern char debugmsg[40];
+extern char debugmsg2[40];
 
