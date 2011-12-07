@@ -90,7 +90,10 @@ void IdentifyDevice(unsigned short *pBuffer, unsigned char unit)
 		//    SwapBytes((char*)&pBuffer[27], 40); //not for 68000
 			break;
 		case HDF_CARD:
-		case HDF_CARDPART:
+		case HDF_CARDPART0:
+		case HDF_CARDPART1:
+		case HDF_CARDPART2:
+		case HDF_CARDPART3:
 			sprintf(debugmsg2,"Type: HDF_CARD");
 			pBuffer[0] = 1 << 6; // hard disk
 			pBuffer[1] = hdf[unit].cylinders; // cyl count
@@ -106,7 +109,10 @@ void IdentifyDevice(unsigned short *pBuffer, unsigned char unit)
 			if(hdf[unit].type==HDF_CARD)
 				memcpy(p, "SD/MMC Card", 11); // copy file name as model name
 			else
-				memcpy(p, "SD/MMC Partition", 16); // copy file name as model name
+			{
+				memcpy(p, "SD/MMC Partition 1", 18); // copy file name as model name
+				p[17]+=hdf[unit].partition;
+			}
 			//    SwapBytes((char*)&pBuffer[27], 40); //not for 68000
 			break;
 	}
@@ -280,7 +286,10 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 				    }
 					break;
 				case HDF_CARD:
-				case HDF_CARDPART:
+				case HDF_CARDPART0:
+				case HDF_CARDPART1:
+				case HDF_CARDPART2:
+				case HDF_CARDPART3:
 					DEBUG2("Read HDF_Card");
 					{
 				        long lba=chs2lba(cylinder, head, sector, unit)+hdf[unit].offset;
@@ -347,7 +356,10 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 				    }
 					break;
 				case HDF_CARD:
-				case HDF_CARDPART:
+				case HDF_CARDPART0:
+				case HDF_CARDPART1:
+				case HDF_CARDPART2:
+				case HDF_CARDPART3:
 					DEBUG2("ReadM HDF_Card");
 					{
 				        long lba=chs2lba(cylinder, head, sector, unit)+hdf[unit].offset;
@@ -381,7 +393,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
                 sector_count = 0x100;
 
 		    long lba=chs2lba(cylinder, head, sector, unit);
-			if(hdf[unit].type==HDF_CARDPART)
+			if(hdf[unit].type>=HDF_CARDPART0)
 				lba+=hdf[unit].offset;
 
 			DEBUG22("Write lba %ld",lba);
@@ -421,7 +433,10 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 				        }
 						break;
 					case HDF_CARD:
-					case HDF_CARDPART:
+					case HDF_CARDPART0:
+					case HDF_CARDPART1:
+					case HDF_CARDPART2:
+					case HDF_CARDPART3:
 						DEBUG2("Write HDF_Card");
 						{
 							DEBUG3("LBA: %ld",lba);
@@ -444,7 +459,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
                 sector_count = 0x100;
 
 		    long lba=chs2lba(cylinder, head, sector, unit);
-			if(hdf[unit].type==HDF_CARDPART)
+			if(hdf[unit].type>=HDF_CARDPART0)
 				lba+=hdf[unit].offset;
 			DEBUG22("WriteM lba %ld",lba);
 
@@ -480,15 +495,18 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 					            FileSeek(&hdf[unit].file, 1, SEEK_CUR);
 					        }
 							break;
-					case HDF_CARD:
-					case HDF_CARDPART:
-						DEBUG2("Write HDF_Card");
-						{
-							DEBUG3("SPB: %d",hdf[unit].sectors_per_block);
-							MMC_Write(lba,sector_buffer);
-							++lba;
-						}
-						break;
+						case HDF_CARD:
+						case HDF_CARDPART0:
+						case HDF_CARDPART1:
+						case HDF_CARDPART2:
+						case HDF_CARDPART3:
+							DEBUG2("Write HDF_Card");
+							{
+								DEBUG3("SPB: %d",hdf[unit].sectors_per_block);
+								MMC_Write(lba,sector_buffer);
+								++lba;
+							}
+							break;
 					}
                     block_count--;  // decrease block count
                     sector_count--; // decrease sector count
@@ -532,7 +550,10 @@ void GetHardfileGeometry(hdfTYPE *pHDF)
 		case HDF_CARD:
 		    total = MMC_GetCapacity();	// GetCapacity returns number of blocks, not bytes.
 			break;
-		case HDF_CARDPART:
+		case HDF_CARDPART0:
+		case HDF_CARDPART1:
+		case HDF_CARDPART2:
+		case HDF_CARDPART3:
 		    total = partitions[pHDF->partition].sectors;
 			break;
 		default:
@@ -648,16 +669,16 @@ unsigned char OpenHardfile(unsigned char unit)
 		    GetHardfileGeometry(&hdf[unit]);
 			return 1;
 			break;
-		case HDF_CARDPART:
-			hdf[unit].type=HDF_CARDPART;
-			hdf[unit].partition=1;	// FIXME - need to make this selectable in the UI
-			if(partitioncount>1)
-			{
-			    config.hardfile[unit].present = 1;
-				hdf[unit].file.size=0;
-				hdf[unit].offset=partitions[hdf[unit].partition].startlba;
-			    GetHardfileGeometry(&hdf[unit]);
-			}
+		case HDF_CARDPART0:
+		case HDF_CARDPART1:
+		case HDF_CARDPART2:
+		case HDF_CARDPART3:
+			hdf[unit].type=config.hardfile[unit].enabled;
+			hdf[unit].partition=hdf[unit].type-HDF_CARDPART0;
+		    config.hardfile[unit].present = 1;
+			hdf[unit].file.size=0;
+			hdf[unit].offset=partitions[hdf[unit].partition].startlba;
+		    GetHardfileGeometry(&hdf[unit]);
 			return 1;
 			break;
 	}

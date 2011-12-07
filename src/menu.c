@@ -78,7 +78,7 @@ const char *config_memory_slow_msg[] = {"none  ", "0.5 MB", "1.0 MB", "1.5 MB"};
 const char *config_scanlines_msg[] = {"off", "dim", "blk"};
 const char *config_memory_fast_msg[] = {"none  ", "2.0 MB", "4.0 MB", "8.0 MB"};
 const char *config_cpu_msg[] = {"68000 ", "68010", "-----","020 alpha"};
-const char *config_hdf_msg[] = {"Disabled", "Hardfile", "MMC/SD card", "MMC/SD partition"};
+const char *config_hdf_msg[] = {"Disabled", "Hardfile", "MMC/SD card", "MMC/SD partition 1", "MMC/SD partition 2", "MMC/SD partition 3", "MMC/SD partition 4"};
 
 const char *config_chipset_msg[] = {"OCS-A500", "OCS-A1000", "ECS", "---"};
 
@@ -261,6 +261,8 @@ void HandleUI(void)
 
         OsdWrite(6, debugmsg2, 0);
         OsdWrite(7, "              exit", menusub == 4);
+
+
 
         menustate = MENU_MAIN2;
         break;
@@ -1021,7 +1023,7 @@ void HandleUI(void)
 //                {
 
                    config.hardfile[0].enabled +=1;
-				   config.hardfile[0].enabled &=3;
+				   config.hardfile[0].enabled %=HDF_CARDPART0+partitioncount;
 //				   if(config.hardfile[0].enabled && !config.hardfile[0].present)
 //					  config.hardfile[0].enabled+=1;	// Disallow hardfile mode if there's no filename set
                    menustate = MENU_SETTINGS_HARDFILE1;
@@ -1037,7 +1039,7 @@ void HandleUI(void)
 //                if (config.hardfile[1].present)
 //                {
                    config.hardfile[1].enabled +=1;
-				   config.hardfile[1].enabled &=3;
+				   config.hardfile[1].enabled %=HDF_CARDPART0+partitioncount;
 //				   if(config.hardfile[1].enabled && !config.hardfile[0].present)
 //					  config.hardfile[1].enabled+=1;	// Disallow hardfile mode if there's no filename set
                    menustate = MENU_SETTINGS_HARDFILE1;
@@ -1130,10 +1132,12 @@ void HandleUI(void)
         {
             if (menusub == 0) // yes
             {
-                if (strncmp(config.hardfile[0].name, t_hardfile[0].name, sizeof(t_hardfile[0].name)) != 0)
+                if ((config.hardfile[0].enabled != t_hardfile[0].enabled)
+					|| (strncmp(config.hardfile[0].name, t_hardfile[0].name, sizeof(t_hardfile[0].name)) != 0))
                     OpenHardfile(0);
 
-                if (strncmp(config.hardfile[1].name, t_hardfile[1].name, sizeof(t_hardfile[1].name)) != 0)
+                if (config.hardfile[1].enabled != t_hardfile[1].enabled
+					|| (strncmp(config.hardfile[1].name, t_hardfile[1].name, sizeof(t_hardfile[1].name)) != 0))
                     OpenHardfile(1);
 
                 ConfigIDE(config.enable_ide, config.hardfile[0].present & config.hardfile[0].enabled, config.hardfile[1].present & config.hardfile[1].enabled);

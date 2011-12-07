@@ -26,7 +26,10 @@
 #define HDF_DISABLED 0
 #define HDF_FILE 1
 #define HDF_CARD 2
-#define HDF_CARDPART 3
+#define HDF_CARDPART0 3
+#define HDF_CARDPART1 4
+#define HDF_CARDPART2 5
+#define HDF_CARDPART3 6
 
 typedef struct
 {
