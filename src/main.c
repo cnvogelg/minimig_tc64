@@ -130,25 +130,38 @@ unsigned char LoadConfiguration(char *filename)
     // load configurastion data
     if (FileOpen(&file, filename))
     {
+		BootPrint("Opened configuration file\n");
         printf("Configuration file size: %lu\r", file.size);
         if (file.size == sizeof(config))
         {
             FileRead(&file, sector_buffer);
 
+			configTYPE *tmpconf=(configTYPE *)&sector_buffer;
+
             // check file id and version
-            if (strncmp((char*)sector_buffer, config_id, sizeof(config.id)) == 0)
+            if (strncmp(tmpconf->id, config_id, sizeof(config.id)) == 0)
             {
-                memcpy((void*)&config, (void*)sector_buffer, sizeof(config));
-                return(1);
+				// A few more sanity checks...
+				if(tmpconf->hardfile[0].enabled<7 && tmpconf->hardfile[1].enabled<7 && tmpconf->floppy.drives<=4) 
+				{
+	                memcpy((void*)&config, (void*)sector_buffer, sizeof(config));
+	                return(1);
+				}
+				else
+					BootPrint("Config file sanity check failed!\n");
             }
             else
-                printf("Wrong configuration file format!\r");
+                BootPrint("Wrong configuration file format!\n");
         }
         else
             printf("Wrong configuration file size: %lu (expected: %u)\r", file.size, sizeof(config));
     }
     else
-        printf("Can not open configuration file!\r");
+        BootPrint("Can not open configuration file!\n");
+
+	BootPrint("Setting config defaults\n");
+
+	WaitTimer(5000);
 
     // set default configuration
     memset((void*)&config, sizeof(config), 0);
@@ -159,6 +172,7 @@ unsigned char LoadConfiguration(char *filename)
     config.cpu = 0;
     config.hardfile[0].enabled = 1;
     strncpy(config.hardfile[0].name, "HARDFILE", sizeof(config.hardfile[0].name));
+    config.hardfile[1].enabled = 2;	// Default is access to entire SD card
     return(0);
 }
 
