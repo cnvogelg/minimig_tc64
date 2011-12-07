@@ -82,11 +82,11 @@ void FatalError(unsigned long error)
         for (i = 0; i < error; i++)
         {
             DISKLED_ON;
-            WaitTimer(25000);
+            WaitTimer(250);
             DISKLED_OFF;
-            WaitTimer(25000);
+            WaitTimer(250);
         }
-        WaitTimer(100000);
+        WaitTimer(1000);
     }
 }
 

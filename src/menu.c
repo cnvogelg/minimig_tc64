@@ -39,7 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "menu.h"
 
 // time delay after which file/dir name starts to scroll
-#define SCROLL_DELAY 50000
+#define SCROLL_DELAY 100
 
 unsigned long scroll_offset; // file/dir name scrolling position
 unsigned long scroll_timer;  // file/dir name scrolling timer
@@ -924,7 +924,7 @@ void HandleUI(void)
             {
                 config.enable_ide ^= 0x01;
                 menustate = MENU_SETTINGS_DRIVES1;
-                ConfigIDE(config.enable_ide, config.hardfile[0].present & config.hardfile[0].enabled, config.hardfile[1].present & config.hardfile[1].enabled);
+                ConfigIDE(config.enable_ide, config.hardfile[0].present && config.hardfile[0].enabled, config.hardfile[1].present && config.hardfile[1].enabled);
             }
             else if (menusub == 3)
             {
@@ -1140,7 +1140,7 @@ void HandleUI(void)
 					|| (strncmp(config.hardfile[1].name, t_hardfile[1].name, sizeof(t_hardfile[1].name)) != 0))
                     OpenHardfile(1);
 
-                ConfigIDE(config.enable_ide, config.hardfile[0].present & config.hardfile[0].enabled, config.hardfile[1].present & config.hardfile[1].enabled);
+                ConfigIDE(config.enable_ide, config.hardfile[0].present && config.hardfile[0].enabled, config.hardfile[1].present && config.hardfile[1].enabled);
                 OsdReset(RESET_NORMAL);
 
                 menustate = MENU_NONE1;

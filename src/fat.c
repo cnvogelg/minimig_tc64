@@ -156,7 +156,7 @@ unsigned char FindDrive(void)
 					bprintfl("  Start: %ld",partitions[i].startlba);
 					bprintfl("  Size: %ld\n",partitions[i].sectors);
 				}
-				WaitTimer(500000);
+				WaitTimer(5000);
 				if (!MMC_Read(boot_sector, sector_buffer)) // read discriptor
 				    return(0);
 				BootPrint("Read boot sector from first partition\n");

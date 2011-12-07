@@ -654,7 +654,7 @@ unsigned char OpenHardfile(unsigned char unit)
 				    time = GetTimer(0);
 				    BuildHardfileIndex(&hdf[unit]);
 				    time = GetTimer(0) - time;
-				    printf("Hardfile indexed in %lu ms\r", time >> 20);
+				    printf("Hardfile indexed in %lu ms\r", time >> 10);
 
 				    config.hardfile[unit].present = 1;
 				    return 1;

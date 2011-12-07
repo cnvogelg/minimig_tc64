@@ -182,15 +182,15 @@ unsigned long CheckButton(void)
 unsigned long GetTimer(unsigned long offset)
 {
     unsigned long systimer = (*(unsigned short *)0xDEE010);
-    systimer = systimer<< 20;
-    systimer += offset << 20;
+    systimer = systimer<< 10;
+    systimer += offset << 10;
     return (systimer); // valid bits [31:20]
 }
 
 unsigned long CheckTimer(unsigned long time)
 {
     unsigned long systimer = (*(unsigned short *)0xDEE010);
-    systimer = systimer<< 20;
+    systimer = systimer<< 10;
 //        printf("systimer:%08X  ",systimer);
     time -= systimer;
     if(time & 0x80000000)
