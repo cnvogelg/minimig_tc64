@@ -39,7 +39,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "menu.h"
 
 // time delay after which file/dir name starts to scroll
-#define SCROLL_DELAY 100
+#define SCROLL_DELAY 2000
+#define SCROLL_DELAY2 75
 
 unsigned long scroll_offset; // file/dir name scrolling position
 unsigned long scroll_timer;  // file/dir name scrolling timer
@@ -1660,7 +1661,7 @@ void ScrollLongName(void)
     if (DirEntryLFN[k][0] && CheckTimer(scroll_timer)) // scroll if long name and timer delay elapsed
 //    if ((pioa ^ pioa_old) & INIT_B)
     {
-        scroll_timer = GetTimer(0); // reset scroll timer to repeat delay
+        scroll_timer = GetTimer(SCROLL_DELAY2); // reset scroll timer to repeat delay
 
         scroll_offset++; // increase scroll position (2 pixel unit)
         memset(s, ' ', 32); // clear buffer
