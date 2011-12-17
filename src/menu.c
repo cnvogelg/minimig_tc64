@@ -237,8 +237,7 @@ void HandleUI(void)
     case MENU_MAIN1 :
 
         OsdWrite(0, "      *** MINIMIG MENU ***   \x15\x11 ", 0);
-        OsdWrite(1, debugmsg, 0);
-
+//        OsdWrite(1, debugmsg, 0);
         // floppy drive info
         for (i = 0; i < 4; i++)
         {
@@ -259,8 +258,7 @@ void HandleUI(void)
             else
                 OsdWrite(2 + i, "", 0);
         }
-
-        OsdWrite(6, debugmsg2, 0);
+//        OsdWrite(6, debugmsg2, 0);
         OsdWrite(7, "              exit", menusub == 4);
 
 
@@ -1223,6 +1221,8 @@ void HandleUI(void)
                 menustate = MENU_SETTINGS_VIDEO1;
                 ConfigScanlines(config.scanlines);
             }
+
+
             else if (menusub == 3)
             {
                 menustate = MENU_SETTINGS1;

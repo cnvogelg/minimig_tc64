@@ -36,10 +36,14 @@ hdfTYPE hdf[2];
 char debugmsg[40];
 char debugmsg2[40];
 
-#define DEBUG(x) sprintf(debugmsg,x)
-#define DEBUG22(x,y) sprintf(debugmsg,x,y)
-#define DEBUG2(x) sprintf(debugmsg2,x)
-#define DEBUG3(x,y) sprintf(debugmsg2,x,y)
+// #define DEBUG1(x) sprintf(debugmsg,x)
+// #define DEBUG2(x) sprintf(debugmsg2,x)
+// #define DEBUG12(x,y) sprintf(debugmsg,x,y)
+// #define DEBUG22(x,y) sprintf(debugmsg2,x,y)
+#define DEBUG1(x)	// Top line
+#define DEBUG2(x)	// Bottom line
+#define DEBUG12(x,y)	// Top line + param
+#define DEBUG22(x,y)	// Bottom line + param
 
 //unsigned char DIRECT_TRANSFER_MODE = 0;
 // helper function for byte swapping
@@ -57,7 +61,7 @@ void SwapBytes(char *ptr, unsigned long len)
 
 void IdentifyDevice(unsigned short *pBuffer, unsigned char unit)
 { // builds Identify Device struct
-	sprintf(debugmsg,"Identify device");
+	DEBUG1("Identify device");
     char *p, i, x;
     unsigned long total_sectors = hdf[unit].cylinders * hdf[unit].heads * hdf[unit].sectors;
 
@@ -66,7 +70,7 @@ void IdentifyDevice(unsigned short *pBuffer, unsigned char unit)
 	switch(hdf[unit].type)
 	{
 		case HDF_FILE:
-			sprintf(debugmsg2,"Type: HDF_FILE");
+			DEBUG2("Type: HDF_FILE");
 			pBuffer[0] = 1 << 6; // hard disk
 			pBuffer[1] = hdf[unit].cylinders; // cyl count
 			pBuffer[3] = hdf[unit].heads; // head count
@@ -94,7 +98,7 @@ void IdentifyDevice(unsigned short *pBuffer, unsigned char unit)
 		case HDF_CARDPART1:
 		case HDF_CARDPART2:
 		case HDF_CARDPART3:
-			sprintf(debugmsg2,"Type: HDF_CARD");
+			DEBUG2("Type: HDF_CARD");
 			pBuffer[0] = 1 << 6; // hard disk
 			pBuffer[1] = hdf[unit].cylinders; // cyl count
 			pBuffer[3] = hdf[unit].heads; // head count
@@ -252,7 +256,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
         }
         else if (tfr[7] == ACMD_READ_SECTORS) // Read Sectors
         {
-			sprintf(debugmsg,"Read Sectors");
+			DEBUG1("Read Sectors");
             WriteStatus(IDE_STATUS_RDY); // pio in (class 1) command type
 
             sector = tfr[3];
@@ -295,7 +299,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 				        long lba=chs2lba(cylinder, head, sector, unit)+hdf[unit].offset;
 					    while (sector_count)
 					    {
-							DEBUG3("LBA: %ld",lba);
+							DEBUG22("LBA: %ld",lba);
 					        while (!(GetFPGAStatus() & CMD_IDECMD)); // wait for empty sector buffer
 					        WriteStatus(IDE_STATUS_IRQ);
 							MMC_Read(lba,0);
@@ -321,7 +325,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
         }
         else if (tfr[7] == ACMD_READ_MULTIPLE) // Read Multiple Sectors (multiple sector transfer per IRQ)
         {
-			DEBUG("Read Multiple");
+			DEBUG1("Read Multiple");
             WriteStatus(IDE_STATUS_RDY); // pio in (class 1) command type
 
             sector = tfr[3];
@@ -363,7 +367,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 					DEBUG2("ReadM HDF_Card");
 					{
 				        long lba=chs2lba(cylinder, head, sector, unit)+hdf[unit].offset;
-						DEBUG3("LBA: %ld",lba);
+						DEBUG22("LBA: %ld",lba);
 					    while (sector_count)
 					    {
 					        while (!(GetFPGAStatus() & CMD_IDECMD)); // wait for empty sector buffer
@@ -396,7 +400,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 			if(hdf[unit].type>=HDF_CARDPART0)
 				lba+=hdf[unit].offset;
 
-			DEBUG22("Write lba %ld",lba);
+			DEBUG12("Write lba %ld",lba);
 
             if (hdf[unit].file.size)	// File size will be 0 in direct card modes
                 HardFileSeek(&hdf[unit], lba);
@@ -439,7 +443,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 					case HDF_CARDPART3:
 						DEBUG2("Write HDF_Card");
 						{
-							DEBUG3("LBA: %ld",lba);
+							DEBUG22("LBA: %ld",lba);
 							MMC_Write(lba,sector_buffer);
 							++lba;
 						}
@@ -461,7 +465,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 		    long lba=chs2lba(cylinder, head, sector, unit);
 			if(hdf[unit].type>=HDF_CARDPART0)
 				lba+=hdf[unit].offset;
-			DEBUG22("WriteM lba %ld",lba);
+			DEBUG12("WriteM lba %ld",lba);
 
             if (hdf[unit].file.size)	// File size will be 0 in direct card modes
                 HardFileSeek(&hdf[unit], lba);
@@ -502,7 +506,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 						case HDF_CARDPART3:
 							DEBUG2("Write HDF_Card");
 							{
-								DEBUG3("SPB: %d",hdf[unit].sectors_per_block);
+								DEBUG22("SPB: %d",hdf[unit].sectors_per_block);
 								MMC_Write(lba,sector_buffer);
 								++lba;
 							}
@@ -654,7 +658,7 @@ unsigned char OpenHardfile(unsigned char unit)
 				    time = GetTimer(0);
 				    BuildHardfileIndex(&hdf[unit]);
 				    time = GetTimer(0) - time;
-				    printf("Hardfile indexed in %lu ms\r", time >> 10);
+				    printf("Hardfile indexed in %lu ms\r", time >> 16);
 
 				    config.hardfile[unit].present = 1;
 				    return 1;
