@@ -493,8 +493,8 @@ void ConfigMemory(unsigned char memory)
     SPI(OSDCMDCFGMEM | 0x08 | ((memory>>4) & 0x03));	//fast
     DisableOsd();
     EnableOsd();
-    SPI(OSDCMDCFGCPU|  0x00);	//68000
-    DisableOsd();
+//    SPI(OSDCMDCFGCPU|  0x00);	//68000  -  Don't want to disable '020 here!  AMR
+//    DisableOsd();
 }
 
 void ConfigCPU(unsigned char cpu)

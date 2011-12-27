@@ -104,7 +104,8 @@ void IdentifyDevice(unsigned short *pBuffer, unsigned char unit)
 			pBuffer[3] = hdf[unit].heads; // head count
 			pBuffer[6] = hdf[unit].sectors; // sectors per track
 			// FIXME - can get serial no from card itself.
-			memcpy((char*)&pBuffer[10], "24682468246824682468", 20); // serial number - byte swapped
+			memcpy((char*)&pBuffer[10], "TC64MiniMigSD0      ", 20); // serial number - byte swapped
+			pBuffer[23]+=hdf[unit].type-HDF_CARD;
 			memcpy((char*)&pBuffer[23], ".100    ", 8); // firmware version - byte swapped
 			p = (char*)&pBuffer[27];
 			// FIXME - likewise the model name can be fetched from the card.
@@ -114,14 +115,14 @@ void IdentifyDevice(unsigned short *pBuffer, unsigned char unit)
 				memcpy(p, "SD/MMC Card", 11); // copy file name as model name
 			else
 			{
-				memcpy(p, "SD/MMC Partition 1", 18); // copy file name as model name
-				p[17]+=hdf[unit].partition;
+				memcpy(p, "Card Part 1", 11); // copy file name as model name
+				p[10]+=hdf[unit].partition;
 			}
 			//    SwapBytes((char*)&pBuffer[27], 40); //not for 68000
 			break;
 	}
 
-    pBuffer[47] = 0x8010; //maximum sectors per block in Read/Write Multiple command
+    pBuffer[47] = 0x8040; //maximum sectors per block in Read/Write Multiple command
     pBuffer[53] = 1;
     pBuffer[54] = hdf[unit].cylinders;
     pBuffer[55] = hdf[unit].heads;

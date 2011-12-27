@@ -365,8 +365,18 @@ __geta4 void main(void)
 
     if (OpenHardfile(0))
     {
-
-        sprintf(s, "\nHardfile 0: %.8s.%.3s", hdf[0].file.name, &hdf[0].file.name[8]);
+		switch(hdf[0].type) // Customise message for SD card access
+		{
+			case HDF_FILE:
+		        sprintf(s, "\nHardfile 0: %.8s.%.3s", hdf[0].file.name, &hdf[0].file.name[8]);
+				break;
+			case HDF_CARD:
+		        sprintf(s, "\nHardfile 0: using entire SD card");
+				break;
+			default:
+		        sprintf(s, "\nHardfile 0: using SD card partition %d",hdf[0].type-HDF_CARD);	// Number from 1
+				break;
+		}
         BootPrint(s);
         sprintf(s, "CHS: %u.%u.%u", hdf[0].cylinders, hdf[0].heads, hdf[0].sectors);
         BootPrint(s);
@@ -376,8 +386,18 @@ __geta4 void main(void)
 
     if (OpenHardfile(1))
     {
-
-        sprintf(s, "\nHardfile 1: %.8s.%.3s", hdf[1].file.name, &hdf[1].file.name[8]);
+		switch(hdf[1].type)
+		{
+			case HDF_FILE:
+		        sprintf(s, "\nHardfile 1: %.8s.%.3s", hdf[1].file.name, &hdf[1].file.name[8]);
+				break;
+			case HDF_CARD:
+		        sprintf(s, "\nHardfile 1: using entire SD card");
+				break;
+			default:
+		        sprintf(s, "\nHardfile 1: using SD card partition %d",hdf[1].type-HDF_CARD);	// Number from 1
+				break;
+		}
         BootPrint(s);
         sprintf(s, "CHS: %u.%u.%u", hdf[1].cylinders, hdf[1].heads, hdf[1].sectors);
         BootPrint(s);
@@ -397,6 +417,7 @@ __geta4 void main(void)
         BootPrint("\n***************************************************");
         BootPrint(  "*  It's recommended to reformat your memory card  *");
         BootPrint(  "*   using 32 KB clusters to improve performance   *");
+		BootPrint(  "*           when using large hardfiles.           *");	// AMR
         BootPrint(  "***************************************************");
     }
 
