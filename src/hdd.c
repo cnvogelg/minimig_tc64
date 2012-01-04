@@ -122,7 +122,7 @@ void IdentifyDevice(unsigned short *pBuffer, unsigned char unit)
 			break;
 	}
 
-    pBuffer[47] = 0x8040; //maximum sectors per block in Read/Write Multiple command
+    pBuffer[47] = 0x8010; //maximum sectors per block in Read/Write Multiple command
     pBuffer[53] = 1;
     pBuffer[54] = hdf[unit].cylinders;
     pBuffer[55] = hdf[unit].heads;
@@ -276,6 +276,25 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 
 				    while (sector_count)
 				    {
+//				 decrease sector count
+						if(sector_count!=1)
+						{
+							if (sector == hdf[unit].sectors)
+							{
+								sector = 1;
+								head++;
+								if (head == hdf[unit].heads)
+								{
+									head = 0;
+									cylinder++;
+								}
+							}
+							else
+								sector++;
+						}
+			
+						WriteTaskFile(0, tfr[2], sector, (unsigned char)cylinder, (unsigned char)(cylinder >> 8), (tfr[6] & 0xF0) | head);
+
 				        while (!(GetFPGAStatus() & CMD_IDECMD)); // wait for empty sector buffer
 
 				        WriteStatus(IDE_STATUS_IRQ);
@@ -300,6 +319,25 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 				        long lba=chs2lba(cylinder, head, sector, unit)+hdf[unit].offset;
 					    while (sector_count)
 					    {
+//				 decrease sector count
+							if(sector_count!=1)
+							{
+								if (sector == hdf[unit].sectors)
+								{
+									sector = 1;
+									head++;
+									if (head == hdf[unit].heads)
+									{
+										head = 0;
+										cylinder++;
+									}
+								}
+								else
+									sector++;
+							}
+				
+							WriteTaskFile(0, tfr[2], sector, (unsigned char)cylinder, (unsigned char)(cylinder >> 8), (tfr[6] & 0xF0) | head);
+
 							DEBUG22("LBA: %ld",lba);
 					        while (!(GetFPGAStatus() & CMD_IDECMD)); // wait for empty sector buffer
 					        WriteStatus(IDE_STATUS_IRQ);
@@ -357,8 +395,29 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 		//                    FileReadEx(&hdf[unit].file, NULL, block_count); // NULL enables direct transfer to the FPGA
 				            FileReadEx(&hdf[unit].file, 0, block_count); // NULL enables direct transfer to the FPGA
 
-				        sector_count -= block_count; // decrease sector count
-				    }
+						while (block_count--)
+						{	
+							if(sector_count!=1)
+							{
+								if (sector == hdf[unit].sectors)
+								{
+									sector = 1;
+									head++;
+									if (head == hdf[unit].heads)
+									{
+										head = 0;
+										cylinder++;
+									}
+								}
+								else
+									sector++;
+							}
+							sector_count--;
+						}	
+						WriteTaskFile(0, tfr[2], sector, (unsigned char)cylinder, (unsigned char)(cylinder >> 8), (tfr[6] & 0xF0) | head);
+		//					WriteTaskFile(0, 0, sector, (unsigned char)cylinder, (unsigned char)(cylinder >> 8), (tfr[6] & 0xF0) | head);
+					}
+		//			WriteTaskFile(0, 0, sector, (unsigned char)cylinder, (unsigned char)(cylinder >> 8), (tfr[6] & 0xF0) | head);
 					break;
 				case HDF_CARD:
 				case HDF_CARDPART0:
@@ -380,8 +439,31 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 					        WriteStatus(IDE_STATUS_IRQ);
 							MMC_ReadMultiple(lba,0,block_count);
 							lba+=block_count;
-							sector_count-=block_count;
+							
+							while (block_count--)
+							{	
+								if(sector_count!=1)
+								{
+									if (sector == hdf[unit].sectors)
+									{
+										sector = 1;
+										head++;
+										if (head == hdf[unit].heads)
+										{
+											head = 0;
+											cylinder++;
+										}
+									}
+									else
+										sector++;
+										
+								}
+								sector_count--;
+							}	
+							WriteTaskFile(0, tfr[2], sector, (unsigned char)cylinder, (unsigned char)(cylinder >> 8), (tfr[6] & 0xF0) | head);
+			//					WriteTaskFile(0, 0, sector, (unsigned char)cylinder, (unsigned char)(cylinder >> 8), (tfr[6] & 0xF0) | head);
 						}
+			//			WriteTaskFile(0, 0, sector, (unsigned char)cylinder, (unsigned char)(cylinder >> 8), (tfr[6] & 0xF0) | head);
 					}
 					break;
 			}
@@ -409,6 +491,25 @@ void HandleHDD(unsigned char c1, unsigned char c2)
             while (sector_count)
             {
                 while (!(GetFPGAStatus() & CMD_IDEDAT)); // wait for full write buffer
+
+//				 decrease sector count
+				if(sector_count!=1)
+				{
+					if (sector == hdf[unit].sectors)
+					{
+						sector = 1;
+						head++;
+						if (head == hdf[unit].heads)
+						{
+							head = 0;
+							cylinder++;
+						}
+					}
+					else
+						sector++;
+				}
+	
+				WriteTaskFile(0, tfr[2], sector, (unsigned char)cylinder, (unsigned char)(cylinder >> 8), (tfr[6] & 0xF0) | head);
 
                 EnableFpga();
                 SPI(CMD_IDE_DATA_RD); // read data command
@@ -481,6 +582,25 @@ void HandleHDD(unsigned char c1, unsigned char c2)
                 {
                     while (!(GetFPGAStatus() & CMD_IDEDAT)); // wait for full write buffer
 
+	//				 decrease sector count
+					if(sector_count!=1)
+					{
+						if (sector == hdf[unit].sectors)
+						{
+							sector = 1;
+							head++;
+							if (head == hdf[unit].heads)
+							{
+								head = 0;
+								cylinder++;
+							}
+						}
+						else
+							sector++;
+					}
+		
+	//				WriteTaskFile(0, tfr[2], sector, (unsigned char)cylinder, (unsigned char)(cylinder >> 8), (tfr[6] & 0xF0) | head);
+
 		            EnableFpga();
 		            SPI(CMD_IDE_DATA_RD); // read data command
 		            SPI(0x00);
@@ -516,6 +636,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
                     block_count--;  // decrease block count
                     sector_count--; // decrease sector count
                 }
+				WriteTaskFile(0, tfr[2], sector, (unsigned char)cylinder, (unsigned char)(cylinder >> 8), (tfr[6] & 0xF0) | head);
 
                 if (sector_count)
                     WriteStatus(IDE_STATUS_IRQ);
