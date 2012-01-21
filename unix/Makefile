@@ -40,3 +40,31 @@ $(REL_BIN): $(ALL_SRC) $(ALL_HDR)
 
 $(ABS_BIN): $(REL_BIN)
 	$(ROMABLE) $(REL_BIN) -o $(ABS_BIN) -DC -C $(ROM_ADDR)
+
+# ----- create Amiga ADF Developer Disk -----
+ADF_DIR=../adf
+DISK_DIR=$(ADF_DIR)/MM_TC64
+ADF_FILE=$(ADF_DIR)/mm_tc64.adf
+AMIGA_DIR=../amiga
+
+.PHONY: clean_disk_dir prepare_disk_dir master_disk adf
+
+clean_amiga_dir:
+	rm -f $(AMIGA_DIR)/OSD_CA01.sys $(AMIGA_DIR)/menu
+
+clean_disk_dir:
+	rm -rf $(DISK_DIR)
+	
+prepare_disk_dir: clean_disk_dir clean_amiga_dir
+	mkdir -p $(DISK_DIR)
+	cp -a ../src $(DISK_DIR)
+	cp -a ../amiga $(DISK_DIR)
+	cp ../README $(DISK_DIR)
+	cp ../INSTALL $(DISK_DIR)
+	
+master_disk: prepare_disk_dir
+	xdftool $(ADF_FILE) pack $(DISK_DIR)
+
+adf:
+	$(MAKE) master_disk
+	$(MAKE) clean_disk_dir
