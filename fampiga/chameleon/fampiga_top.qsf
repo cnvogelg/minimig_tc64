@@ -187,8 +187,6 @@ set_global_assignment -name VERILOG_FILE ../minimig/Minimig1.v
 set_global_assignment -name VERILOG_FILE ../minimig/Paula.v
 set_global_assignment -name VERILOG_FILE ../minimig/PS2Keyboard.v
 set_global_assignment -name VERILOG_FILE ../minimig/Sprites.v
-set_global_assignment -name SIGNALTAP_FILE stp1.stp
-set_global_assignment -name VERILOG_FILE test.v
 set_global_assignment -name MISC_FILE "D:/_chameleon/dockingstation/chameleon/fampiga_top.dpf"
 set_global_assignment -name VHDL_FILE ../board/chameleon_docking_station.vhd
 set_global_assignment -name FMAX_REQUIREMENT "108 MHz"
