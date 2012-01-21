@@ -60,4 +60,3 @@ void ScrollLongName(void);
 void ErrorMessage(char *message, unsigned char code);
 void InfoMessage(char *message);
 
-

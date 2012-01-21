@@ -39,7 +39,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "menu.h"
 
 // time delay after which file/dir name starts to scroll
-#define SCROLL_DELAY 500
+#define SCROLL_DELAY 2000
+#define SCROLL_DELAY2 75
 
 unsigned long scroll_offset; // file/dir name scrolling position
 unsigned long scroll_timer;  // file/dir name scrolling timer
@@ -78,6 +79,7 @@ const char *config_memory_slow_msg[] = {"none  ", "0.5 MB", "1.0 MB", "1.5 MB"};
 const char *config_scanlines_msg[] = {"off", "dim", "blk"};
 const char *config_memory_fast_msg[] = {"none  ", "2.0 MB", "4.0 MB", "8.0 MB"};
 const char *config_cpu_msg[] = {"68000 ", "68010", "-----","020 alpha"};
+const char *config_hdf_msg[] = {"Disabled", "Hardfile", "MMC/SD card", "MMC/SD partition 1", "MMC/SD partition 2", "MMC/SD partition 3", "MMC/SD partition 4"};
 
 const char *config_chipset_msg[] = {"OCS-A500", "OCS-A1000", "ECS", "---"};
 
@@ -235,8 +237,7 @@ void HandleUI(void)
     case MENU_MAIN1 :
 
         OsdWrite(0, "      *** MINIMIG MENU ***   \x15\x11 ", 0);
-        OsdWrite(1, "", 0);
-
+        OsdWrite(1, debugmsg, 0);
         // floppy drive info
         for (i = 0; i < 4; i++)
         {
@@ -257,9 +258,10 @@ void HandleUI(void)
             else
                 OsdWrite(2 + i, "", 0);
         }
-
-        OsdWrite(6, "", 0);
+        OsdWrite(6, debugmsg2, 0);
         OsdWrite(7, "              exit", menusub == 4);
+
+
 
         menustate = MENU_MAIN2;
         break;
@@ -921,7 +923,7 @@ void HandleUI(void)
             {
                 config.enable_ide ^= 0x01;
                 menustate = MENU_SETTINGS_DRIVES1;
-                ConfigIDE(config.enable_ide, config.hardfile[0].present & config.hardfile[0].enabled, config.hardfile[1].present & config.hardfile[1].enabled);
+                ConfigIDE(config.enable_ide, config.hardfile[0].present && config.hardfile[0].enabled, config.hardfile[1].present && config.hardfile[1].enabled);
             }
             else if (menusub == 3)
             {
@@ -963,7 +965,7 @@ void HandleUI(void)
         OsdWrite(0, "            HARDFILES", 0);
         OsdWrite(1, "", 0);
         strcpy(s, "     Master : ");
-        strcat(s, config.hardfile[0].present ? config.hardfile[0].enabled ? "enabled" : "disabled" : "n/a");
+        strcat(s, config_hdf_msg[config.hardfile[0].enabled]);
         OsdWrite(2, s, menusub == 0);
         if (config.hardfile[0].present)
         {
@@ -978,7 +980,7 @@ void HandleUI(void)
             OsdWrite(3, "       ** file not found **", menusub == 1);
 
         strcpy(s, "      Slave : ");
-        strcat(s, config.hardfile[1].present ? config.hardfile[1].enabled ? "enabled" : "disabled" : "n/a");
+        strcat(s, config_hdf_msg[config.hardfile[1].enabled]);
         OsdWrite(4, s, menusub == 2);
         if (config.hardfile[1].present)
         {
@@ -1016,11 +1018,16 @@ void HandleUI(void)
         {
             if (menusub == 0)
             {
-                if (config.hardfile[0].present)
-                {
-                   config.hardfile[0].enabled ^= 0x01;
+//                if (config.hardfile[0].present)
+//                {
+
+                   config.hardfile[0].enabled +=1;
+				   config.hardfile[0].enabled %=HDF_CARDPART0+partitioncount;
+//				   if(config.hardfile[0].enabled && !config.hardfile[0].present)
+//					  config.hardfile[0].enabled+=1;	// Disallow hardfile mode if there's no filename set
                    menustate = MENU_SETTINGS_HARDFILE1;
-                }
+//                }
+//
             }
             else if (menusub == 1)
             {
@@ -1028,11 +1035,14 @@ void HandleUI(void)
             }
             else if (menusub == 2)
             {
-                if (config.hardfile[1].present)
-                {
-                   config.hardfile[1].enabled ^= 0x01;
+//                if (config.hardfile[1].present)
+//                {
+                   config.hardfile[1].enabled +=1;
+				   config.hardfile[1].enabled %=HDF_CARDPART0+partitioncount;
+//				   if(config.hardfile[1].enabled && !config.hardfile[0].present)
+//					  config.hardfile[1].enabled+=1;	// Disallow hardfile mode if there's no filename set
                    menustate = MENU_SETTINGS_HARDFILE1;
-                }
+//                }
             }
             else if (menusub == 3)
             {
@@ -1121,13 +1131,15 @@ void HandleUI(void)
         {
             if (menusub == 0) // yes
             {
-                if (strncmp(config.hardfile[0].name, t_hardfile[0].name, sizeof(t_hardfile[0].name)) != 0)
+                if ((config.hardfile[0].enabled != t_hardfile[0].enabled)
+					|| (strncmp(config.hardfile[0].name, t_hardfile[0].name, sizeof(t_hardfile[0].name)) != 0))
                     OpenHardfile(0);
 
-                if (strncmp(config.hardfile[1].name, t_hardfile[1].name, sizeof(t_hardfile[1].name)) != 0)
+                if (config.hardfile[1].enabled != t_hardfile[1].enabled
+					|| (strncmp(config.hardfile[1].name, t_hardfile[1].name, sizeof(t_hardfile[1].name)) != 0))
                     OpenHardfile(1);
 
-                ConfigIDE(config.enable_ide, config.hardfile[0].present & config.hardfile[0].enabled, config.hardfile[1].present & config.hardfile[1].enabled);
+                ConfigIDE(config.enable_ide, config.hardfile[0].present && config.hardfile[0].enabled, config.hardfile[1].present && config.hardfile[1].enabled);
                 OsdReset(RESET_NORMAL);
 
                 menustate = MENU_NONE1;
@@ -1209,6 +1221,9 @@ void HandleUI(void)
                 menustate = MENU_SETTINGS_VIDEO1;
                 ConfigScanlines(config.scanlines);
             }
+
+
+
             else if (menusub == 3)
             {
                 menustate = MENU_SETTINGS1;
@@ -1647,7 +1662,7 @@ void ScrollLongName(void)
     if (DirEntryLFN[k][0] && CheckTimer(scroll_timer)) // scroll if long name and timer delay elapsed
 //    if ((pioa ^ pioa_old) & INIT_B)
     {
-        scroll_timer = GetTimer(0); // reset scroll timer to repeat delay
+        scroll_timer = GetTimer(SCROLL_DELAY2); // reset scroll timer to repeat delay
 
         scroll_offset++; // increase scroll position (2 pixel unit)
         memset(s, ' ', 32); // clear buffer
@@ -1716,6 +1731,7 @@ char* GetDiskInfo(char* lfn, long len)
             if (!cmp) // match found
             {
                 k = i - 1; // no need to check if k is valid since i is greater than zero
+
                 c = lfn[k]; // get the first character to the left of the matched template substring
                 if (c >= '0' && c <= '9') // check if a digit
                 {

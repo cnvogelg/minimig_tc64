@@ -63,6 +63,9 @@ unsigned long fat_size;                 // size of fat
 
 unsigned char sector_buffer[512];       // sector buffer
 
+struct PartitionEntry partitions[4];	// lbastart and sectors will be byteswapped as necessary
+int partitioncount;
+
 FATBUFFER fat_buffer;                   // buffer for caching fat entries
 unsigned long buffered_fat_index;       // index of buffered FAT sector
 
@@ -83,6 +86,27 @@ unsigned char t_sort_table[MAXDIRENTRIES];
 extern unsigned long GetTimer(unsigned long);
 extern void ErrorMessage(const char *message, unsigned char code);
 
+unsigned long SwapEndianL(unsigned long l)
+{
+  unsigned char *c=(unsigned char *)&l;
+  return((c[3]<<24)+(c[2]<<16)+(c[1]<<8)+c[0]);
+}
+
+void SwapPartitionBytes(int i)
+{
+	// We don't bother to byteswap the CHS geometry fields since we don't use them.
+	partitions[i].startlba=SwapEndianL(partitions[i].startlba);
+	partitions[i].sectors=SwapEndianL(partitions[i].sectors);
+}
+
+extern char BootPrint(const char *s);
+void bprintfl(const char *fmt,unsigned long l)
+{
+	char s[64];
+	sprintf(s,fmt,l);
+	BootPrint(s);
+}
+
 // FindDrive() checks if a card is present and contains FAT formatted primary partition
 unsigned char FindDrive(void)
 {
@@ -91,76 +115,83 @@ unsigned char FindDrive(void)
     if (!MMC_Read(0, sector_buffer)) // read MBR
         return(0);
 
-    // get start of first partition
-    boot_sector = sector_buffer[457];
-    boot_sector <<= 8;
-    boot_sector |= sector_buffer[456];
-    boot_sector <<= 8;
-    boot_sector |= sector_buffer[455];
-    boot_sector <<= 8;
-    boot_sector |= sector_buffer[454];
-    
-//    switch (sector_buffer[450])
-//    {
-//    case 0x00:
-//        fattype = 0;
-//        break;
-//    case 0x01:
-//        fattype = 12;
-//        break;
-//    case 0x04:
-//    case 0x06:
-//        fattype = 16;
-//        break;
-//    case 0x0B:
-//    case 0x0C:
-//        fattype = 32;
-//        break;
-//    default:
-//        fattype = 255;
-//        break;
-//    }
+	boot_sector=0;
+	partitioncount=1;
+
+	// If we can identify a filesystem on block 0 we don't look for partitions
+    if (strncmp((const char*)&sector_buffer[0x36], "FAT16   ", 8)==0) // check for FAT16
+		partitioncount=0;
+    if (strncmp((const char*)&sector_buffer[0x52], "FAT32   ", 8)==0) // check for FAT32
+		partitioncount=0;
+
+	if(partitioncount)
+	{
+		// We have at least one partition, parse the MBR.
+		struct MasterBootRecord *mbr=(struct MasterBootRecord *)sector_buffer;
+		memcpy(&partitions[0],&mbr->Partition[0],sizeof(struct PartitionEntry));
+		memcpy(&partitions[1],&mbr->Partition[1],sizeof(struct PartitionEntry));
+		memcpy(&partitions[2],&mbr->Partition[2],sizeof(struct PartitionEntry));
+		memcpy(&partitions[3],&mbr->Partition[3],sizeof(struct PartitionEntry));
+
+		switch(mbr->Signature)
+		{
+			case 0x55aa:	// Little-endian MBR on a big-endian system
+				BootPrint("Swapping byte order of partition entries");
+				SwapPartitionBytes(0);
+				SwapPartitionBytes(1);
+				SwapPartitionBytes(2);
+				SwapPartitionBytes(3);
+				// fall through...
+			case 0xaa55:
+				// get start of first partition
+				boot_sector = partitions[0].startlba;
+				bprintfl("Start: %ld\n",partitions[0].startlba);
+				for(partitioncount=4;(partitions[partitioncount-1].sectors==0) && (partitioncount>1); --partitioncount)
+					;
+				bprintfl("PartitionCount: %ld\n",partitioncount);
+				int i;
+				for(i=0;i<partitioncount;++i)
+				{
+					bprintfl("Partition: %ld",i);
+					bprintfl("  Start: %ld",partitions[i].startlba);
+					bprintfl("  Size: %ld\n",partitions[i].sectors);
+				}
+				WaitTimer(5000);
+				if (!MMC_Read(boot_sector, sector_buffer)) // read discriptor
+				    return(0);
+				BootPrint("Read boot sector from first partition\n");
+				break;
+			default:
+				BootPrint("No partition signature found\n");
+				break;
+		}
+	}
 
     if (strncmp((const char*)&sector_buffer[0x36], "FAT16   ", 8)==0) // check for FAT16
-	{	boot_sector = 0;
-		sector_buffer[450] = 0;
-//	    fattype = 16;
-	}
-    if (strncmp((const char*)&sector_buffer[0x52], "FAT32   ", 8)==0) // check for FAT32
-	{	boot_sector = 0;
-		sector_buffer[450] = 0;
-//	    fattype = 32;
-	}
-	
-    if (!MMC_Read(boot_sector, sector_buffer)) // read discriptor
-        return(0);
+		fattype = 16;
 
-    if (strncmp((const char*)&sector_buffer[0x36], "FAT16   ", 8)==0) // check for FAT16
-	{	fattype = 16;
-	}
     if (strncmp((const char*)&sector_buffer[0x52], "FAT32   ", 8)==0) // check for FAT32
-	{	fattype = 32;
-	}
+		fattype = 32;
 	
     printf("partition type: 0x%02X (", sector_buffer[450]);
     switch (fattype)
     {
-    case 0:
-        printf("NONE");
-        break;
-    case 12:
-        printf("FAT12");
-        break;
-    case 16:
-        printf("FAT16");
-        break;
-    case 32:
-        printf("FAT32");
-        fat32 = 1;
-        break;
-    default:
-        printf("UNKNOWN");
-        break;
+		case 0:
+		    printf("NONE");
+		    break;
+		case 12:
+		    printf("FAT12");
+		    break;
+		case 16:
+		    printf("FAT16");
+		    break;
+		case 32:
+		    printf("FAT32");
+		    fat32 = 1;
+		    break;
+		default:
+		    printf("UNKNOWN");
+		    break;
     }
     printf(")\r");
 

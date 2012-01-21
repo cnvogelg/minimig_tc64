@@ -36,6 +36,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 2010-08-15   - support for joystick emulation
 // 2010-08-18   - clean-up
 
+// FIXME - detect number of partitions on the SD card, and allow that many to be selected as hard files.
+
 //#include "AT91SAM7S256.h"
 //#include "stdio.h"
 //#include "string.h"
@@ -71,8 +73,9 @@ void FatalError(unsigned long error)
 {
     unsigned long i;
 
-    printf("Fatal error: %lu\r", error);
+    sprintf(s,"Fatal error: %lu\n", error);
     BootPrint("FatalError...\n");
+	BootPrint(s);
 
     while (1)
     {
@@ -127,25 +130,38 @@ unsigned char LoadConfiguration(char *filename)
     // load configurastion data
     if (FileOpen(&file, filename))
     {
+		BootPrint("Opened configuration file\n");
         printf("Configuration file size: %lu\r", file.size);
         if (file.size == sizeof(config))
         {
             FileRead(&file, sector_buffer);
 
+			configTYPE *tmpconf=(configTYPE *)&sector_buffer;
+
             // check file id and version
-            if (strncmp((char*)sector_buffer, config_id, sizeof(config.id)) == 0)
+            if (strncmp(tmpconf->id, config_id, sizeof(config.id)) == 0)
             {
-                memcpy((void*)&config, (void*)sector_buffer, sizeof(config));
-                return(1);
+				// A few more sanity checks...
+				if(tmpconf->hardfile[0].enabled<7 && tmpconf->hardfile[1].enabled<7 && tmpconf->floppy.drives<=4) 
+				{
+	                memcpy((void*)&config, (void*)sector_buffer, sizeof(config));
+	                return(1);
+				}
+				else
+					BootPrint("Config file sanity check failed!\n");
             }
             else
-                printf("Wrong configuration file format!\r");
+                BootPrint("Wrong configuration file format!\n");
         }
         else
             printf("Wrong configuration file size: %lu (expected: %u)\r", file.size, sizeof(config));
     }
     else
-        printf("Can not open configuration file!\r");
+        BootPrint("Can not open configuration file!\n");
+
+	BootPrint("Setting config defaults\n");
+
+	WaitTimer(5000);
 
     // set default configuration
     memset((void*)&config, sizeof(config), 0);
@@ -156,6 +172,7 @@ unsigned char LoadConfiguration(char *filename)
     config.cpu = 0;
     config.hardfile[0].enabled = 1;
     strncpy(config.hardfile[0].name, "HARDFILE", sizeof(config.hardfile[0].name));
+    config.hardfile[1].enabled = 2;	// Default is access to entire SD card
     return(0);
 }
 
@@ -226,11 +243,12 @@ void HandleFpga(void)
 
 __geta4 void main(void)
 {
+	debugmsg[0]=0;
+	debugmsg2[0]=0;
     unsigned char rc;
     unsigned char key;
 //    unsigned long time;
     unsigned short spiclk;
-    //unsigned char CSD[16];
         BootPrint("OSD_CA01.SYS is here...\n");
 
     DISKLED_ON;
@@ -250,8 +268,8 @@ __geta4 void main(void)
 
     if (!MMC_Init())
         FatalError(1);
-        
-    BootPrint("Init done again...\n");
+
+    BootPrint("Init done again - hunting for drive...\n");
 
     spiclk = 7;//MCLK / ((AT91C_SPI_CSR[0] & AT91C_SPI_SCBR) >> 8) / 1000000;
     printf("spiclk: %u MHz\r", spiclk);
@@ -347,8 +365,18 @@ __geta4 void main(void)
 
     if (OpenHardfile(0))
     {
-
-        sprintf(s, "\nHardfile 0: %.8s.%.3s", hdf[0].file.name, &hdf[0].file.name[8]);
+		switch(hdf[0].type) // Customise message for SD card access
+		{
+			case HDF_FILE:
+		        sprintf(s, "\nHardfile 0: %.8s.%.3s", hdf[0].file.name, &hdf[0].file.name[8]);
+				break;
+			case HDF_CARD:
+		        sprintf(s, "\nHardfile 0: using entire SD card");
+				break;
+			default:
+		        sprintf(s, "\nHardfile 0: using SD card partition %d",hdf[0].type-HDF_CARD);	// Number from 1
+				break;
+		}
         BootPrint(s);
         sprintf(s, "CHS: %u.%u.%u", hdf[0].cylinders, hdf[0].heads, hdf[0].sectors);
         BootPrint(s);
@@ -358,8 +386,18 @@ __geta4 void main(void)
 
     if (OpenHardfile(1))
     {
-
-        sprintf(s, "\nHardfile 1: %.8s.%.3s", hdf[1].file.name, &hdf[1].file.name[8]);
+		switch(hdf[1].type)
+		{
+			case HDF_FILE:
+		        sprintf(s, "\nHardfile 1: %.8s.%.3s", hdf[1].file.name, &hdf[1].file.name[8]);
+				break;
+			case HDF_CARD:
+		        sprintf(s, "\nHardfile 1: using entire SD card");
+				break;
+			default:
+		        sprintf(s, "\nHardfile 1: using SD card partition %d",hdf[1].type-HDF_CARD);	// Number from 1
+				break;
+		}
         BootPrint(s);
         sprintf(s, "CHS: %u.%u.%u", hdf[1].cylinders, hdf[1].heads, hdf[1].sectors);
         BootPrint(s);
@@ -379,8 +417,44 @@ __geta4 void main(void)
         BootPrint("\n***************************************************");
         BootPrint(  "*  It's recommended to reformat your memory card  *");
         BootPrint(  "*   using 32 KB clusters to improve performance   *");
+		BootPrint(  "*           when using large hardfiles.           *");	// AMR
         BootPrint(  "***************************************************");
     }
+
+/*
+    // save CSD data.
+    memset((void*)&sector_buffer, 0, sizeof(sector_buffer));
+
+	long cap=MMC_GetCapacity();
+
+    if (FileOpen(&file, "CSDData"))
+    {
+	    sprintf(&sector_buffer[16],"Cap: %ld\r",cap);
+	    memcpy((void*)&sector_buffer, (void*)&CSDData, 16);
+        FileWrite(&file, sector_buffer);
+    }
+    else
+    {
+        strncpy(file.name, "CSDData", 8);
+        file.attributes = 0;
+        file.size = 32;
+        if (FileCreate(0, &file))
+        {
+		    sprintf(&sector_buffer[16],"Cap: %ld\r",cap);
+		    memcpy((void*)&sector_buffer, (void*)&CSDData, 16);
+            if (FileWrite(&file, sector_buffer))
+            {
+                printf("File written successfully.\r");
+            }
+            else
+                printf("File write failed!\r");
+        }
+        else
+            printf("File creation failed!\r");
+    }
+
+	//
+*/
 
     ConfigIDE(config.enable_ide, config.hardfile[0].present && config.hardfile[0].enabled, config.hardfile[1].present && config.hardfile[1].enabled);
     WaitTimer(1000);

@@ -24,6 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 2009-11-22 - multiple sector read implemented
 
 
+// FIXME - get capacity from SD card
+
 //#include "AT91SAM7S256.h"
 //#include "stdio.h"
 //#include "string.h"
@@ -37,6 +39,8 @@ unsigned char crc;
 unsigned long timeout;
 unsigned char response;
 unsigned char CardType;
+
+unsigned char CSDData[16];
 
 // internal functions
 void MMC_CRC(unsigned char c);
@@ -253,6 +257,92 @@ unsigned char MMC_Read(unsigned long lba, unsigned char *pReadBuffer)
     return(1);
 }
 #pragma section_no_code_init
+
+// Read CSD register
+unsigned char MMC_GetCSD()
+{
+	int i;
+    EnableCard();
+
+    if (MMC_Command(CMD9,0))
+    {
+        printf("CMD9 (GET_CSD): invalid response 0x%02X \r", response);
+        DisableCard();
+        return(0);
+    }
+
+    // now we are waiting for data token, it takes around 300us
+    timeout = 0;
+    while ((SPI(0xFF)) != 0xFE)
+    {
+        if (timeout++ >= 1000000) // we can't wait forever
+        {
+            printf("CMD9 (READ_BLOCK): no data token!\r");
+            DisableCard();
+            return(0);
+        }
+    }
+
+	for (i = 0; i < 16; i++)
+		CSDData[i]=SPI(0xFF);
+
+    SPI(0xFF); // read CRC lo byte
+    SPI(0xFF); // read CRC hi byte
+
+    DisableCard();
+    return(1);
+}
+
+
+unsigned long MMC_GetCapacity()
+{
+	unsigned long result=0;
+	MMC_GetCSD();
+//	switch(CardType)
+//	{
+//		case CARDTYPE_SDHC:
+//			result=(CSDData[7]&0x3f)<<26;
+//			result|=CSDData[8]<<18;
+//			result|=CSDData[9]<<10;
+//			result+=1024;
+//			return(result);
+//			break;
+//		default:
+//			int blocksize=CSDData[5]&15;	// READ_BL_LEN
+//			blocksize=1<<(blocksize-9);		// Now a scalar:  physical block size / 512.
+//			result=(CSDData[6]&3)<<10;
+//			result|=CSDData[7]<<2;
+// 			result|=(CSDData[8]>>6)&3;		// result now contains C_SIZE
+//			int cmult=(CSDData[9]&3)<<1;
+//			cmult|=(CSDData[10]>>7) & 1;
+//			++result;
+//			result<<=cmult+2;
+//			return(result);
+//			break;
+//	}
+    if ((CSDData[0] & 0xC0)==0x40)   //CSD Version 2.0 - SDHC
+    {
+			result=(CSDData[7]&0x3f)<<26;
+			result|=CSDData[8]<<18;
+			result|=CSDData[9]<<10;
+			result+=1024;
+			return(result);
+	}
+	else
+	{    
+			int blocksize=CSDData[5]&15;	// READ_BL_LEN
+			blocksize=1<<(blocksize-9);		// Now a scalar:  physical block size / 512.
+			result=(CSDData[6]&3)<<10;
+			result|=CSDData[7]<<2;
+ 			result|=(CSDData[8]>>6)&3;		// result now contains C_SIZE
+			int cmult=(CSDData[9]&3)<<1;
+			cmult|=(CSDData[10]>>7) & 1;
+			++result;
+			result<<=cmult+2;
+			return(result);
+    }
+}
+
 
 // read multiple 512-byte blocks
 unsigned char MMC_ReadMultiple(unsigned long lba, unsigned char *pReadBuffer, unsigned long nBlockCount)
