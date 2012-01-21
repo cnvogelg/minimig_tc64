@@ -155,18 +155,18 @@ set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
 set_global_assignment -name CYCLONEII_OPTIMIZATION_TECHNIQUE SPEED
 set_global_assignment -name GENERATE_RBF_FILE ON
 set_global_assignment -name FORCE_CONFIGURATION_VCCIO ON
-set_global_assignment -name VHDL_FILE ../Board/chameleon_cdtv_remote.vhd
-set_global_assignment -name VHDL_FILE ../Board/palclk.vhd
-set_global_assignment -name VHDL_FILE ../Board/cfide.vhd
-set_global_assignment -name BDF_FILE ../Board/fampiga_top.bdf
-set_global_assignment -name SOURCE_FILE ../Board/JBboot.cmp
-set_global_assignment -name AHDL_FILE ../Board/JBboot.tdf
-set_global_assignment -name VHDL_FILE ../Board/sdram.vhd
-set_global_assignment -name VHDL_FILE ../Board/startram.vhd
-set_global_assignment -name VHDL_FILE ../Board/TG68K.vhd
-set_global_assignment -name VHDL_FILE ../Board/TG68K_ALU.vhd
-set_global_assignment -name VHDL_FILE ../Board/TG68K_Pack.vhd
-set_global_assignment -name VHDL_FILE ../Board/TG68KdotC_Kernel.vhd
+set_global_assignment -name VHDL_FILE ../board/chameleon_cdtv_remote.vhd
+set_global_assignment -name VHDL_FILE ../board/palclk.vhd
+set_global_assignment -name VHDL_FILE ../board/cfide.vhd
+set_global_assignment -name BDF_FILE ../board/fampiga_top.bdf
+set_global_assignment -name SOURCE_FILE ../board/JBboot.cmp
+set_global_assignment -name AHDL_FILE ../board/JBboot.tdf
+set_global_assignment -name VHDL_FILE ../board/sdram.vhd
+set_global_assignment -name VHDL_FILE ../board/startram.vhd
+set_global_assignment -name VHDL_FILE ../board/TG68K.vhd
+set_global_assignment -name VHDL_FILE ../board/TG68K_ALU.vhd
+set_global_assignment -name VHDL_FILE ../board/TG68K_Pack.vhd
+set_global_assignment -name VHDL_FILE ../board/TG68KdotC_Kernel.vhd
 set_global_assignment -name VERILOG_FILE ../minimig/Userio.v
 set_global_assignment -name VERILOG_FILE ../minimig/ActionReplay3.v
 set_global_assignment -name VERILOG_FILE ../minimig/Agnus.v
@@ -190,7 +190,7 @@ set_global_assignment -name VERILOG_FILE ../minimig/Sprites.v
 set_global_assignment -name SIGNALTAP_FILE stp1.stp
 set_global_assignment -name VERILOG_FILE test.v
 set_global_assignment -name MISC_FILE "D:/_chameleon/dockingstation/chameleon/fampiga_top.dpf"
-set_global_assignment -name VHDL_FILE ../Board/chameleon_docking_station.vhd
+set_global_assignment -name VHDL_FILE ../board/chameleon_docking_station.vhd
 set_global_assignment -name FMAX_REQUIREMENT "108 MHz"
 set_global_assignment -name ENABLE_CLOCK_LATENCY ON
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
