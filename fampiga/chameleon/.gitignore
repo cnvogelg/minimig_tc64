@@ -1,0 +1,13 @@
+PLLJ_PLLSPE_INFO.txt
+db/
+*.rpt
+*.done
+*.summary
+*.jdi
+*.smsg
+*.pin
+*.rbf
+*.sof
+incremental_db/
+simulation/
+
