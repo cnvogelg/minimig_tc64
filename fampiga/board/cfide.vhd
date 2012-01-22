@@ -46,7 +46,8 @@ entity cfide is
 	memce: out std_logic;			
 	cpudata: out std_logic_vector(15 downto 0);		
 	cpuena: buffer std_logic;			
-	TxD: out std_logic;			
+	txd: in std_logic;			
+	rxd: out std_logic;
 	sd_cs 		: out std_logic_vector(7 downto 0);
 	sd_clk 		: out std_logic;
 	sd_do		: out std_logic;
@@ -258,6 +259,8 @@ end process;
 					ir <= mux_q(3);
 				when X"A" =>
 --					vga_id <= mux_q;
+				when X"D" =>
+					rxd <= mux_q(3); -- IEC ATN = Rxd
 				when X"E" =>
 					kb_data <= mux_q(0);
 					kb_clk <= mux_q(1);
@@ -294,7 +297,7 @@ end process;
 						mux_regd <= X"B";
 					when X"B" =>
 						mux_d_regd(3 downto 1) <= "111";
-						mux_d_regd(0) <= shiftout;
+						mux_d_regd(0) <= txd; -- IEC_DAT = txd -- shiftout;
 --						mux_d_regd(0) <= '1';
 						mux_regd <= X"D";
 					when X"C" =>
@@ -442,7 +445,7 @@ end process;
 -----------------------------------------------------------------
 -- Simple UART only TxD
 -----------------------------------------------------------------
-TxD <= not shiftout;
+--TxD <= not shiftout;
 process(n_reset, sysclk, shift)
 begin
 	if shift="0000000000" then
