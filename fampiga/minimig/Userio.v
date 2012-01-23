@@ -63,7 +63,7 @@
 // TobiFlex
 // 2011-04-10   - double buffering for spi8:out   
 // 2011-04-10   - add cpu and fastmem config   
-// 2012-01-07   - add Joystick 1-4 and mice 1+2 for Chameleon Docking Station   
+// 2012-01-07   - add Joystick 1-4 and AMIGA mice 1+2 and AMIGA Keybord for Chameleon Docking Station   
 
 module userio
 (
@@ -126,7 +126,8 @@ reg		joy1enable;					// joystick 1 enable (mouse/joy switch)
 reg		joy2enable;					// joystick 2 enable when no osd
 //wire	osd_enable;					// OSD display enable
 wire	key_disable;				// Amiga keyboard disable
-reg		[7:0] t_osd_ctrl;			// JB: osd control lines
+//reg		[7:0] t_osd_ctrl;			// JB: osd control lines
+wire		[7:0] t_osd_ctrl;			// JB: osd control lines
 wire	test_load;					// load test value to mouse counter 
 wire	[15:0] test_data;			// mouse counter test value
 wire	[1:0] autofire_config;
@@ -200,27 +201,28 @@ always @(posedge clk)
 //	autofire is permanent active if enabled, can be overwritten any time by normal fire button
 assign _sjoy2[5:0] = joy2enable ? {_xjoy2[5], sel_autofire ^ _xjoy2[4], _xjoy2[3:0]} : 6'b11_1111;
 
-always @(joy2enable or _xjoy2 or osd_ctrl)
-	if (~joy2enable)
-		if (~_xjoy2[5] || (~_xjoy2[3] && ~_xjoy2[2]))
-			t_osd_ctrl = KEY_MENU;
-		else if (~_xjoy2[4])
-			t_osd_ctrl = KEY_ENTER;
-		else if (~_xjoy2[3])
-			t_osd_ctrl = KEY_UP;
-		else if (~_xjoy2[2])
-			t_osd_ctrl = KEY_DOWN;
-		else if (~_xjoy2[1])
-			t_osd_ctrl = KEY_LEFT;
-		else if (~_xjoy2[0])
-			t_osd_ctrl = KEY_RIGHT;
-		else
-			t_osd_ctrl = osd_ctrl;
-	else
-		if (~_xjoy2[3] && ~_xjoy2[2])
-			t_osd_ctrl = KEY_MENU;
-		else
-			t_osd_ctrl = osd_ctrl;
+//always @(joy2enable or _xjoy2 or osd_ctrl)
+//	if (~joy2enable)
+//		if (~_xjoy2[5] || (~_xjoy2[3] && ~_xjoy2[2]))
+//			t_osd_ctrl = KEY_MENU;
+//		else if (~_xjoy2[4])
+//			t_osd_ctrl = KEY_ENTER;
+//		else if (~_xjoy2[3])
+//			t_osd_ctrl = KEY_UP;
+//		else if (~_xjoy2[2])
+//			t_osd_ctrl = KEY_DOWN;
+//		else if (~_xjoy2[1])
+//			t_osd_ctrl = KEY_LEFT;
+//		else if (~_xjoy2[0])
+//			t_osd_ctrl = KEY_RIGHT;
+//		else
+//			t_osd_ctrl = osd_ctrl;
+//	else
+//		if (~_xjoy2[3] && ~_xjoy2[2])
+//			t_osd_ctrl = KEY_MENU;
+//		else
+//			t_osd_ctrl = osd_ctrl;
+assign	t_osd_ctrl = osd_ctrl;
 
 // port 1 automatic mouse/joystick switch
 always @(posedge clk)
