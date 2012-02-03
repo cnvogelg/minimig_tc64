@@ -163,6 +163,7 @@ __geta4 void main(void)
 
     key = OsdGetCtrl();
 
+	config.kickstart.name[0]=0;
 	SetConfigurationFilename(0); // Use default config
     rc = LoadConfiguration(0);	// Use slot-based config filename
 
@@ -171,12 +172,6 @@ __geta4 void main(void)
 
     if (key == KEY_F2)
        config.chipset &= ~CONFIG_NTSC; // force PAL mode if F2 pressed
-
-    ConfigChipset(config.chipset | CONFIG_TURBO); // set CPU in turbo mode
-
-    OsdReset(RESET_BOOTLOADER);
-
-    ConfigFloppy(1, CONFIG_FLOPPY2X); // set floppy speed
 
     sprintf(s, "** ARM firmware %s **\n", version + 5);
     BootPrint(s);
@@ -201,20 +196,8 @@ __geta4 void main(void)
 
     BootPrint("");
 
-    if (!UploadKickstart(config.kickstart.name))
-    {
-        strcpy(config.kickstart.name, "KICK    ");
-        if (!UploadKickstart(config.kickstart.name))
-            FatalError(6);
-    }
-
-    if (!CheckButton() && !config.disable_ar3) // if menu button pressed don't load Action Replay
-    {
-		UploadActionReplay();
-    }
-
-    if (OpenHardfile(0))
-    {
+	if(config.hardfile[0].present)
+	{
 		switch(hdf[0].type) // Customise message for SD card access
 		{
 			case HDF_FILE:
@@ -234,8 +217,8 @@ __geta4 void main(void)
         BootPrint(s);
     }
 
-    if (OpenHardfile(1))
-    {
+	if(config.hardfile[1].present)
+	{
 		switch(hdf[1].type)
 		{
 			case HDF_FILE:
@@ -270,25 +253,7 @@ __geta4 void main(void)
 		BootPrint(  "*           when using large hardfiles.           *");	// AMR
         BootPrint(  "***************************************************");
     }
-
-    ConfigIDE(config.enable_ide, config.hardfile[0].present && config.hardfile[0].enabled, config.hardfile[1].present && config.hardfile[1].enabled);
-    WaitTimer(1000);
-
-    printf("Bootloading is complete.\r");
-
-    BootPrint("\nExiting bootloader...");
-    WaitTimer(500);
-
-    ConfigMemory(config.memory);
-    ConfigCPU(config.cpu);
-    ConfigFloppy(config.floppy.drives, config.floppy.speed);
-
-    BootExit();
-
-    ConfigChipset(config.chipset);
-    ConfigFilter(config.filter.lores, config.filter.hires);
-    ConfigScanlines(config.scanlines);
-    
+ 
     while (1)
     {
         HandleFpga();
