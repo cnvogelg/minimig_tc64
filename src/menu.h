@@ -53,6 +53,13 @@ enum MENU
     MENU_INFO,
 };
 
+// UI strings, used by boot messages
+extern char *config_filter_msg[];
+extern char *config_memory_chip_msg[];
+extern char *config_memory_slow_msg[];
+extern char *config_scanline_msg[];
+
+
 void InsertFloppy(adfTYPE *drive);
 void HandleUI(void);
 void PrintDirectory(void);

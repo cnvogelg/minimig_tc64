@@ -85,9 +85,6 @@ const char *config_chipset_msg[] = {"OCS-A500", "OCS-A1000", "ECS", "---"};
 
 char *config_autofire_msg[] = {"        AUTOFIRE OFF", "        AUTOFIRE FAST", "        AUTOFIRE MEDIUM", "        AUTOFIRE SLOW"};
 
-extern char UploadKickstart(char *name);
-extern unsigned char SaveConfiguration(char *filename);
-
 extern unsigned char DEBUG;
 
 unsigned char config_autofire = 0;
@@ -657,7 +654,8 @@ void HandleUI(void)
             }
             else if (menusub == 5)
             {
-                SaveConfiguration("MINIMIG CFG");
+                SaveConfiguration(0);	// Use slot-based config filename
+										// FIXME - new menu needed here to select slot.
                 menustate = MENU_MAIN2_1;
                 menusub = 1;
             }
@@ -1221,6 +1219,7 @@ void HandleUI(void)
                 menustate = MENU_SETTINGS_VIDEO1;
                 ConfigScanlines(config.scanlines);
             }
+
 
 
 

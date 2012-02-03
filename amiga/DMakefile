@@ -8,7 +8,7 @@ DCCLINK=-rom -l rom.lib
 ROM_ADDR=0x2000
 
 C_ASM=start.asm
-C_SRC=main.c fdd.c fat.c osd.c hardware.c fpga.c mmc.c hdd.c menu.c
+C_SRC=main.c fdd.c fat.c osd.c hardware.c fpga.c mmc.c hdd.c menu.c config.c
 C_HDR=config.h errors.h fat.h fdd.h firmware.h fpga.h hardware.h hdd.h menu.h mmc.h osd.h
 C_ALL= $(C_ASM) $(C_SRC)
 ALL_SRC=$(C_ALL:*:"/src/*")
