@@ -332,14 +332,13 @@ void HandleUI(void)
 
         OsdWrite(0, " \x10\x14   *** MINIMIG MENU ***", 0);
         OsdWrite(1, "", 0);
-        OsdWrite(2, "            reset", menusub == 0);
-        OsdWrite(3, "            settings", menusub == 1);
-//        OsdWrite(4, "            firmware", menusub == 2);
-        OsdWrite(4, "", 0);
+        OsdWrite(2, "       reset", menusub == 0);
+        OsdWrite(3, "       settings", menusub == 1);
+        OsdWrite(4, "       load configuration", menusub == 2);
         OsdWrite(5, "", 0);
         OsdWrite(6, "", 0);
 //        OsdWrite(7, "              exit", menusub == 3);
-        OsdWrite(7, "              exit", menusub == 2);
+        OsdWrite(7, "              exit", menusub == 3);
 
         menustate = MENU_MAIN2_2;
         break;
@@ -356,8 +355,7 @@ void HandleUI(void)
         }
         else if (down)
         {
-//            if (menusub < 3)
-            if (menusub < 2)
+            if (menusub < 5)
                 menusub++;
             menustate = MENU_MAIN2_1;
         }
@@ -374,17 +372,69 @@ void HandleUI(void)
                 menustate = MENU_SETTINGS1;
             }
             else if (menusub == 2)
-//            {
-//                menusub = 2;
-//                menustate = MENU_FIRMWARE1;
-//            }
-//            else if (menusub == 3)
+            {
+                menusub = 0;
+                menustate = MENU_LOADCONFIG_1;
+            }
+            else if (menusub == 3)
                 menustate = MENU_NONE1;
         }
         else if (left)
         {
             menustate = MENU_MAIN1;
             menusub = 0;
+        }
+        break;
+
+    case MENU_LOADCONFIG_1 :
+
+        OsdWrite(0, "    *** LOAD CONFIGURATION ***", 0);
+        OsdWrite(1, "", 0);
+        OsdWrite(2, "             Default", menusub == 0);
+        OsdWrite(3, "             1", menusub == 1);
+        OsdWrite(4, "             2", menusub == 2);
+        OsdWrite(5, "             3", menusub == 3);
+        OsdWrite(6, "             4", menusub == 4);
+//        OsdWrite(6, "", 0);
+//        OsdWrite(7, "              exit", menusub == 3);
+        OsdWrite(7, "              exit", menusub == 5);
+
+        menustate = MENU_LOADCONFIG_2;
+        break;
+
+    case MENU_LOADCONFIG_2 :
+
+        if (menu)
+        {
+            menustate = MENU_MAIN2_1;
+            menusub = 2;
+        }
+        else if (up)
+        {
+            if (menusub > 0)
+                menusub--;
+            menustate = MENU_LOADCONFIG_1;
+        }
+        else if (down)
+        {
+//            if (menusub < 3)
+            if (menusub < 5)
+                menusub++;
+            menustate = MENU_LOADCONFIG_1;
+        }
+        else if (select)
+        {
+			if(menusub<5)
+			{
+				SetConfigurationFilename(menusub);
+				LoadConfiguration(NULL);
+	   	        menustate = MENU_NONE1;
+			}
+			else
+			{
+				menustate = MENU_MAIN2_1;
+				menusub = 2;
+			}
         }
         break;
 
@@ -654,10 +704,10 @@ void HandleUI(void)
             }
             else if (menusub == 5)
             {
-                SaveConfiguration(0);	// Use slot-based config filename
-										// FIXME - new menu needed here to select slot.
-                menustate = MENU_MAIN2_1;
-                menusub = 1;
+//                SaveConfiguration(0);	// Use slot-based config filename instead
+										
+                menustate = MENU_SAVECONFIG_1;
+                menusub = 0;
             }
         }
 
@@ -667,6 +717,60 @@ void HandleUI(void)
             menusub = 1;
         }
         break;
+
+    case MENU_SAVECONFIG_1 :
+
+        OsdWrite(0, "    *** SAVE CONFIGURATION ***", 0);
+        OsdWrite(1, "", 0);
+        OsdWrite(2, "           Default", menusub == 0);
+        OsdWrite(3, "           1", menusub == 1);
+        OsdWrite(4, "           2", menusub == 2);
+        OsdWrite(5, "           3", menusub == 3);
+        OsdWrite(6, "           4", menusub == 4);
+//        OsdWrite(6, "", 0);
+//        OsdWrite(7, "              exit", menusub == 3);
+        OsdWrite(7, "              exit", menusub == 5);
+
+        menustate = MENU_SAVECONFIG_2;
+        break;
+
+    case MENU_SAVECONFIG_2 :
+
+        if (menu)
+		{
+            menustate = MENU_SETTINGS1;
+            menusub = 5;
+		}
+        else if (up)
+        {
+            if (menusub > 0)
+                menusub--;
+            menustate = MENU_SAVECONFIG_1;
+        }
+        else if (down)
+        {
+//            if (menusub < 3)
+            if (menusub < 5)
+                menusub++;
+            menustate = MENU_SAVECONFIG_1;
+        }
+        else if (select)
+        {
+			if(menusub<5)
+			{
+				SetConfigurationFilename(menusub);
+				SaveConfiguration(NULL);
+		        menustate = MENU_NONE1;
+			}
+			else
+			{
+				menustate = MENU_SETTINGS1;
+				menusub = 0;
+			}
+        }
+        break;
+
+
 
         /******************************************************************/
         /* chipset settings menu                                          */

@@ -107,6 +107,8 @@ unsigned char LoadConfiguration(char *filename)
 				// A few more sanity checks...
 				if(tmpconf->hardfile[0].enabled<7 && tmpconf->hardfile[1].enabled<7 && tmpconf->floppy.drives<=4) 
 				{
+					// If either the old config and new config have a different kickstart file,
+					// or this is the first boot, we need to upload a kickstart image.
 					if(strcmp(tmpconf->kickstart.name,config.kickstart.name)!=0)
 						updatekickstart=true;
 	                memcpy((void*)&config, (void*)sector_buffer, sizeof(config));
@@ -157,8 +159,6 @@ unsigned char LoadConfiguration(char *filename)
 
 void ApplyConfiguration(char reloadkickstart)
 {
-	// If either the old config and new config have a different kickstart file,
-	// or this is the first boot, we need to upload a kickstart image.
 	if(reloadkickstart)
 	{
 		ConfigChipset(config.chipset | CONFIG_TURBO); // set CPU in turbo mode
