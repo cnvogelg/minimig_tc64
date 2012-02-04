@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "hardware.h"
 #include "fat.h"
 #include "hdd.h"
+#include "hdd_internal.h"
 //#include "MMC.h"
 //#include "FPGA.h"
 #include "config.h"
@@ -259,6 +260,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
         {
 			DEBUG1("Read Sectors");
             WriteStatus(IDE_STATUS_RDY); // pio in (class 1) command type
+
 
 
             sector = tfr[3];
