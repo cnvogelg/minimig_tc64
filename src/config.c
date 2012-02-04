@@ -85,6 +85,7 @@ unsigned char LoadConfiguration(char *filename)
     static const char config_id[] = "MNMGCFG0";
 	char updatekickstart=0;
 	char result=0;
+    unsigned char key;
 
 	if(!filename)
 		filename=configfilename;	// Use slot-based filename if none provided.
@@ -126,7 +127,7 @@ unsigned char LoadConfiguration(char *filename)
 
 		BootPrint("Setting config defaults\n");
 
-		WaitTimer(5000);
+//		WaitTimer(5000);
 
 		// set default configuration
 		memset((void*)&config, sizeof(config), 0);
@@ -141,9 +142,24 @@ unsigned char LoadConfiguration(char *filename)
 		updatekickstart=true;
 	}
 
+    key = OsdGetCtrl();
+    if (key == KEY_F1)
+       config.chipset |= CONFIG_NTSC; // force NTSC mode if F1 pressed
+
+    if (key == KEY_F2)
+       config.chipset &= ~CONFIG_NTSC; // force PAL mode if F2 pressed
+
+	ApplyConfiguration(updatekickstart);
+
+    return(result);
+}
+
+
+void ApplyConfiguration(char reloadkickstart)
+{
 	// If either the old config and new config have a different kickstart file,
 	// or this is the first boot, we need to upload a kickstart image.
-	if(updatekickstart)
+	if(reloadkickstart)
 	{
 		ConfigChipset(config.chipset | CONFIG_TURBO); // set CPU in turbo mode
 		ConfigFloppy(1, CONFIG_FLOPPY2X); // set floppy speed
@@ -164,28 +180,97 @@ unsigned char LoadConfiguration(char *filename)
 
 	// Whether or not we uploaded a kickstart image we now need to set various parameters from the config.
 
-   	OpenHardfile(0);
-   	OpenHardfile(1);
+  	if(OpenHardfile(0))
+	{
+		switch(hdf[0].type) // Customise message for SD card access
+		{
+			case HDF_FILE:
+		        sprintf(s, "\nHardfile 0: %.8s.%.3s", hdf[0].file.name, &hdf[0].file.name[8]);
+				break;
+			case HDF_CARD:
+		        sprintf(s, "\nHardfile 0: using entire SD card");
+				break;
+			default:
+		        sprintf(s, "\nHardfile 0: using SD card partition %d",hdf[0].type-HDF_CARD);	// Number from 1
+				break;
+		}
+        BootPrint(s);
+        sprintf(s, "CHS: %u.%u.%u", hdf[0].cylinders, hdf[0].heads, hdf[0].sectors);
+        BootPrint(s);
+        sprintf(s, "Size: %lu MB", ((((unsigned long) hdf[0].cylinders) * hdf[0].heads * hdf[0].sectors) >> 11));
+        BootPrint(s);
+	}
+   	if(OpenHardfile(1))
+	{
+		switch(hdf[1].type)
+		{
+			case HDF_FILE:
+		        sprintf(s, "\nHardfile 1: %.8s.%.3s", hdf[1].file.name, &hdf[1].file.name[8]);
+				break;
+			case HDF_CARD:
+		        sprintf(s, "\nHardfile 1: using entire SD card");
+				break;
+			default:
+		        sprintf(s, "\nHardfile 1: using SD card partition %d",hdf[1].type-HDF_CARD);	// Number from 1
+				break;
+		}
+        BootPrint(s);
+        sprintf(s, "CHS: %u.%u.%u", hdf[1].cylinders, hdf[1].heads, hdf[1].sectors);
+        BootPrint(s);
+        sprintf(s, "Size: %lu MB", ((((unsigned long) hdf[1].cylinders) * hdf[1].heads * hdf[1].sectors) >> 11));
+        BootPrint(s);
+	}
 
     ConfigIDE(config.enable_ide, config.hardfile[0].present && config.hardfile[0].enabled, config.hardfile[1].present && config.hardfile[1].enabled);
-    WaitTimer(1000);
+//    WaitTimer(1000);
+
+    sprintf(s, "CPU clock     : %s", config.chipset & 0x01 ? "turbo" : "normal");
+    BootPrint(s);
+    sprintf(s, "Chip RAM size : %s", config_memory_chip_msg[config.memory & 0x03]);
+    BootPrint(s);
+    sprintf(s, "Slow RAM size : %s", config_memory_slow_msg[config.memory >> 2 & 0x03]);
+    BootPrint(s);
+
+    sprintf(s, "Floppy drives : %u", config.floppy.drives + 1);
+    BootPrint(s);
+    sprintf(s, "Floppy speed  : %s", config.floppy.speed ? "fast": "normal");
+    BootPrint(s);
+
+    BootPrint("");
+
+    sprintf(s, "\nA600 IDE HDC is %s.", config.enable_ide ? "enabled" : "disabled");
+    BootPrint(s);
+    sprintf(s, "Master HDD is %s.", config.hardfile[0].present ? config.hardfile[0].enabled ? "enabled" : "disabled" : "not present");
+    BootPrint(s);
+    sprintf(s, "Slave HDD is %s.", config.hardfile[1].present ? config.hardfile[1].enabled ? "enabled" : "disabled" : "not present");
+    BootPrint(s);
+
+    if (cluster_size < 64)
+    {
+        BootPrint("\n***************************************************");
+        BootPrint(  "*  It's recommended to reformat your memory card  *");
+        BootPrint(  "*   using 32 KB clusters to improve performance   *");
+		BootPrint(  "*           when using large hardfiles.           *");	// AMR
+        BootPrint(  "***************************************************");
+    }
 
     printf("Bootloading is complete.\r");
 
     BootPrint("\nExiting bootloader...");
-    WaitTimer(500);
+//    WaitTimer(500);
 
     ConfigMemory(config.memory);
     ConfigCPU(config.cpu);
-    ConfigFloppy(config.floppy.drives, config.floppy.speed);
-
-    BootExit();
-
-    ConfigChipset(config.chipset);
     ConfigFilter(config.filter.lores, config.filter.hires);
     ConfigScanlines(config.scanlines);
 
-    return(result);
+	if(reloadkickstart)
+	    BootExit();
+	else
+		OsdReset(RESET_NORMAL);
+
+    ConfigChipset(config.chipset);
+    ConfigFloppy(config.floppy.drives, config.floppy.speed);
 }
 
 

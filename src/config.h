@@ -48,5 +48,5 @@ char UploadActionReplay();
 void SetConfigurationFilename(int config);	// Set configuration filename by slot number
 unsigned char LoadConfiguration(char *filename);	// Can supply NULL to use filename previously set by slot number
 unsigned char SaveConfiguration(char *filename);	// Can supply NULL to use filename previously set by slot number
-
+void ApplyConfiguration(char reloadkickstart);
 

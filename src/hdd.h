@@ -58,3 +58,5 @@ unsigned char OpenHardfile(unsigned char unit);
 extern char debugmsg[40];
 extern char debugmsg2[40];
 
+extern hdfTYPE hdf[2];
+

@@ -53,9 +53,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "menu.h"
 #include "config.h"
 
-const char version[] = {"$VER:AYQ100818"};
+const char version[] = {"$VER:AYQ100818_RB2"};
 
-extern hdfTYPE hdf[2];
 extern adfTYPE df[4];
 
 unsigned char Error;
@@ -106,11 +105,9 @@ __geta4 void main(void)
 {
 	debugmsg[0]=0;
 	debugmsg2[0]=0;
-    unsigned char rc;
-    unsigned char key;
 //    unsigned long time;
-    unsigned short spiclk;
-        BootPrint("OSD_CA01.SYS is here...\n");
+//    unsigned short spiclk;
+    BootPrint("OSD_CA01.SYS is here...\n");
 
     DISKLED_ON;
 
@@ -122,6 +119,9 @@ __geta4 void main(void)
     printf("\rARM Controller by Jakub Bednarski\r\r");
     printf("Version %s\r\r", version+5);
 
+    sprintf(s, "** ARM firmware %s **\n", version + 5);
+    BootPrint(s);
+
 //    SPI_Init();
 
 //    if (CheckButton()) // if menu button pressed fall back to slow SPI mode
@@ -132,8 +132,8 @@ __geta4 void main(void)
 
     BootPrint("Init done again - hunting for drive...\n");
 
-    spiclk = 7;//MCLK / ((AT91C_SPI_CSR[0] & AT91C_SPI_SCBR) >> 8) / 1000000;
-    printf("spiclk: %u MHz\r", spiclk);
+//    spiclk = 7;//MCLK / ((AT91C_SPI_CSR[0] & AT91C_SPI_SCBR) >> 8) / 1000000;
+//    printf("spiclk: %u MHz\r", spiclk);
 
     if (!FindDrive())
         FatalError(2);
@@ -161,98 +161,12 @@ __geta4 void main(void)
 	df[2].status = 0;
 	df[3].status = 0;
 
-    key = OsdGetCtrl();
-
 	config.kickstart.name[0]=0;
 	SetConfigurationFilename(0); // Use default config
-    rc = LoadConfiguration(0);	// Use slot-based config filename
+    LoadConfiguration(0);	// Use slot-based config filename
 
-    if (key == KEY_F1)
-       config.chipset |= CONFIG_NTSC; // force NTSC mode if F1 pressed
-
-    if (key == KEY_F2)
-       config.chipset &= ~CONFIG_NTSC; // force PAL mode if F2 pressed
-
-    sprintf(s, "** ARM firmware %s **\n", version + 5);
-    BootPrint(s);
-
-    sprintf(s, "SPI clock: %u MHz\n", spiclk);
-    BootPrint(s);
-
-    if (!rc)
-        BootPrint("Configuration file not found...\n");
-
-    sprintf(s, "CPU clock     : %s", config.chipset & 0x01 ? "turbo" : "normal");
-    BootPrint(s);
-    sprintf(s, "Chip RAM size : %s", config_memory_chip_msg[config.memory & 0x03]);
-    BootPrint(s);
-    sprintf(s, "Slow RAM size : %s", config_memory_slow_msg[config.memory >> 2 & 0x03]);
-    BootPrint(s);
-
-    sprintf(s, "Floppy drives : %u", config.floppy.drives + 1);
-    BootPrint(s);
-    sprintf(s, "Floppy speed  : %s", config.floppy.speed ? "fast": "normal");
-    BootPrint(s);
-
-    BootPrint("");
-
-	if(config.hardfile[0].present)
-	{
-		switch(hdf[0].type) // Customise message for SD card access
-		{
-			case HDF_FILE:
-		        sprintf(s, "\nHardfile 0: %.8s.%.3s", hdf[0].file.name, &hdf[0].file.name[8]);
-				break;
-			case HDF_CARD:
-		        sprintf(s, "\nHardfile 0: using entire SD card");
-				break;
-			default:
-		        sprintf(s, "\nHardfile 0: using SD card partition %d",hdf[0].type-HDF_CARD);	// Number from 1
-				break;
-		}
-        BootPrint(s);
-        sprintf(s, "CHS: %u.%u.%u", hdf[0].cylinders, hdf[0].heads, hdf[0].sectors);
-        BootPrint(s);
-        sprintf(s, "Size: %lu MB", ((((unsigned long) hdf[0].cylinders) * hdf[0].heads * hdf[0].sectors) >> 11));
-        BootPrint(s);
-    }
-
-	if(config.hardfile[1].present)
-	{
-		switch(hdf[1].type)
-		{
-			case HDF_FILE:
-		        sprintf(s, "\nHardfile 1: %.8s.%.3s", hdf[1].file.name, &hdf[1].file.name[8]);
-				break;
-			case HDF_CARD:
-		        sprintf(s, "\nHardfile 1: using entire SD card");
-				break;
-			default:
-		        sprintf(s, "\nHardfile 1: using SD card partition %d",hdf[1].type-HDF_CARD);	// Number from 1
-				break;
-		}
-        BootPrint(s);
-        sprintf(s, "CHS: %u.%u.%u", hdf[1].cylinders, hdf[1].heads, hdf[1].sectors);
-        BootPrint(s);
-        sprintf(s, "Size: %lu MB", ((((unsigned long) hdf[1].cylinders) * hdf[1].heads * hdf[1].sectors) >> 11));
-        BootPrint(s);
-    }
-
-    sprintf(s, "\nA600 IDE HDC is %s.", config.enable_ide ? "enabled" : "disabled");
-    BootPrint(s);
-    sprintf(s, "Master HDD is %s.", config.hardfile[0].present ? config.hardfile[0].enabled ? "enabled" : "disabled" : "not present");
-    BootPrint(s);
-    sprintf(s, "Slave HDD is %s.", config.hardfile[1].present ? config.hardfile[1].enabled ? "enabled" : "disabled" : "not present");
-    BootPrint(s);
-
-    if (cluster_size < 64)
-    {
-        BootPrint("\n***************************************************");
-        BootPrint(  "*  It's recommended to reformat your memory card  *");
-        BootPrint(  "*   using 32 KB clusters to improve performance   *");
-		BootPrint(  "*           when using large hardfiles.           *");	// AMR
-        BootPrint(  "***************************************************");
-    }
+//    sprintf(s, "SPI clock: %u MHz\n", spiclk);
+//    BootPrint(s);
  
     while (1)
     {

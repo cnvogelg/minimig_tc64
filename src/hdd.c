@@ -260,6 +260,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 			DEBUG1("Read Sectors");
             WriteStatus(IDE_STATUS_RDY); // pio in (class 1) command type
 
+
             sector = tfr[3];
             cylinder = tfr[4] | (tfr[5] << 8);
             head = tfr[6] & 0x0F;
