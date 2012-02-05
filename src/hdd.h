@@ -30,6 +30,7 @@
 #define HDF_CARDPART1 4
 #define HDF_CARDPART2 5
 #define HDF_CARDPART3 6
+#define HDF_TYPEMASK 15
 #define HDF_SYNTHRDB 128	// Flag to indicate whether we should auto-synthesize a RigidDiskBlock
 
 typedef struct

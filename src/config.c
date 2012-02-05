@@ -15,6 +15,7 @@ configTYPE config;
 fileTYPE file;
 extern char s[40];
 char configfilename[12];
+char DebugMode=0;
 
 char UploadKickstart(char *name)
 {
@@ -24,7 +25,6 @@ char UploadKickstart(char *name)
 
 	BootPrint("Loading file: ");
 	BootPrint(filename);
-    WaitTimer(5000);
 
     if (FileOpen(&file, filename))
     {
@@ -132,8 +132,6 @@ unsigned char LoadConfiguration(char *filename)
         BootPrint("Can not open configuration file!\n");
 
 		BootPrint("Setting config defaults\n");
-
-		WaitTimer(5000);
 
 		// set default configuration
 		memset((void*)&config, sizeof(config), 0);
@@ -256,10 +254,9 @@ void ApplyConfiguration(char reloadkickstart)
 		else
 			BootPrint("Hardfile 1 has no RigidDiskBlock");
 	}
-    WaitTimer(5000);
 
     ConfigIDE(config.enable_ide, config.hardfile[0].present && config.hardfile[0].enabled, config.hardfile[1].present && config.hardfile[1].enabled);
-    WaitTimer(5000);
+
     sprintf(s, "CPU clock     : %s", config.chipset & 0x01 ? "turbo" : "normal");
     BootPrint(s);
     sprintf(s, "Chip RAM size : %s", config_memory_chip_msg[config.memory & 0x03]);
@@ -281,6 +278,7 @@ void ApplyConfiguration(char reloadkickstart)
     sprintf(s, "Slave HDD is %s.", config.hardfile[1].present ? config.hardfile[1].enabled ? "enabled" : "disabled" : "not present");
     BootPrint(s);
 
+#if 0
     if (cluster_size < 64)
     {
         BootPrint("\n***************************************************");
@@ -289,22 +287,21 @@ void ApplyConfiguration(char reloadkickstart)
 		BootPrint(  "*           when using large hardfiles.           *");	// AMR
         BootPrint(  "***************************************************");
     }
-
     printf("Bootloading is complete.\r");
+#endif
 
     BootPrint("\nExiting bootloader...");
-//    WaitTimer(500);
 
     ConfigMemory(config.memory);
     ConfigCPU(config.cpu);
     ConfigFilter(config.filter.lores, config.filter.hires);
     ConfigScanlines(config.scanlines);
 
-    WaitTimer(5000);
-    WaitTimer(5000);
-
 	if(reloadkickstart)
+	{
+	    WaitTimer(5000);
 	    BootExit();
+	}
 	else
 		OsdReset(RESET_NORMAL);
 

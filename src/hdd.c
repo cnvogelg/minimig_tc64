@@ -37,18 +37,7 @@ hdfTYPE hdf[2];
 char debugmsg[40];
 char debugmsg2[40];
 
-#define DEBUG1(x) DebugMessage(x)
-#define DEBUG2(x) DebugMessage(x)
-#define DEBUG12(x,y) sprintf(debugmsg,x,y), DebugMessage(debugmsg)
-#define DEBUG22(x,y) sprintf(debugmsg2,x,y), DebugMessage(debugmsg2)
-//#define DEBUG1(x) sprintf(debugmsg,x)
-//#define DEBUG2(x) sprintf(debugmsg2,x)
-//#define DEBUG12(x,y) sprintf(debugmsg,x,y)
-//#define DEBUG22(x,y) sprintf(debugmsg2,x,y)
-//#define DEBUG1(x)	// Top line
-//#define DEBUG2(x)	// Bottom line
-//#define DEBUG12(x,y)	// Top line + param
-//#define DEBUG22(x,y)	// Bottom line + param
+#define DEBUG2(x,y) {if(DebugMode) { sprintf(debugmsg2,x,y); DebugMessage(debugmsg2); }}
 
 //unsigned char DIRECT_TRANSFER_MODE = 0;
 // helper function for byte swapping
@@ -180,7 +169,7 @@ void IdentifyDevice(unsigned short *pBuffer, unsigned char unit)
 	{
 		case HDF_FILE | HDF_SYNTHRDB:
 		case HDF_FILE:
-			DEBUG2("Identify - Type: HDF_FILE");
+			DebugMessage("Identify - Type: HDF_FILE");
 			pBuffer[0] = 1 << 6; // hard disk
 			pBuffer[1] = hdf[unit].cylinders; // cyl count
 			pBuffer[3] = hdf[unit].heads; // head count
@@ -217,7 +206,7 @@ void IdentifyDevice(unsigned short *pBuffer, unsigned char unit)
 		case HDF_CARDPART1:
 		case HDF_CARDPART2:
 		case HDF_CARDPART3:
-			DEBUG2("Identify - Type: HDF_CARD");
+			DebugMessage("Identify - Type: HDF_CARD");
 			pBuffer[0] = 1 << 6; // hard disk
 			pBuffer[1] = hdf[unit].cylinders; // cyl count
 			pBuffer[3] = hdf[unit].heads; // head count
@@ -389,9 +378,8 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 				case HDF_FILE | HDF_SYNTHRDB:
 				case HDF_FILE:
 					lba=chs2lba(cylinder, head, sector, unit);
-					DEBUG12("Read HDF_File %ld",lba+hdf[unit].offset);
-					DEBUG12("Offset %ld",hdf[unit].offset);
-					_showdebugmessages();
+					DEBUG2("Read HDF_File %ld",lba+hdf[unit].offset);
+					DEBUG2("Offset %ld",hdf[unit].offset);
 				    if (hdf[unit].file.size)
 				        HardFileSeek(&hdf[unit], (lba+hdf[unit].offset) < 0 ? 0 : lba+hdf[unit].offset);
 
@@ -411,25 +399,17 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 								}
 							}
 							else
-								sector++;			DebugMessage("Sending Identify data");
-
+								sector++;
 						}
 			
 						if((lba+hdf[unit].offset)<0)
 						{
-							DEBUG12("RDB %d",lba);
-							_showdebugmessages();
+							DEBUG2("RDB %d",lba);
 
 							FakeRDB(unit,lba);
 
-							DEBUG2("Updating taskfile");
-							_showdebugmessages();
 							WriteTaskFile(0, tfr[2], sector, (unsigned char)cylinder, (unsigned char)(cylinder >> 8), (tfr[6] & 0xF0) | head);
-							DEBUG2("Writing Ready status");
-							_showdebugmessages();
 				            WriteStatus(IDE_STATUS_RDY); // pio in (class 1) command type
-							DEBUG2("Writing data");
-							_showdebugmessages();
 				            EnableFpga();
 				            SPI(CMD_IDE_DATA_WR); // write data command
 				            SPI(0x00);
@@ -442,9 +422,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 				                SPI(sector_buffer[i]);
 				            }
 				            DisableFpga();
-							DEBUG2("Writing IRQ");
 				            WriteStatus(IDE_STATUS_END | IDE_STATUS_IRQ);
-							DEBUG2("DONE");
 						}
 						else
 						{
@@ -474,7 +452,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 					{
 			            WriteStatus(IDE_STATUS_RDY); // pio in (class 1) command type
 				        lba=chs2lba(cylinder, head, sector, unit)+hdf[unit].offset;
-						DEBUG12("Read HDF_Card: %ld",lba);
+						DEBUG2("Read HDF_Card: %ld",lba);
 					    while (sector_count)
 					    {
 //				 decrease sector count
@@ -535,7 +513,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 				case HDF_FILE | HDF_SYNTHRDB:
 				case HDF_FILE:
 					lba=chs2lba(cylinder, head, sector, unit);
-					DEBUG12("ReadM HDF_File, %ld",lba);
+					DEBUG2("ReadM HDF_File, %ld",lba);
 				    if (hdf[unit].file.size)
 				        HardFileSeek(&hdf[unit], (lba+hdf[unit].offset) < 0 ? 0 : lba + hdf[unit].offset);
 					// FIXME - READM could cross the fake RDB -> real disk boundary.
@@ -585,7 +563,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 				case HDF_CARDPART3:
 					{
 				        long lba=chs2lba(cylinder, head, sector, unit)+hdf[unit].offset;
-						DEBUG12("ReadM HDF_Card, %ld",lba);
+						DEBUG2("ReadM HDF_Card, %ld",lba);
 					    while (sector_count)
 					    {
 					        while (!(GetFPGAStatus() & CMD_IDECMD)); // wait for empty sector buffer
@@ -641,7 +619,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 //			if(hdf[unit].type>=HDF_CARDPART0)
 				lba+=hdf[unit].offset;
 
-			DEBUG12("Write lba %ld",lba);
+			DEBUG2("Write lba %ld",lba);
 
 			if(lba>-1)
 			{
@@ -703,7 +681,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 						case HDF_CARDPART1:
 						case HDF_CARDPART2:
 						case HDF_CARDPART3:
-							DEBUG2("Write HDF_Card");
+							DebugMessage("Write HDF_Card");
 							{
 								MMC_Write(lba,sector_buffer);
 								++lba;
@@ -731,7 +709,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 		    long lba=chs2lba(cylinder, head, sector, unit);
 //			if(hdf[unit].type>=HDF_CARDPART0)
 				lba+=hdf[unit].offset;
-			DEBUG12("WriteM lba %ld",lba);
+			DEBUG2("WriteM lba %ld",lba);
 
 			if(lba>-1)
 			{
@@ -791,9 +769,9 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 							case HDF_CARDPART1:
 							case HDF_CARDPART2:
 							case HDF_CARDPART3:
-								DEBUG2("Write HDF_Card");
+								DebugMessage("Write HDF_Card");
 								{
-									DEBUG22("SPB: %d",hdf[unit].sectors_per_block);
+									DEBUG2("SPB: %d",hdf[unit].sectors_per_block);
 									MMC_Write(lba,sector_buffer);
 									++lba;
 								}
@@ -845,7 +823,7 @@ void GetHardfileGeometry(hdfTYPE *pHDF)
 		    total = pHDF->file.size / 512;
 			pHDF->heads = 1;
 			pHDF->sectors = 32;
-			pHDF->cylinders = total/32;
+			pHDF->cylinders = total/32 + 1;	// Add a cylinder for the fake RDB.
 			return;			
 		case HDF_FILE:
 		    if (pHDF->file.size == 0)
@@ -963,7 +941,7 @@ unsigned char OpenHardfile(unsigned char unit)
 				    printf("Hardfile indexed in %lu ms\r", time >> 16);
 
 					if(config.hardfile[unit].enabled & HDF_SYNTHRDB)
-						hdf[unit].offset=-chs2lba(1,0,1,unit);
+						hdf[unit].offset=-(hdf[unit].heads*hdf[unit].sectors);
 					else
 						hdf[unit].offset=0;		
 

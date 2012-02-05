@@ -95,9 +95,9 @@ unsigned char fs_Options;
 unsigned char fs_MenuSelect;
 unsigned char fs_MenuCancel;
 
-
 static char debuglines[8*32+1];
 static char debugptr=0;
+
 void _showdebugmessages()
 {
 	int i;
@@ -135,7 +135,6 @@ void HandleUI(void)
     static hardfileTYPE t_hardfile[2]; // temporary copy of former hardfile configuration
     static unsigned char ctrl = false;
     static unsigned char lalt = false;
-	static char debug=1;
 
     // get user control codes
     c = OsdGetCtrl();
@@ -228,7 +227,7 @@ void HandleUI(void)
         /* no menu selected                                               */
         /******************************************************************/
     case MENU_NONE1 :
-		if(debug)
+		if(DebugMode)
 			OsdEnable(0);
 		else
 	        OsdDisable();
@@ -236,7 +235,7 @@ void HandleUI(void)
         break;
 
     case MENU_NONE2 :
-		if(debug)
+		if(DebugMode)
 			_showdebugmessages();
         if (menu)
         {
@@ -397,7 +396,7 @@ void HandleUI(void)
             }
             else if (menusub == 3)
             {
-				debug=debug^1;
+				DebugMode=DebugMode^1;
                 menustate = MENU_NONE1;
             }
             else if (menusub == 4)
@@ -1091,7 +1090,7 @@ void HandleUI(void)
         OsdWrite(0, "            HARDFILES", 0);
         OsdWrite(1, "", 0);
         strcpy(s, "     Master : ");
-        strcat(s, config_hdf_msg[config.hardfile[0].enabled]);
+        strcat(s, config_hdf_msg[config.hardfile[0].enabled & HDF_TYPEMASK]);
         OsdWrite(2, s, menusub == 0);
         if (config.hardfile[0].present)
         {
@@ -1106,7 +1105,7 @@ void HandleUI(void)
             OsdWrite(3, "       ** file not found **", menusub == 1);
 
         strcpy(s, "      Slave : ");
-        strcat(s, config_hdf_msg[config.hardfile[1].enabled]);
+        strcat(s, config_hdf_msg[config.hardfile[1].enabled & HDF_TYPEMASK]);
         OsdWrite(4, s, menusub == 2);
         if (config.hardfile[1].present)
         {
@@ -1273,7 +1272,7 @@ void HandleUI(void)
 					|| (strncmp(config.hardfile[1].name, t_hardfile[1].name, sizeof(t_hardfile[1].name)) != 0))
 				{
                     OpenHardfile(1);
-					if((config.hardfile[0].enabled == HDF_FILE) && !FindRDB(1))
+					if((config.hardfile[1].enabled == HDF_FILE) && !FindRDB(1))
 						menustate = MENU_SYNTHRDB2_1;
 				}
 
@@ -2009,6 +2008,8 @@ char* GetDiskInfo(char* lfn, long len)
 // print directory contents
 void PrintDirectory(void)
 {
+
+
     unsigned char i;
     unsigned char k;
     unsigned long len;

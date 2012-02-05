@@ -42,6 +42,7 @@ typedef struct
 } configTYPE;
 
 extern configTYPE config; 
+extern char DebugMode;
 
 char UploadKickstart(char *name);
 char UploadActionReplay();
