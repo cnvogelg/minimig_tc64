@@ -422,7 +422,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 				                SPI(sector_buffer[i]);
 				            }
 				            DisableFpga();
-				            WriteStatus(IDE_STATUS_END | IDE_STATUS_IRQ);
+				            WriteStatus(sector_count==1 ? IDE_STATUS_IRQ|IDE_STATUS_END : IDE_STATUS_IRQ);
 						}
 						else
 						{
@@ -517,6 +517,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 				    if (hdf[unit].file.size)
 				        HardFileSeek(&hdf[unit], (lba+hdf[unit].offset) < 0 ? 0 : lba + hdf[unit].offset);
 					// FIXME - READM could cross the fake RDB -> real disk boundary.
+					// FIXME - but first we should make some attempt to generate fake RGB in multiple mode.
 
 				    while (sector_count)
 				    {
@@ -621,10 +622,8 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 
 			DEBUG2("Write lba %ld",lba);
 
-			if(lba>-1)
-			{
 		        if (hdf[unit].file.size)	// File size will be 0 in direct card modes
-		            HardFileSeek(&hdf[unit], lba);
+		            HardFileSeek(&hdf[unit], lba>-1 ? lba : 0);
 
 		        while (sector_count)
 		        {
@@ -670,7 +669,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 					switch(hdf[unit].type)
 					{
 						case HDF_FILE:
-						    if (hdf[unit].file.size)
+						    if (hdf[unit].file.size && lba>-1)	// Don't attempt to write to fake RDB
 						    {
 						        FileWrite(&hdf[unit].file, sector_buffer);
 						        FileSeek(&hdf[unit].file, 1, SEEK_CUR);
@@ -689,11 +688,6 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 							break;
 					}
 		        }
-		    }
-			else
-			{
-				// FIXME - throw a fit if the user tries to overwrite the fake RDB
-			}
 		} 
        else if (tfr[7] == ACMD_WRITE_MULTIPLE) // write sectors
         {
@@ -711,10 +705,8 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 				lba+=hdf[unit].offset;
 			DEBUG2("WriteM lba %ld",lba);
 
-			if(lba>-1)
-			{
 		        if (hdf[unit].file.size)	// File size will be 0 in direct card modes
-		            HardFileSeek(&hdf[unit], lba);
+		            HardFileSeek(&hdf[unit], lba>-1 ? lba : 0);
 
 		        while (sector_count)
 		        {
@@ -758,7 +750,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 						switch(hdf[unit].type)
 						{
 							case HDF_FILE:
-							    if (hdf[unit].file.size)
+							    if (hdf[unit].file.size && lba>-1)
 							    {
 							        FileWrite(&hdf[unit].file, sector_buffer);
 							        FileSeek(&hdf[unit].file, 1, SEEK_CUR);
@@ -787,11 +779,6 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 		            else
 		                WriteStatus(IDE_STATUS_END | IDE_STATUS_IRQ);
 		        }
-			}
-			else
-			{
-				// FIXME - throw a fit if the user tries to overwrite the fake RDB
-			}
         }
         else
         {
