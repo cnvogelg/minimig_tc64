@@ -95,6 +95,21 @@ unsigned char fs_Options;
 unsigned char fs_MenuSelect;
 unsigned char fs_MenuCancel;
 
+
+static char debuglines[8*32+1];
+static char debugptr=0;
+void _showdebugmessages()
+{
+	int i;
+	for(i=0;i<8;++i)
+	{
+		int j=(debugptr+i)&7;
+		debuglines[j*32+31]=0;
+		OsdWrite(i,&debuglines[j*32],i==7);
+	}
+}
+
+
 void SelectFile(char* pFileExt, unsigned char Options, unsigned char MenuSelect, unsigned char MenuCancel)
 {
     // this function displays file selection menu
@@ -120,6 +135,7 @@ void HandleUI(void)
     static hardfileTYPE t_hardfile[2]; // temporary copy of former hardfile configuration
     static unsigned char ctrl = false;
     static unsigned char lalt = false;
+	static char debug=1;
 
     // get user control codes
     c = OsdGetCtrl();
@@ -212,13 +228,16 @@ void HandleUI(void)
         /* no menu selected                                               */
         /******************************************************************/
     case MENU_NONE1 :
-
-        OsdDisable();
+		if(debug)
+			OsdEnable(0);
+		else
+	        OsdDisable();
         menustate = MENU_NONE2;
         break;
 
     case MENU_NONE2 :
-
+		if(debug)
+			_showdebugmessages();
         if (menu)
         {
             menustate = MENU_MAIN1;
@@ -234,7 +253,7 @@ void HandleUI(void)
     case MENU_MAIN1 :
 
         OsdWrite(0, "      *** MINIMIG MENU ***   \x15\x11 ", 0);
-        OsdWrite(1, debugmsg, 0);
+        OsdWrite(1, "", 0);
         // floppy drive info
         for (i = 0; i < 4; i++)
         {
@@ -255,7 +274,7 @@ void HandleUI(void)
             else
                 OsdWrite(2 + i, "", 0);
         }
-        OsdWrite(6, debugmsg2, 0);
+        OsdWrite(6, "", 0);
         OsdWrite(7, "              exit", menusub == 4);
 
 
@@ -335,10 +354,10 @@ void HandleUI(void)
         OsdWrite(2, "       reset", menusub == 0);
         OsdWrite(3, "       settings", menusub == 1);
         OsdWrite(4, "       load configuration", menusub == 2);
-        OsdWrite(5, "", 0);
+        OsdWrite(5, "       toggle debug mode", menusub==3);
         OsdWrite(6, "", 0);
 //        OsdWrite(7, "              exit", menusub == 3);
-        OsdWrite(7, "              exit", menusub == 3);
+        OsdWrite(7, "              exit", menusub == 4);
 
         menustate = MENU_MAIN2_2;
         break;
@@ -377,6 +396,11 @@ void HandleUI(void)
                 menustate = MENU_LOADCONFIG_1;
             }
             else if (menusub == 3)
+            {
+				debug=debug^1;
+                menustate = MENU_NONE1;
+            }
+            else if (menusub == 4)
                 menustate = MENU_NONE1;
         }
         else if (left)
@@ -1233,18 +1257,31 @@ void HandleUI(void)
         {
             if (menusub == 0) // yes
             {
+				// FIXME - waiting for user-confirmation increases the window of opportunity for file corruption!
+
                 if ((config.hardfile[0].enabled != t_hardfile[0].enabled)
 					|| (strncmp(config.hardfile[0].name, t_hardfile[0].name, sizeof(t_hardfile[0].name)) != 0))
+				{
                     OpenHardfile(0);
+					if(!FindRDB(0))
+						menustate = MENU_SYNTHRDB1;
+				}
 
                 if (config.hardfile[1].enabled != t_hardfile[1].enabled
 					|| (strncmp(config.hardfile[1].name, t_hardfile[1].name, sizeof(t_hardfile[1].name)) != 0))
+				{
                     OpenHardfile(1);
+					if(!FindRDB(1))
+						menustate = MENU_SYNTHRDB2_1;
+				}
 
-                ConfigIDE(config.enable_ide, config.hardfile[0].present && config.hardfile[0].enabled, config.hardfile[1].present && config.hardfile[1].enabled);
-                OsdReset(RESET_NORMAL);
-
-                menustate = MENU_NONE1;
+				if(menustate==MENU_HARDFILE_CHANGED2)
+				{
+	                ConfigIDE(config.enable_ide, config.hardfile[0].present && config.hardfile[0].enabled, config.hardfile[1].present && config.hardfile[1].enabled);
+    	            OsdReset(RESET_NORMAL);
+				
+	                menustate = MENU_NONE1;
+				}
             }
             else if (menusub == 1) // no
             {
@@ -1261,6 +1298,103 @@ void HandleUI(void)
             menusub = 3;
         }
         break;
+
+    case MENU_SYNTHRDB1 :
+        OsdWrite(0, "", 0);
+        OsdWrite(1, "     No partitions found -", 0);
+        OsdWrite(2, "  Open in compatibility mode?", 0);
+        OsdWrite(3, "  (Say no if you plan to use", 0);
+        OsdWrite(4, "  HDToolBox to prep this HDF)", 0);
+        OsdWrite(5, "", 0);
+        OsdWrite(6, "               yes", menusub == 0);
+        OsdWrite(7, "               no", menusub == 1);
+
+        menustate = MENU_SYNTHRDB2;
+        break;
+
+    case MENU_SYNTHRDB2 :
+
+        if (down && menusub < 1)
+        {
+            menusub++;
+            menustate = MENU_SYNTHRDB1;
+        }
+
+        if (up && menusub > 0)
+        {
+            menusub--;
+            menustate = MENU_SYNTHRDB1;
+        }
+
+        if (select)
+        {
+            if (menusub == 0) // yes
+            {
+				config.hardfile[0].enabled |= HDF_SYNTHRDB;
+                OpenHardfile(0);
+            }
+            ConfigIDE(config.enable_ide, config.hardfile[0].present && config.hardfile[0].enabled, config.hardfile[1].present && config.hardfile[1].enabled);
+            OsdReset(RESET_NORMAL);
+
+            menustate = MENU_NONE1;
+        }
+
+        if (menu)
+        {
+            memcpy(config.hardfile, t_hardfile, sizeof(t_hardfile)); // restore configuration
+            menustate = MENU_SETTINGS_DRIVES1;
+            menusub = 3;
+        }
+        break;
+
+    case MENU_SYNTHRDB2_1 :
+        OsdWrite(0, "", 0);
+        OsdWrite(1, "     No partitions found -", 0);
+        OsdWrite(2, "  Open in compatibility mode?", 0);
+        OsdWrite(3, "  (Say no if you plan to use", 0);
+        OsdWrite(4, "  HDToolBox to prep this HDF)", 0);
+        OsdWrite(5, "", 0);
+        OsdWrite(6, "               yes", menusub == 0);
+        OsdWrite(7, "               no", menusub == 1);
+
+        menustate = MENU_SYNTHRDB2_2;
+        break;
+
+    case MENU_SYNTHRDB2_2 :
+
+        if (down && menusub < 1)
+        {
+            menusub++;
+            menustate = MENU_SYNTHRDB2_1;
+        }
+
+        if (up && menusub > 0)
+        {
+            menusub--;
+            menustate = MENU_SYNTHRDB2_1;
+        }
+
+        if (select)
+        {
+            if (menusub == 0) // yes
+            {
+				config.hardfile[1].enabled |= HDF_SYNTHRDB;
+                OpenHardfile(1);
+                ConfigIDE(config.enable_ide, config.hardfile[0].present && config.hardfile[0].enabled, config.hardfile[1].present && config.hardfile[1].enabled);
+			}
+            OsdReset(RESET_NORMAL);
+
+            menustate = MENU_NONE1;
+        }
+
+        if (menu)
+        {
+            memcpy(config.hardfile, t_hardfile, sizeof(t_hardfile)); // restore configuration
+            menustate = MENU_SETTINGS_DRIVES1;
+            menusub = 3;
+        }
+        break;
+
 
         /******************************************************************/
         /* video settings menu                                            */
@@ -2063,5 +2197,12 @@ void InfoMessage(char *message)
     OsdWrite(1, message, 0);
     menu_timer = GetTimer(1000);
     menustate = MENU_INFO;
+}
+
+void DebugMessage(char *message)
+{
+	strncpy(&debuglines[debugptr*32],message,31);
+	debuglines[debugptr*32+31]=0;
+	debugptr=(debugptr+1)&7;
 }
 

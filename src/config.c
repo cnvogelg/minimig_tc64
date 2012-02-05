@@ -22,6 +22,10 @@ char UploadKickstart(char *name)
     strncpy(filename, name, 8); // copy base name
     strcpy(&filename[8], "ROM"); // add extension
 
+	BootPrint("Loading file: ");
+	BootPrint(filename);
+    WaitTimer(5000);
+
     if (FileOpen(&file, filename))
     {
         if (file.size == 0x80000)
@@ -90,7 +94,7 @@ unsigned char LoadConfiguration(char *filename)
 	if(!filename)
 		filename=configfilename;	// Use slot-based filename if none provided.
 
-    // load configurastion data
+    // load configuration data
     if (FileOpen(&file, filename))
     {
 		BootPrint("Opened configuration file\n");
@@ -105,7 +109,7 @@ unsigned char LoadConfiguration(char *filename)
             if (strncmp(tmpconf->id, config_id, sizeof(config.id)) == 0)
             {
 				// A few more sanity checks...
-				if(tmpconf->hardfile[0].enabled<7 && tmpconf->hardfile[1].enabled<7 && tmpconf->floppy.drives<=4) 
+				if(tmpconf->floppy.drives<=4) 
 				{
 					// If either the old config and new config have a different kickstart file,
 					// or this is the first boot, we need to upload a kickstart image.
@@ -129,7 +133,7 @@ unsigned char LoadConfiguration(char *filename)
 
 		BootPrint("Setting config defaults\n");
 
-//		WaitTimer(5000);
+		WaitTimer(5000);
 
 		// set default configuration
 		memset((void*)&config, sizeof(config), 0);
@@ -138,10 +142,19 @@ unsigned char LoadConfiguration(char *filename)
 		config.kickstart.long_name[0] = 0;
 		config.memory = 0x15;
 		config.cpu = 0;
+		config.chipset = 0;
+		config.floppy.speed=CONFIG_FLOPPY2X;
+		config.floppy.drives=1;
+		config.enable_ide=0;
 		config.hardfile[0].enabled = 1;
 		strncpy(config.hardfile[0].name, "HARDFILE", sizeof(config.hardfile[0].name));
+		config.hardfile[0].long_name[0]=0;
+		strncpy(config.hardfile[1].name, "HARDFILE", sizeof(config.hardfile[1].name));
+		config.hardfile[1].long_name[0]=0;
 		config.hardfile[1].enabled = 2;	// Default is access to entire SD card
 		updatekickstart=true;
+
+		BootPrint("Defaults set\n");
 	}
 
     key = OsdGetCtrl();
@@ -177,6 +190,11 @@ void ApplyConfiguration(char reloadkickstart)
 			UploadActionReplay();
 		}
 	}
+	else
+	{
+	    ConfigChipset(config.chipset);
+	    ConfigFloppy(config.floppy.drives, config.floppy.speed);
+	}
 
 	// Whether or not we uploaded a kickstart image we now need to set various parameters from the config.
 
@@ -184,6 +202,9 @@ void ApplyConfiguration(char reloadkickstart)
 	{
 		switch(hdf[0].type) // Customise message for SD card access
 		{
+			case HDF_FILE | HDF_SYNTHRDB:
+		        sprintf(s, "\nHardfile 1 (with fake RDB): %.8s.%.3s", hdf[1].file.name, &hdf[1].file.name[8]);
+				break;
 			case HDF_FILE:
 		        sprintf(s, "\nHardfile 0: %.8s.%.3s", hdf[0].file.name, &hdf[0].file.name[8]);
 				break;
@@ -199,11 +220,20 @@ void ApplyConfiguration(char reloadkickstart)
         BootPrint(s);
         sprintf(s, "Size: %lu MB", ((((unsigned long) hdf[0].cylinders) * hdf[0].heads * hdf[0].sectors) >> 11));
         BootPrint(s);
+        sprintf(s, "Offset: %ld", hdf[0].offset);
+		BootPrint(s);
+		if(FindRDB(0))
+			BootPrint("Hardfile 0 has a RigidDiskBlock");
+		else
+			BootPrint("Hardfile 0 has no RigidDiskBlock");
 	}
    	if(OpenHardfile(1))
 	{
 		switch(hdf[1].type)
 		{
+			case HDF_FILE | HDF_SYNTHRDB:
+		        sprintf(s, "\nHardfile 1 (with fake RDB): %.8s.%.3s", hdf[1].file.name, &hdf[1].file.name[8]);
+				break;
 			case HDF_FILE:
 		        sprintf(s, "\nHardfile 1: %.8s.%.3s", hdf[1].file.name, &hdf[1].file.name[8]);
 				break;
@@ -219,11 +249,16 @@ void ApplyConfiguration(char reloadkickstart)
         BootPrint(s);
         sprintf(s, "Size: %lu MB", ((((unsigned long) hdf[1].cylinders) * hdf[1].heads * hdf[1].sectors) >> 11));
         BootPrint(s);
+        sprintf(s, "Offset: %ld", hdf[1].offset);
+        BootPrint(s);
+		if(FindRDB(1))
+			BootPrint("Hardfile 1 has a RigidDiskBlock");
+		else
+			BootPrint("Hardfile 1 has no RigidDiskBlock");
 	}
 
     ConfigIDE(config.enable_ide, config.hardfile[0].present && config.hardfile[0].enabled, config.hardfile[1].present && config.hardfile[1].enabled);
-//    WaitTimer(1000);
-
+    WaitTimer(5000);
     sprintf(s, "CPU clock     : %s", config.chipset & 0x01 ? "turbo" : "normal");
     BootPrint(s);
     sprintf(s, "Chip RAM size : %s", config_memory_chip_msg[config.memory & 0x03]);
@@ -263,6 +298,9 @@ void ApplyConfiguration(char reloadkickstart)
     ConfigCPU(config.cpu);
     ConfigFilter(config.filter.lores, config.filter.hires);
     ConfigScanlines(config.scanlines);
+
+    WaitTimer(5000);
+    WaitTimer(5000);
 
 	if(reloadkickstart)
 	    BootExit();

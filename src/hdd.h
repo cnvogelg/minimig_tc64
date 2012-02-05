@@ -30,6 +30,7 @@
 #define HDF_CARDPART1 4
 #define HDF_CARDPART2 5
 #define HDF_CARDPART3 6
+#define HDF_SYNTHRDB 128	// Flag to indicate whether we should auto-synthesize a RigidDiskBlock
 
 typedef struct
 {
@@ -40,7 +41,7 @@ typedef struct
     unsigned short sectors;
     unsigned short sectors_per_block;
 	unsigned short partition;	// Partition no.
-	unsigned long  offset;	// If a partition, the lba offset of the partition.
+	long  offset;	// If a partition, the lba offset of the partition.  Can be negative if we've synthesized an RDB.
     unsigned long  index[1024];
     unsigned long  index_size;
 } hdfTYPE;
@@ -54,6 +55,7 @@ void GetHardfileGeometry(hdfTYPE *hdf);
 void BuildHardfileIndex(hdfTYPE *hdf);
 unsigned char HardFileSeek(hdfTYPE *hdf, unsigned long lba);
 unsigned char OpenHardfile(unsigned char unit);
+unsigned char FindRDB(unsigned char unit);	// Returns 1 if RDB found, 0 otherwise
 
 extern char debugmsg[40];
 extern char debugmsg2[40];

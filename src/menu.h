@@ -33,6 +33,10 @@ enum MENU
     MENU_HARDFILE_EXIT,
     MENU_HARDFILE_CHANGED1,
     MENU_HARDFILE_CHANGED2,
+    MENU_SYNTHRDB1,
+    MENU_SYNTHRDB2,
+    MENU_SYNTHRDB2_1,
+    MENU_SYNTHRDB2_2,
     MENU_MAIN2_1,
     MENU_MAIN2_2,
     MENU_LOADCONFIG_1,
@@ -70,4 +74,6 @@ void PrintDirectory(void);
 void ScrollLongName(void);
 void ErrorMessage(char *message, unsigned char code);
 void InfoMessage(char *message);
+void DebugMessage(char *message);
+void _showdebugmessages();
 
