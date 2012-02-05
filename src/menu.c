@@ -1196,6 +1196,7 @@ void HandleUI(void)
             memcpy((void*)config.hardfile[0].name, (void*)file.name, sizeof(config.hardfile[0].name));
             memcpy((void*)config.hardfile[0].long_name, (void*)file.long_name, sizeof(config.hardfile[0].long_name));
             config.hardfile[0].present = 1;
+			config.hardfile[0].enabled=HDF_FILE;
         }
 
         if (menusub == 3) // slave drive selected
@@ -1203,6 +1204,7 @@ void HandleUI(void)
             memcpy((void*)config.hardfile[1].name, (void*)file.name, sizeof(config.hardfile[1].name));
             memcpy((void*)config.hardfile[1].long_name, (void*)file.long_name, sizeof(config.hardfile[1].long_name));
             config.hardfile[1].present = 1;
+			config.hardfile[1].enabled=HDF_FILE;
         }
 
         menustate = MENU_SETTINGS_HARDFILE1;
@@ -1263,7 +1265,7 @@ void HandleUI(void)
 					|| (strncmp(config.hardfile[0].name, t_hardfile[0].name, sizeof(t_hardfile[0].name)) != 0))
 				{
                     OpenHardfile(0);
-					if(!FindRDB(0))
+					if((config.hardfile[0].enabled == HDF_FILE) && !FindRDB(0))
 						menustate = MENU_SYNTHRDB1;
 				}
 
@@ -1271,7 +1273,7 @@ void HandleUI(void)
 					|| (strncmp(config.hardfile[1].name, t_hardfile[1].name, sizeof(t_hardfile[1].name)) != 0))
 				{
                     OpenHardfile(1);
-					if(!FindRDB(1))
+					if((config.hardfile[0].enabled == HDF_FILE) && !FindRDB(1))
 						menustate = MENU_SYNTHRDB2_1;
 				}
 

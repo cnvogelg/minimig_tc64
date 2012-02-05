@@ -72,7 +72,7 @@ static void RDBChecksum(unsigned long *p)
 	long result=0;
 	DebugMessage("Generating checksum");
 	p[2]=0;
-	for(c2=2;c2<count;++c2)
+	for(c2=0;c2<count;++c2)
 		result+=p[c2];
 	p[2]=(unsigned long)-result;
 }
@@ -129,10 +129,39 @@ static void FakeRDB(int unit,int block)
 				strcpy(rdb->rdb_DiskVendor,"Do not ");
 				strcpy(rdb->rdb_DiskProduct, "repartition!");
 
-				RDBChecksum((unsigned long *)rdb);
+				RDBChecksum((unsigned int *)rdb);
 			}
 			break;
 		case 1: // Partition
+			{
+				struct PartitionBlock *pb=(struct PartitionBlock *)sector_buffer;
+				DebugMessage("Creating RDB...");
+				pb->pb_ID = 'P'<<24 | 'A' << 16 | 'R' << 8 | 'T';
+			
+				pb->pb_Summedlongs=0x40;
+				pb->pb_HostID=0x07;
+				pb->pb_Next=0xffffffff;
+				pb->pb_Flags=0x1; // Bootable
+				pb->pb_DevFlags=0;
+				strcpy(pb->pb_DriveName," DH0");
+				pb->pb_DriveName[0]=3;	// BCPL string
+
+				pb->pb_Environment.de_TableSize=0x10;
+				pb->pb_Environment.de_SizeBlock=0x80;
+				pb->pb_Environment.de_Surfaces=hdf[unit].heads;
+				pb->pb_Environment.de_SectorPerBlock=1;
+				pb->pb_Environment.de_BlocksPerTrack=hdf[unit].sectors;
+				pb->pb_Environment.de_Reserved=2;
+				pb->pb_Environment.de_LowCyl=1;
+				pb->pb_Environment.de_HighCyl=hdf[unit].cylinders-1;
+				pb->pb_Environment.de_NumBuffers=30;
+				pb->pb_Environment.de_MaxTransfer=0xffffff;
+				pb->pb_Environment.de_Mask=0x7ffffffe;
+				pb->pb_Environment.de_DosType=0x444f5301;
+
+				RDBChecksum((unsigned int *)pb);
+			}
+			break;
 			break;
 		default:
 			break;
@@ -149,6 +178,7 @@ void IdentifyDevice(unsigned short *pBuffer, unsigned char unit)
 
 	switch(hdf[unit].type)
 	{
+		case HDF_FILE | HDF_SYNTHRDB:
 		case HDF_FILE:
 			DEBUG2("Identify - Type: HDF_FILE");
 			pBuffer[0] = 1 << 6; // hard disk
@@ -160,16 +190,25 @@ void IdentifyDevice(unsigned short *pBuffer, unsigned char unit)
 			memcpy((char*)&pBuffer[23], ".100    ", 8); // firmware version - byte swapped
 			p = (char*)&pBuffer[27];
 			// FIXME - likewise the model name can be fetched from the card.
-			memcpy(p, "YAQUBE                                  ", 40); // model name - byte swapped
-			p += 8;
-			if (config.hardfile[unit].long_name[0])
+			if(hdf[unit].type & HDF_SYNTHRDB)
 			{
-				for (i = 0; (x = config.hardfile[unit].long_name[i]) && i < 16; i++) // copy file name as model name
-				    p[i] = x;
+				memcpy(p, "DON'T                                   ", 40);
+				p += 8;
+				memcpy(p, "REPARTITION!    ", 16);
 			}
 			else
 			{
-				memcpy(p, config.hardfile[unit].name, 8); // copy file name as model name
+				memcpy(p, "YAQUBE                                  ", 40); // model name - byte swapped
+				p += 8;
+				if (config.hardfile[unit].long_name[0])
+				{
+					for (i = 0; (x = config.hardfile[unit].long_name[i]) && i < 16; i++) // copy file name as model name
+						p[i] = x;
+				}
+				else
+				{
+					memcpy(p, config.hardfile[unit].name, 8); // copy file name as model name
+				}
 			}
 		//    SwapBytes((char*)&pBuffer[27], 40); //not for 68000
 			break;
@@ -800,6 +839,14 @@ void GetHardfileGeometry(hdfTYPE *pHDF)
 
 	switch(pHDF->type)
 	{
+		case (HDF_FILE | HDF_SYNTHRDB):
+		    if (pHDF->file.size == 0)
+    		    return;
+		    total = pHDF->file.size / 512;
+			pHDF->heads = 1;
+			pHDF->sectors = 32;
+			pHDF->cylinders = total/32;
+			return;			
 		case HDF_FILE:
 		    if (pHDF->file.size == 0)
     		    return;
@@ -894,7 +941,7 @@ unsigned char OpenHardfile(unsigned char unit)
 	{
 		case HDF_FILE | HDF_SYNTHRDB:
 		case HDF_FILE:
-			hdf[unit].type=HDF_FILE;
+			hdf[unit].type=config.hardfile[unit].enabled;
 			strncpy(filename, config.hardfile[unit].name, 8);
 			strcpy(&filename[8], "HDF");
 
@@ -916,7 +963,7 @@ unsigned char OpenHardfile(unsigned char unit)
 				    printf("Hardfile indexed in %lu ms\r", time >> 16);
 
 					if(config.hardfile[unit].enabled & HDF_SYNTHRDB)
-						hdf[unit].offset=-chs2lba(1,0,0,unit);
+						hdf[unit].offset=-chs2lba(1,0,1,unit);
 					else
 						hdf[unit].offset=0;		
 

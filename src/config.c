@@ -202,7 +202,7 @@ void ApplyConfiguration(char reloadkickstart)
 	{
 		switch(hdf[0].type) // Customise message for SD card access
 		{
-			case HDF_FILE | HDF_SYNTHRDB:
+			case (HDF_FILE | HDF_SYNTHRDB):
 		        sprintf(s, "\nHardfile 1 (with fake RDB): %.8s.%.3s", hdf[1].file.name, &hdf[1].file.name[8]);
 				break;
 			case HDF_FILE:
@@ -231,7 +231,7 @@ void ApplyConfiguration(char reloadkickstart)
 	{
 		switch(hdf[1].type)
 		{
-			case HDF_FILE | HDF_SYNTHRDB:
+			case (HDF_FILE | HDF_SYNTHRDB):
 		        sprintf(s, "\nHardfile 1 (with fake RDB): %.8s.%.3s", hdf[1].file.name, &hdf[1].file.name[8]);
 				break;
 			case HDF_FILE:
@@ -256,6 +256,7 @@ void ApplyConfiguration(char reloadkickstart)
 		else
 			BootPrint("Hardfile 1 has no RigidDiskBlock");
 	}
+    WaitTimer(5000);
 
     ConfigIDE(config.enable_ide, config.hardfile[0].present && config.hardfile[0].enabled, config.hardfile[1].present && config.hardfile[1].enabled);
     WaitTimer(5000);
