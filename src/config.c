@@ -134,7 +134,7 @@ unsigned char LoadConfiguration(char *filename)
 		BootPrint("Setting config defaults\n");
 
 		// set default configuration
-		memset((void*)&config, sizeof(config), 0);
+		memset((void*)&config, 0, sizeof(config));	// Finally found default config bug - params were reversed!
 		strncpy(config.id, config_id, sizeof(config.id));
 		strncpy(config.kickstart.name, "KICK    ", sizeof(config.kickstart.name));
 		config.kickstart.long_name[0] = 0;
