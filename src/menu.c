@@ -197,7 +197,10 @@ void HandleUI(void)
         }
         break;
     case KEY_MENU :
-        menu = true;
+        if (ctrl && lalt)
+			DebugMode=DebugMode^1;
+		else
+	        menu = true;
         break;
     case KEY_ESC :
         if (menustate != MENU_NONE2)
@@ -353,10 +356,10 @@ void HandleUI(void)
         OsdWrite(2, "       reset", menusub == 0);
         OsdWrite(3, "       settings", menusub == 1);
         OsdWrite(4, "       load configuration", menusub == 2);
-        OsdWrite(5, "       toggle debug mode", menusub==3);
+        OsdWrite(5, "", 0);
+//        OsdWrite(5, "       toggle debug mode", menusub==3);
         OsdWrite(6, "", 0);
-//        OsdWrite(7, "              exit", menusub == 3);
-        OsdWrite(7, "              exit", menusub == 4);
+        OsdWrite(7, "              exit", menusub == 3);
 
         menustate = MENU_MAIN2_2;
         break;
@@ -394,12 +397,12 @@ void HandleUI(void)
                 menusub = 0;
                 menustate = MENU_LOADCONFIG_1;
             }
+//            else if (menusub == 3)
+//            {
+//  	  		DebugMode=DebugMode^1;
+//              menustate = MENU_NONE1;
+//            }
             else if (menusub == 3)
-            {
-				DebugMode=DebugMode^1;
-                menustate = MENU_NONE1;
-            }
-            else if (menusub == 4)
                 menustate = MENU_NONE1;
         }
         else if (left)

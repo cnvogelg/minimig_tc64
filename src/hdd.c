@@ -254,6 +254,7 @@ void WriteTaskFile(unsigned char error, unsigned char sector_count, unsigned cha
     SPI(0x00);
     SPI(0x00); // dummy
     SPI(0x00);
+
     SPI(0x00); // dummy
 
     SPI(0x00);
@@ -617,13 +618,12 @@ void HandleHDD(unsigned char c1, unsigned char c2)
                 sector_count = 0x100;
 
 		    long lba=chs2lba(cylinder, head, sector, unit);
+			DEBUG2("Write lba %ld",lba);
 //			if(hdf[unit].type>=HDF_CARDPART0)
 				lba+=hdf[unit].offset;
 
-			DEBUG2("Write lba %ld",lba);
-
 		        if (hdf[unit].file.size)	// File size will be 0 in direct card modes
-		            HardFileSeek(&hdf[unit], lba>-1 ? lba : 0);
+		            HardFileSeek(&hdf[unit], (lba>-1) ? lba : 0);
 
 		        while (sector_count)
 		        {
@@ -668,12 +668,14 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 
 					switch(hdf[unit].type)
 					{
+						case HDF_FILE | HDF_SYNTHRDB:
 						case HDF_FILE:
-						    if (hdf[unit].file.size && lba>-1)	// Don't attempt to write to fake RDB
+						    if (hdf[unit].file.size && (lba>-1))	// Don't attempt to write to fake RDB
 						    {
 						        FileWrite(&hdf[unit].file, sector_buffer);
 						        FileSeek(&hdf[unit].file, 1, SEEK_CUR);
 						    }
+							++lba;
 							break;
 						case HDF_CARD:
 						case HDF_CARDPART0:
@@ -681,10 +683,8 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 						case HDF_CARDPART2:
 						case HDF_CARDPART3:
 							DebugMessage("Write HDF_Card");
-							{
-								MMC_Write(lba,sector_buffer);
-								++lba;
-							}
+							MMC_Write(lba,sector_buffer);
+							++lba;
 							break;
 					}
 		        }
@@ -701,12 +701,12 @@ void HandleHDD(unsigned char c1, unsigned char c2)
                 sector_count = 0x100;
 
 		    long lba=chs2lba(cylinder, head, sector, unit);
+			DEBUG2("WriteM lba %ld",lba);
 //			if(hdf[unit].type>=HDF_CARDPART0)
 				lba+=hdf[unit].offset;
-			DEBUG2("WriteM lba %ld",lba);
 
 		        if (hdf[unit].file.size)	// File size will be 0 in direct card modes
-		            HardFileSeek(&hdf[unit], lba>-1 ? lba : 0);
+		            HardFileSeek(&hdf[unit], (lba>-1) ? lba : 0);
 
 		        while (sector_count)
 		        {
@@ -749,12 +749,14 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 				        DisableFpga();
 						switch(hdf[unit].type)
 						{
+							case HDF_FILE | HDF_SYNTHRDB:
 							case HDF_FILE:
-							    if (hdf[unit].file.size && lba>-1)
+							    if (hdf[unit].file.size && (lba>-1))
 							    {
 							        FileWrite(&hdf[unit].file, sector_buffer);
 							        FileSeek(&hdf[unit].file, 1, SEEK_CUR);
 							    }
+								++lba;
 								break;
 							case HDF_CARD:
 							case HDF_CARDPART0:
@@ -762,11 +764,9 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 							case HDF_CARDPART2:
 							case HDF_CARDPART3:
 								DebugMessage("Write HDF_Card");
-								{
-									DEBUG2("SPB: %d",hdf[unit].sectors_per_block);
-									MMC_Write(lba,sector_buffer);
-									++lba;
-								}
+								DEBUG2("SPB: %d",hdf[unit].sectors_per_block);
+								MMC_Write(lba,sector_buffer);
+								++lba;
 								break;
 						}
 		                block_count--;  // decrease block count
