@@ -198,7 +198,10 @@ void HandleUI(void)
         break;
     case KEY_MENU :
         if (ctrl && lalt)
+		{
 			DebugMode=DebugMode^1;
+	        menustate = MENU_NONE1;
+		}
 		else
 	        menu = true;
         break;
