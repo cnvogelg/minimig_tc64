@@ -73,7 +73,8 @@
 #define RESET_BOOTLOADER 1
 
 /*functions*/
-void OsdWrite(unsigned char n, char *s, unsigned char inver);
+void OsdSetTitle(unsigned char *s);
+void OsdWrite(unsigned char n, char *s, unsigned char inver, unsigned char stipple);
 void OsdClear(void);
 void OsdEnable(unsigned char mode);
 void OsdDisable(void);
