@@ -1555,6 +1555,7 @@ void HandleUI(void)
     case MENU_ROMFILE_SELECTED :
 
          menusub = 1;
+		 menustate=MENU_ROMFILE_SELECTED1;
          // no break intended
 
     case MENU_ROMFILE_SELECTED1 :
