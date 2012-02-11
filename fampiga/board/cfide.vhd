@@ -294,7 +294,7 @@ end process;
 						mux_regd <= X"B";
 					when X"B" =>
 						mux_d_regd(3 downto 1) <= "111";
-						mux_d_regd(0) <= shiftout;
+						mux_d_regd(0) <= not shiftout; -- CV: invert serial signal to fit USB2serial dongle
 --						mux_d_regd(0) <= '1';
 						mux_regd <= X"D";
 					when X"C" =>
