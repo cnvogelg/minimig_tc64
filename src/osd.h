@@ -72,8 +72,11 @@
 #define RESET_NORMAL 0
 #define RESET_BOOTLOADER 1
 
+#define OSD_ARROW_LEFT 1
+#define OSD_ARROW_RIGHT 2
+
 /*functions*/
-void OsdSetTitle(unsigned char *s);
+void OsdSetTitle(unsigned char *s,int arrow);	// arrow > 0 = display right arrow in bottom right, < 0 = display left arrow
 void OsdWrite(unsigned char n, char *s, unsigned char inver, unsigned char stipple);
 void OsdClear(void);
 void OsdEnable(unsigned char mode);

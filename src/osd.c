@@ -53,6 +53,7 @@ const char keycode_table[128] =
       0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
 };
 
+static int arrow;
 static char titlebuffer[64];
 
 static void rotatechar(unsigned char *in,unsigned char *out)
@@ -73,9 +74,10 @@ static void rotatechar(unsigned char *in,unsigned char *out)
 }
 
 
-void OsdSetTitle(unsigned char *s)
+void OsdSetTitle(unsigned char *s,int a)
 {
 	// Compose the title, condensing character gaps
+	arrow=a;
 	char zeros=0;
 	char i=0,j=0;
 	char outp=0;
@@ -140,6 +142,9 @@ void OsdWrite(unsigned char n, char *s, unsigned char invert, unsigned char stip
     unsigned char b;
     const unsigned char *p;
 	unsigned char stipplemask=0xff;
+	int linelimit=OSDLINELEN;
+	if(n==7 && (arrow & OSD_ARROW_RIGHT))
+		linelimit-=22;
 
 	if(stipple)
 	{
@@ -167,26 +172,7 @@ void OsdWrite(unsigned char n, char *s, unsigned char invert, unsigned char stip
     {
 		if(i==0)	// Render sidestripe
 		{
-//			char c=osdtitle[7-n];
-//	        p = &charfont[c+128][0];
 	        p = &titlebuffer[(7-n)*8];
-/*
-			SPI(0xaa);
-			SPI(0x55);
-	        SPI(0xaa & (255^*p)); SPI(0x55 & (255^*p++));
-	        SPI(0xaa & (255^*p)); SPI(0x55 & (255^*p++));
-	        SPI(0xaa & (255^*p)); SPI(0x55 & (255^*p++));
-	        SPI(0xaa & (255^*p)); SPI(0x55 & (255^*p++));
-	        SPI(0xaa & (255^*p)); SPI(0x55 & (255^*p++));
-	        SPI(0xaa & (255^*p)); SPI(0x55 & (255^*p++));
-	        SPI(0xaa & (255^*p)); SPI(0x55 & (255^*p++));
-	        SPI(0xaa & (255^*p)); SPI(0x55 & (255^*p++));
-			SPI(0xaa);
-			SPI(0x55);
-			SPI(0x00);
-			SPI(0x00);
-	        i += 22;
-*/
 			SPI(0xff);
 			SPI(0xff);
 	        SPI(255^*p); SPI(255^*p++);
@@ -203,6 +189,28 @@ void OsdWrite(unsigned char n, char *s, unsigned char invert, unsigned char stip
 			SPI(0x00);
 	        i += 22;
 		}
+		else if(n==7 && (arrow & OSD_ARROW_LEFT))	// Draw final arrow
+		{
+			SPI(0);
+			SPI(0);
+			SPI(0);
+		    p = &charfont[0x10][0];
+		    SPI(*p++); SPI(*p++); SPI(*p++); SPI(*p++);
+		    SPI(*p++); SPI(*p++); SPI(*p++); SPI(*p++);
+		    p = &charfont[0x14][0];
+		    SPI(*p++); SPI(*p++); SPI(*p++); SPI(*p++);
+		    SPI(*p++); SPI(*p++); SPI(*p++); SPI(*p++);
+			SPI(0);
+			SPI(0);
+			SPI(0);
+			SPI(invert);
+			SPI(invert);
+			i+=24;
+			arrow&=~OSD_ARROW_LEFT;
+			if(*s++ == 0) break;	// Skip 3 characters, to keep alignent the same.
+			if(*s++ == 0) break;
+			if(*s++ == 0) break;
+		}
 		else
 		{
 		    b = *s++;
@@ -213,14 +221,14 @@ void OsdWrite(unsigned char n, char *s, unsigned char invert, unsigned char stip
 		    else if (b == 0x0d || b == 0x0a) // cariage return / linefeed, go to next line
 		    {
 		        // increment line counter
-		        if (++n >= OSDNLINE)
+		        if (++n >= linelimit)
 		            n = 0;
 		        // send new line number to OSD
 		        DisableOsd();
 		        EnableOsd();
 		        SPI(OSDCMDWRITE | n);
 		    }
-			else if(i<(OSDLINELEN-8)) // normal character
+			else if(i<(linelimit-8)) // normal character
 		    {
 		        p = &charfont[b][0];
 		        SPI((*p++&stipplemask)^invert);	stipplemask^=stipple;
@@ -235,8 +243,24 @@ void OsdWrite(unsigned char n, char *s, unsigned char invert, unsigned char stip
 		    }
 		}
     }
-    for (; i < OSDLINELEN; i++) // clear end of line
+    for (; i < linelimit; i++) // clear end of line
        SPI(invert);
+	if(n==7 && (arrow & OSD_ARROW_RIGHT))	// Draw final arrow if needed
+	{
+		SPI(0);
+		SPI(0);
+		SPI(0);
+        p = &charfont[0x15][0];
+        SPI(*p++); SPI(*p++); SPI(*p++); SPI(*p++);
+        SPI(*p++); SPI(*p++); SPI(*p++); SPI(*p++);
+        p = &charfont[0x11][0];
+        SPI(*p++); SPI(*p++); SPI(*p++); SPI(*p++);
+        SPI(*p++); SPI(*p++); SPI(*p++); SPI(*p++);
+		SPI(0);
+		SPI(0);
+		SPI(0);
+		i+=22;
+	}
 
     // deselect OSD SPI device
     DisableOsd();
