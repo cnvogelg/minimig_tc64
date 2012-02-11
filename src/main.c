@@ -39,8 +39,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // FIXME - detect number of partitions on the SD card, and allow that many to be selected as hard files.
 
 //#include "AT91SAM7S256.h"
-//#include "stdio.h"
-//#include "string.h"
+#include "stdio.h"
+#include "string.h"
 #include "errors.h"
 #include "hardware.h"
 #include "mmc.h"
@@ -241,7 +241,7 @@ void HandleFpga(void)
     UpdateDriveStatus();
 }
 
-__geta4 void main(void)
+void c_entry(void)
 {
 	debugmsg[0]=0;
 	debugmsg2[0]=0;

@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 2010-04-14   - changed command header id
 
 //#include "AT91SAM7S256.h"
-//#include "stdio.h"
+#include "stdio.h"
 #include "errors.h"
 #include "hardware.h"
 #include "fat.h"
@@ -197,6 +197,7 @@ extern fileTYPE file;
 //    return 0;
 //}
 
+
 void SendFile(fileTYPE *file)
 {
     unsigned char  c1, c2;
@@ -247,6 +248,7 @@ void SendFile(fileTYPE *file)
     }
     printf("]\r");
 }
+
 
 // print message on the boot screen
 char BootPrint(const char *text)

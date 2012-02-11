@@ -27,7 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // FIXME - get capacity from SD card
 
 //#include "AT91SAM7S256.h"
-//#include "stdio.h"
+#include "stdio.h"
 //#include "string.h"
 #include "hardware.h"
 #include "mmc.h"

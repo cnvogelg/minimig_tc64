@@ -17,20 +17,27 @@
 #define DISKLED_ON // *AT91C_PIOA_SODR = DISKLED;
 #define DISKLED_OFF // *AT91C_PIOA_CODR = DISKLED;
 
-#define EnableCard()  *(unsigned short *)0xda4004=0x02
-#define DisableCard() *(unsigned short *)0xda4004=0x03
-#define EnableFpga()  *(unsigned short *)0xda4004=0x10
-#define DisableFpga() *(unsigned short *)0xda4004=0x11
-#define EnableOsd()   *(unsigned short *)0xda4004=0x20
-#define DisableOsd()  *(unsigned short *)0xda4004=0x21
-#define EnableDMode() *(unsigned short *)0xda4004=0x40
-#define DisableDMode() *(unsigned short *)0xda4004=0x41
+#define EnableCard()  *(volatile unsigned short *)0xda4004=0x02
+#define DisableCard() *(volatile unsigned short *)0xda4004=0x03
+#define EnableFpga()  *(volatile unsigned short *)0xda4004=0x10
+#define DisableFpga() *(volatile unsigned short *)0xda4004=0x11
+#define EnableOsd()   *(volatile unsigned short *)0xda4004=0x20
+#define DisableOsd()  *(volatile unsigned short *)0xda4004=0x21
+#define EnableDMode() *(volatile unsigned short *)0xda4004=0x40
+#define DisableDMode() *(volatile unsigned short *)0xda4004=0x41
 
-#define SPI_slow()  *(unsigned short *)0xda4008=0x20
-#define SPI_fast()  *(unsigned short *)0xda4008=0x01   //14MHz/2
-#define SPI  *(unsigned char *)0xda4000=
-#define RDSPI  *(unsigned char *)0xda4001
-#define RS232  *(unsigned char *)0xda8001=
+#define SPI_slow()  *(volatile unsigned short *)0xda4008=0x20
+#define SPI_fast()  *(volatile unsigned short *)0xda4008=0x01   //14MHz/2
+
+static inline unsigned char SPI(unsigned char o)
+{	
+	volatile unsigned char *ptr = (volatile unsigned char *)0xda4000;
+	*ptr = o;
+	return *ptr;
+}
+	
+#define RDSPI  *(volatile unsigned char *)0xda4001
+#define RS232  *(volatile unsigned char *)0xda8001=
  
 
 //void USART_Init(unsigned long baudrate);

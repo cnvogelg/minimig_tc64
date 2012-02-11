@@ -20,8 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 2009-11-22 - read/write multiple implemented
 
 //#include "AT91SAM7S256.h"
-//#include "stdio.h"
-//#include "string.h"
+#include "stdio.h"
+#include "string.h"
 #include "errors.h"
 #include "hardware.h"
 #include "fat.h"

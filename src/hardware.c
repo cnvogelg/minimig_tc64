@@ -181,7 +181,7 @@ unsigned long CheckButton(void)
 //
 unsigned long GetTimer(unsigned long offset)
 {
-    unsigned long systimer = (*(unsigned short *)0xDEE010);
+    unsigned long systimer = (*(volatile unsigned short *)0xDEE010);
     systimer = systimer<< 16;
     systimer += offset << 16;
     return (systimer); // valid bits [31:16]
@@ -189,7 +189,7 @@ unsigned long GetTimer(unsigned long offset)
 
 unsigned long CheckTimer(unsigned long time)
 {
-    unsigned long systimer = (*(unsigned short *)0xDEE010);
+    unsigned long systimer = (*(volatile unsigned short *)0xDEE010);
     systimer = systimer<< 16;
 //        printf("systimer:%08X  ",systimer);
     time -= systimer;
