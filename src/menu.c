@@ -40,7 +40,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // time delay after which file/dir name starts to scroll
 #define SCROLL_DELAY 2000
-#define SCROLL_DELAY2 75
+#define SCROLL_DELAY2 40
 
 unsigned long scroll_offset; // file/dir name scrolling position
 unsigned long scroll_timer;  // file/dir name scrolling timer
@@ -53,7 +53,6 @@ unsigned char parentstate;
 unsigned char menusub = 0;
 unsigned int menumask = 0; // Used to determine which rows are selectable...
 unsigned long menu_timer;
-
 
 extern unsigned char drives;
 extern adfTYPE df[4];
@@ -133,7 +132,7 @@ void SelectFile(char* pFileExt, unsigned char Options, unsigned char MenuSelect,
 #define STD_EXIT "            exit"
 void HandleUI(void)
 {
-    unsigned char i, c, up, down, select, menu, right, left;
+    unsigned char i, c, up, down, select, menu, right, left, plus, minus;
     unsigned long len;
     static hardfileTYPE t_hardfile[2]; // temporary copy of former hardfile configuration
     static unsigned char ctrl = false;
@@ -150,6 +149,8 @@ void HandleUI(void)
     down = false;
     left = false;
     right = false;
+	plus=false;
+	minus=false;
 
     switch (c)
     {
@@ -175,6 +176,8 @@ void HandleUI(void)
             else if (menustate == MENU_NONE2 || menustate == MENU_INFO)
                 InfoMessage("             TURBO");
         }
+		else
+			plus=true;
         break;
     case KEY_KPMINUS :
         if (ctrl && lalt)
@@ -186,6 +189,8 @@ void HandleUI(void)
             else if (menustate == MENU_NONE2 || menustate == MENU_INFO)
                 InfoMessage("             NORMAL");
         }
+		else
+			minus=true;
         break;
     case KEY_KP0 :
         if (ctrl && lalt)
@@ -241,7 +246,7 @@ void HandleUI(void)
 		{
 			do
 				menusub++;
-			while(menumask & (1<<(menusub)) == 0);
+			while((menumask & (1<<menusub)) == 0);
             menustate = parentstate;
         }
 
@@ -285,57 +290,68 @@ void HandleUI(void)
         /* main menu                                                      */
         /******************************************************************/
     case MENU_MAIN1 :
-		menumask=0x30;
+		menumask=0x70;	// b01110000 Floppy turbo, Harddisk options & Exit.
 		OsdSetTitle("Minimig",OSD_ARROW_RIGHT);
-//        OsdWrite(0, "      *** MINIMIG MENU ***   \x15\x11 ", 0,0);
-//        OsdWrite(1, "", 0,0);
         // floppy drive info
+		// We display a line for each drive that's active
+		// in the config file, but grey out any that the FPGA doesn't think are active.
+		// We also print a help text in place of the last drive if it's inactive.
         for (i = 0; i < 4; i++)
         {
-            strcpy(s, " dfx: ");
-            s[3] = i + '0';
-            if (df[i].status & DSK_INSERTED) // floppy disk is inserted
-            {
-                strncpy(&s[6], df[i].name, sizeof(df[0].name));
-                strcpy(&s[6 + sizeof(df[0].name)], df[i].status & DSK_WRITABLE ? " RW" : " RO"); // floppy disk is writable or read-only
-            }
-            else // no floppy disk
-                strcat(s, " * no disk *");
+			if(i==config.floppy.drives+1)
+				OsdWrite(i," KP +/- to add/remove drives",0,1);
+			else
+			{
+		        strcpy(s, " dfx: ");
+		        s[3] = i + '0';
+				if(i<=drives)
+				{
+					menumask|=(1<<i);	// Make enabled drives selectable
 
-            OsdWrite(i, s, menusub == i,i>drives);
-			if(i<=drives)
-				menumask|=(1<<i);	// Make enabled drives selectable
+				    if (df[i].status & DSK_INSERTED) // floppy disk is inserted
+				    {
+				        strncpy(&s[6], df[i].name, sizeof(df[0].name));
+				        strcpy(&s[6 + sizeof(df[0].name)], df[i].status & DSK_WRITABLE ? " RW" : " RO"); // floppy disk is writable or read-only
+				    }
+				    else // no floppy disk
+					{
+				        strcat(s, "* no disk *");
+					}
+				}
+				else if(i<=config.floppy.drives)
+				{
+					strcat(s,"* active after reset *");
+				}
+				else
+					strcpy(s,"");
+		        OsdWrite(i, s, menusub == i,(i>drives)||(i>config.floppy.drives));
+			}
         }
-        OsdWrite(4, "", 0,0);
-        OsdWrite(5, " Hard disk settings...", menusub == 4,0);
+		sprintf(s," Floppy disk turbo : %s",config.floppy.speed ? "on" : "off");
+        OsdWrite(4, s, menusub==4,0);
+        OsdWrite(5, " Hard disk settings \x16", menusub == 5,0);
         OsdWrite(6, "", 0,0);
-        OsdWrite(7, STD_EXIT, menusub == 5,0);
+        OsdWrite(7, STD_EXIT, menusub == 6,0);
 
         menustate = MENU_MAIN2;
 		parentstate=MENU_MAIN1;
         break;
 
     case MENU_MAIN2 :
-       if (menu)
+        if (menu)
             menustate = MENU_NONE1;
-/*
-        else if (up)
-        {
-            if (menusub > 0)
-                menusub--;
-            if (menusub == 3)
-                menusub = drives;
-            menustate = MENU_MAIN1;
-        }
-        else if (down)
-        {
-            if (menusub < 5)
-                menusub++;
-            if ((menusub > drives) && (menusub<4))
-                menusub = 4;
-            menustate = MENU_MAIN1;
-        }
-*/
+		else if(plus && (config.floppy.drives<3))
+		{
+			config.floppy.drives++;
+			ConfigFloppy(config.floppy.drives,config.floppy.speed);
+	        menustate = MENU_MAIN1;
+		}
+		else if(minus && (config.floppy.drives>0))
+		{
+			config.floppy.drives--;
+			ConfigFloppy(config.floppy.drives,config.floppy.speed);
+	        menustate = MENU_MAIN1;
+		}
         else if (select)
         {
             if (menusub < 4)
@@ -351,14 +367,20 @@ void HandleUI(void)
                     SelectFile("ADF", SCAN_DIR | SCAN_LFN, MENU_FILE_SELECTED, MENU_MAIN1);
                 }
             }
-            else if (menusub == 4)
+            else if (menusub == 4)	// Toggle floppy turbo
+			{
+                config.floppy.speed^=1;
+				ConfigFloppy(config.floppy.drives,config.floppy.speed);
+                menustate = MENU_MAIN1;
+			}
+            else if (menusub == 5)	// Go to harddrives page.
 			{
                  t_hardfile[0] = config.hardfile[0];
                  t_hardfile[1] = config.hardfile[1];
                  menustate = MENU_SETTINGS_HARDFILE1;
 				 menusub=0;
 			}
-            else if (menusub == 5)
+            else if (menusub == 6)
                 menustate = MENU_NONE1;
         }
         else if (c == KEY_BACK) // eject all floppies
@@ -390,17 +412,17 @@ void HandleUI(void)
         /******************************************************************/
     case MENU_MAIN2_1 :
 		menumask=0x7f;
- 		OsdSetTitle("Options",OSD_ARROW_LEFT);
-        OsdWrite(0, "    load configuration...", menusub == 0,0);
-        OsdWrite(1, "    chipset...", menusub == 1,0);
-        OsdWrite(2, "    memory...", menusub == 2,0);
-        OsdWrite(3, "    drives...", menusub == 3,0);
-        OsdWrite(4, "    video...", menusub == 4,0);
-        OsdWrite(5, "    save configuration...", menusub == 5,0);
+ 		OsdSetTitle("Settings",OSD_ARROW_LEFT|OSD_ARROW_RIGHT);
+        OsdWrite(0, "    load configuration", menusub == 0,0);
+        OsdWrite(1, "    save configuration", menusub == 1,0);
+        OsdWrite(2, "", 0,0);
+        OsdWrite(3, "    chipset settings \x16", menusub == 2,0);
+        OsdWrite(4, "     memory settings \x16", menusub == 3,0);
+        OsdWrite(5, "      video settings \x16", menusub == 4,0);
         OsdWrite(6, "", 0,0);
-        OsdWrite(7, STD_EXIT, menusub == 6,0);
+        OsdWrite(7, STD_EXIT, menusub == 5,0);
 
-		parentstate = MENU_MAIN2_1;
+		parentstate = menustate;
         menustate = MENU_MAIN2_2;
         break;
 
@@ -408,20 +430,6 @@ void HandleUI(void)
 
         if (menu)
             menustate = MENU_NONE1;
-/*
-        else if (up)
-        {
-            if (menusub > 0)
-                menusub--;
-            menustate = MENU_MAIN2_1;
-        }
-        else if (down)
-        {
-            if (menusub < 4)
-                menusub++;
-            menustate = MENU_MAIN2_1;
-        }
-*/
         else if (select)
         {
             if (menusub == 0)
@@ -431,17 +439,17 @@ void HandleUI(void)
             }
             else if (menusub == 1)
             {
-                menustate = MENU_SETTINGS_CHIPSET1;
                 menusub = 0;
+                menustate = MENU_SAVECONFIG_1;
             }
             else if (menusub == 2)
             {
-                menustate = MENU_SETTINGS_MEMORY1;
+                menustate = MENU_SETTINGS_CHIPSET1;
                 menusub = 0;
             }
             else if (menusub == 3)
             {
-                menustate = MENU_SETTINGS_DRIVES1;
+                menustate = MENU_SETTINGS_MEMORY1;
                 menusub = 0;
             }
             else if (menusub == 4)
@@ -450,11 +458,6 @@ void HandleUI(void)
                 menusub = 0;
             }
             else if (menusub == 5)
-            {
-                menusub = 0;
-                menustate = MENU_SAVECONFIG_1;
-            }
-            else if (menusub == 6)
                 menustate = MENU_NONE1;
         }
         else if (left)
@@ -462,20 +465,65 @@ void HandleUI(void)
             menustate = MENU_MAIN1;
             menusub = 0;
         }
+        else if (right)
+        {
+            menustate = MENU_MISC1;
+            menusub = 0;
+        }
         break;
 
+    case MENU_MISC1 :
+		menumask=0x09;	// Just reset and exit for now...
+ 		OsdSetTitle("Misc",OSD_ARROW_LEFT);
+        OsdWrite(0, "    Reset", menusub == 0,0);
+        OsdWrite(1, "", 0,0);
+        OsdWrite(2, "    Return to Chameleon", menusub == 1,1);
+        OsdWrite(3, "    (Not yet implemented)", 0,1);
+        OsdWrite(4, "", 0,0);
+        OsdWrite(5, "    About", menusub == 2,1);
+        OsdWrite(6, "", 0,0);
+        OsdWrite(7, STD_EXIT, menusub == 3,0);
+
+		parentstate = menustate;
+        menustate = MENU_MISC2;
+        break;
+
+    case MENU_MISC2 :
+
+        if (menu)
+            menusub=0, menustate = MENU_NONE1;
+		if (left)
+			menusub=0, menustate = MENU_MAIN2_1;
+        else if (select)
+        {
+            if (menusub == 0)	// Reset
+            {
+                menusub = 0;
+				menustate=MENU_RESET1;
+			}
+            if (menusub == 1)	// About
+            {
+				// FIXME - display an about message...
+			}
+            if (menusub == 2)	// Exit
+            {
+				menustate=MENU_NONE1;
+			}
+		}
+		break;
+
     case MENU_LOADCONFIG_1 :
-		menumask=0;
+		menumask=0x3f;
+		parentstate=menustate;
  		OsdSetTitle("Load",0);
 
-        OsdWrite(0, "    *** LOAD CONFIGURATION ***", 0,0);
-        OsdWrite(1, "", 0,0);
-        OsdWrite(2, "             Default", menusub == 0,0);
-        OsdWrite(3, "             1", menusub == 1,0);
-        OsdWrite(4, "             2", menusub == 2,0);
-        OsdWrite(5, "             3", menusub == 3,0);
-        OsdWrite(6, "             4", menusub == 4,0);
-//        OsdWrite(6, "", 0);
+        OsdWrite(0, "", 0,0);
+        OsdWrite(1, "          Default", menusub == 0,0);
+        OsdWrite(2, "          1", menusub == 1,0);
+        OsdWrite(3, "          2", menusub == 2,0);
+        OsdWrite(4, "          3", menusub == 3,0);
+        OsdWrite(5, "          4", menusub == 4,0);
+        OsdWrite(6, "", 0,0);
 //        OsdWrite(7, "              exit", menusub == 3);
         OsdWrite(7, STD_EXIT, menusub == 5,0);
 
@@ -484,18 +532,7 @@ void HandleUI(void)
 
     case MENU_LOADCONFIG_2 :
 
-        if (menu)
-        {
-            menustate = MENU_MAIN2_1;
-            menusub = 2;
-        }
-        else if (up)
-        {
-            if (menusub > 0)
-                menusub--;
-            menustate = MENU_LOADCONFIG_1;
-        }
-        else if (down)
+        if (down)
         {
 //            if (menusub < 3)
             if (menusub < 5)
@@ -522,7 +559,7 @@ void HandleUI(void)
         /* file selection menu                                            */
         /******************************************************************/
     case MENU_FILE_SELECT1 :
-
+ 		OsdSetTitle("Select",0);
         PrintDirectory();
         menustate = MENU_FILE_SELECT2;
         break;
@@ -681,11 +718,11 @@ void HandleUI(void)
     case MENU_RESET1 :
 		OsdSetTitle("Reset",0);
 
-        OsdWrite(0, "         Reset Minimig?", 0,0);
-        OsdWrite(1, "", 0,0);
-        OsdWrite(2, "               yes", menusub == 0,0);
-        OsdWrite(3, "               no", menusub == 1,0);
-        OsdWrite(4, "", 0,0);
+        OsdWrite(0, "", 0,0);
+        OsdWrite(1, "         Reset Minimig?", 0,0);
+        OsdWrite(2, "", 0,0);
+        OsdWrite(3, "               yes", menusub == 0,0);
+        OsdWrite(4, "               no", menusub == 1,0);
         OsdWrite(5, "", 0,0);
         OsdWrite(6, "", 0,0);
         OsdWrite(7, "", 0,0);
@@ -723,6 +760,7 @@ void HandleUI(void)
         /******************************************************************/
         /* settings menu                                                  */
         /******************************************************************/
+/*
     case MENU_SETTINGS1 :
 		menumask=0;
  		OsdSetTitle("Settings",0);
@@ -801,19 +839,20 @@ void HandleUI(void)
             menusub = 1;
         }
         break;
+*/
 
     case MENU_SAVECONFIG_1 :
-		menumask=0;
+		menumask=0x3f;
+		parentstate=menustate;
  		OsdSetTitle("Save",0);
 
-        OsdWrite(0, "    *** SAVE CONFIGURATION ***", 0,0);
-        OsdWrite(1, "", 0, 0);
-        OsdWrite(2, "           Default", menusub == 0,0);
-        OsdWrite(3, "           1", menusub == 1,0);
-        OsdWrite(4, "           2", menusub == 2,0);
-        OsdWrite(5, "           3", menusub == 3,0);
-        OsdWrite(6, "           4", menusub == 4,0);
-//        OsdWrite(6, "", 0);
+        OsdWrite(0, "", 0, 0);
+        OsdWrite(1, "        Default", menusub == 0,0);
+        OsdWrite(2, "        1", menusub == 1,0);
+        OsdWrite(3, "        2", menusub == 2,0);
+        OsdWrite(4, "        3", menusub == 3,0);
+        OsdWrite(5, "        4", menusub == 4,0);
+        OsdWrite(6, "", 0,0);
 //        OsdWrite(7, "              exit", menusub == 3);
         OsdWrite(7, STD_EXIT, menusub == 5,0);
 
@@ -824,7 +863,7 @@ void HandleUI(void)
 
         if (menu)
 		{
-            menustate = MENU_SETTINGS1;
+            menustate = MENU_MAIN2_1;
             menusub = 5;
 		}
 
@@ -851,7 +890,7 @@ void HandleUI(void)
 			}
 			else
 			{
-				menustate = MENU_SETTINGS1;
+				menustate = MENU_MAIN2_1;
 				menusub = 0;
 			}
         }
@@ -930,14 +969,14 @@ void HandleUI(void)
             }
             else if (menusub == 3)
             {
-                menustate = MENU_SETTINGS1;
+                menustate = MENU_MAIN2_1;
                 menusub = 0;
             }
         }
 
         if (menu)
         {
-            menustate = MENU_SETTINGS1;
+            menustate = MENU_MAIN2_1;
             menusub = 0;
         }
         else if (right)
@@ -956,7 +995,9 @@ void HandleUI(void)
         /* memory settings menu                                           */
         /******************************************************************/
     case MENU_SETTINGS_MEMORY1 :
-		menumask=0;
+		menumask=0x3f;
+		parentstate=menustate;
+
  		OsdSetTitle("Memory",OSD_ARROW_LEFT|OSD_ARROW_RIGHT);
 
         OsdWrite(0, "", 0,0);
@@ -988,19 +1029,6 @@ void HandleUI(void)
         break;
 
     case MENU_SETTINGS_MEMORY2 :
-
-        if (down && menusub < 5)
-        {
-            menusub++;
-            menustate = MENU_SETTINGS_MEMORY1;
-        }
-
-        if (up && menusub > 0)
-        {
-            menusub--;
-            menustate = MENU_SETTINGS_MEMORY1;
-        }
-
         if (select)
         {
             if (menusub == 0)
@@ -1039,19 +1067,19 @@ void HandleUI(void)
             }
             else if (menusub == 5)
             {
-                menustate = MENU_SETTINGS1;
+                menustate = MENU_MAIN2_1;
                 menusub = 1;
             }
         }
 
         if (menu)
         {
-            menustate = MENU_SETTINGS1;
+            menustate = MENU_MAIN2_1;
             menusub = 1;
         }
         else if (right)
         {
-            menustate = MENU_SETTINGS_DRIVES1;
+            menustate = MENU_SETTINGS_VIDEO1;
             menusub = 0;
         }
         else if (left)
@@ -1064,6 +1092,7 @@ void HandleUI(void)
         /******************************************************************/
         /* drive settings menu                                            */
         /******************************************************************/
+/*
     case MENU_SETTINGS_DRIVES1 :
 		menumask=0;
  
@@ -1154,13 +1183,20 @@ void HandleUI(void)
         }
         break;
 
+*/
+
         /******************************************************************/
         /* hardfile settings menu                                         */
         /******************************************************************/
 
+		// FIXME!  Nasty race condition here.  Changing HDF type has immediate effect
+		// which could be disastrous if the user's writing to the drive at the time!
+		// Make the menu work on the copy, not the original, and copy on acceptance,
+		// not on rejection.
     case MENU_SETTINGS_HARDFILE1 :
 		OsdSetTitle("Harddisks",0);
 
+		parentstate = menustate;
 		menumask=0x21;	// b00100001 - On/off & exit enabled by default...
 		if(config.enable_ide)
 			menumask|=0x0a;  // b00001010 - HD0 and HD1 type
@@ -1208,13 +1244,9 @@ void HandleUI(void)
 			menumask|=0x10;	// Make hardfile selectable
         OsdWrite(5, s, enable ? (menusub == 4) : 0 ,enable==0);
 
-		sprintf(s,"%d, %lx, %lx",menusub,(1<<menusub),menumask);
-        OsdWrite(6, s, 0,0);
-
-//        OsdWrite(6, "", 0,0);
+        OsdWrite(6, "", 0,0);
         OsdWrite(7, STD_EXIT, menusub == 5,0);
 
-		parentstate = MENU_SETTINGS_HARDFILE1;
         menustate = MENU_SETTINGS_HARDFILE2;
 
         break;
@@ -1293,7 +1325,7 @@ void HandleUI(void)
          }
          else
          {
-             menustate = MENU_SETTINGS_DRIVES1;
+             menustate = MENU_MAIN1;
              menusub = 3;
          }
 
@@ -1301,35 +1333,23 @@ void HandleUI(void)
 
     // hardfile configuration has changed, ask user if he wants to use the new settings
     case MENU_HARDFILE_CHANGED1 :
-		menumask=0;
+		menumask=0x03;
+		parentstate=menustate;
  		OsdSetTitle("Confirm",0);
 
         OsdWrite(0, "", 0,0);
-        OsdWrite(1, "      Changing configuration", 0,0);
-        OsdWrite(2, "        requires reset.", 0,0);
+        OsdWrite(1, "    Changing configuration", 0,0);
+        OsdWrite(2, "      requires reset.", 0,0);
         OsdWrite(3, "", 0,0);
-        OsdWrite(4, "         Reset Minimig?", 0,0);
+        OsdWrite(4, "       Reset Minimig?", 0,0);
         OsdWrite(5, "", 0,0);
-        OsdWrite(6, "               yes", menusub == 0,0);
-        OsdWrite(7, "               no", menusub == 1,0);
+        OsdWrite(6, "             yes", menusub == 0,0);
+        OsdWrite(7, "             no", menusub == 1,0);
 
         menustate = MENU_HARDFILE_CHANGED2;
         break;
 
     case MENU_HARDFILE_CHANGED2 :
-
-        if (down && menusub < 1)
-        {
-            menusub++;
-            menustate = MENU_HARDFILE_CHANGED1;
-        }
-
-        if (up && menusub > 0)
-        {
-            menusub--;
-            menustate = MENU_HARDFILE_CHANGED1;
-        }
-
         if (select)
         {
             if (menusub == 0) // yes
@@ -1363,7 +1383,7 @@ void HandleUI(void)
             else if (menusub == 1) // no
             {
                 memcpy(config.hardfile, t_hardfile, sizeof(t_hardfile)); // restore configuration
-                menustate = MENU_SETTINGS_DRIVES1;
+                menustate = MENU_MAIN1;
                 menusub = 3;
             }
         }
@@ -1371,40 +1391,29 @@ void HandleUI(void)
         if (menu)
         {
             memcpy(config.hardfile, t_hardfile, sizeof(t_hardfile)); // restore configuration
-            menustate = MENU_SETTINGS_DRIVES1;
+            menustate = MENU_MAIN1;
             menusub = 3;
         }
         break;
 
     case MENU_SYNTHRDB1 :
+		menumask=0x03;
+		parentstate=menustate;
 		menumask=0;
  		OsdSetTitle("Confirm",0);
         OsdWrite(0, "", 0,0);
-        OsdWrite(1, "     No partitions found -", 0,0);
-        OsdWrite(2, "  Open in compatibility mode?", 0,0);
-        OsdWrite(3, "  (Say no if you plan to use", 0,0);
-        OsdWrite(4, "  HDToolBox to prep this HDF)", 0,0);
+        OsdWrite(1, "   No partitions found -", 0,0);
+        OsdWrite(2, " Open in compatibility mode?", 0,0);
+        OsdWrite(3, " (Say no if you plan to use", 0,0);
+        OsdWrite(4, " HDToolBox to prep this HDF)", 0,0);
         OsdWrite(5, "", 0,0);
-        OsdWrite(6, "               yes", menusub == 0,0);
-        OsdWrite(7, "               no", menusub == 1,0);
+        OsdWrite(6, "             yes", menusub == 0,0);
+        OsdWrite(7, "             no", menusub == 1,0);
 
         menustate = MENU_SYNTHRDB2;
         break;
 
     case MENU_SYNTHRDB2 :
-
-        if (down && menusub < 1)
-        {
-            menusub++;
-            menustate = MENU_SYNTHRDB1;
-        }
-
-        if (up && menusub > 0)
-        {
-            menusub--;
-            menustate = MENU_SYNTHRDB1;
-        }
-
         if (select)
         {
             if (menusub == 0) // yes
@@ -1421,39 +1430,27 @@ void HandleUI(void)
         if (menu)
         {
             memcpy(config.hardfile, t_hardfile, sizeof(t_hardfile)); // restore configuration
-            menustate = MENU_SETTINGS_DRIVES1;
+            menustate = MENU_MAIN1;
             menusub = 3;
         }
         break;
 
     case MENU_SYNTHRDB2_1 :
-		menumask=0;
-         OsdWrite(0, "", 0,0);
-        OsdWrite(1, "     No partitions found -", 0,0);
-        OsdWrite(2, "  Open in compatibility mode?", 0,0);
-        OsdWrite(3, "  (Say no if you plan to use", 0,0);
-        OsdWrite(4, "  HDToolBox to prep this HDF)", 0,0);
+		menumask=0x03;
+		parentstate=menustate;
+        OsdWrite(0, "", 0,0);
+        OsdWrite(1, "    No partitions found -", 0,0);
+        OsdWrite(2, " Open in compatibility mode?", 0,0);
+        OsdWrite(3, " (Say no if you plan to use", 0,0);
+        OsdWrite(4, " HDToolBox to prep this HDF)", 0,0);
         OsdWrite(5, "", 0,0);
-        OsdWrite(6, "               yes", menusub == 0,0);
-        OsdWrite(7, "               no", menusub == 1,0);
+        OsdWrite(6, "             yes", menusub == 0,0);
+        OsdWrite(7, "             no", menusub == 1,0);
 
         menustate = MENU_SYNTHRDB2_2;
         break;
 
     case MENU_SYNTHRDB2_2 :
-
-        if (down && menusub < 1)
-        {
-            menusub++;
-            menustate = MENU_SYNTHRDB2_1;
-        }
-
-        if (up && menusub > 0)
-        {
-            menusub--;
-            menustate = MENU_SYNTHRDB2_1;
-        }
-
         if (select)
         {
             if (menusub == 0) // yes
@@ -1470,7 +1467,7 @@ void HandleUI(void)
         if (menu)
         {
             memcpy(config.hardfile, t_hardfile, sizeof(t_hardfile)); // restore configuration
-            menustate = MENU_SETTINGS_DRIVES1;
+            menustate = MENU_MAIN1;
             menusub = 3;
         }
         break;
@@ -1480,20 +1477,21 @@ void HandleUI(void)
         /* video settings menu                                            */
         /******************************************************************/
     case MENU_SETTINGS_VIDEO1 :
-		menumask=0;
+		menumask=0x0f;
+		parentstate=menustate;
  
 		OsdSetTitle("Video",OSD_ARROW_LEFT|OSD_ARROW_RIGHT);
-        OsdWrite(0, " \x10\x14          VIDEO           \x15\x11", 0,0);
-        OsdWrite(1, "", 0,0);
+        OsdWrite(0, "", 0,0);
         strcpy(s, "   Lores Filter : ");
         strcat(s, config_filter_msg[config.filter.lores]);
-        OsdWrite(2, s, menusub == 0,0);
+        OsdWrite(1, s, menusub == 0,0);
         strcpy(s, "   Hires Filter : ");
         strcat(s, config_filter_msg[config.filter.hires]);
-        OsdWrite(3, s, menusub == 1,0);
+        OsdWrite(2, s, menusub == 1,0);
         strcpy(s, "   Scanlines    : ");
         strcat(s, config_scanlines_msg[config.scanlines]);
-        OsdWrite(4, s, menusub == 2,0);
+        OsdWrite(3, s, menusub == 2,0);
+        OsdWrite(4, "", 0,0);
         OsdWrite(5, "", 0,0);
         OsdWrite(6, "", 0,0);
         OsdWrite(7, STD_EXIT, menusub == 3,0);
@@ -1502,19 +1500,6 @@ void HandleUI(void)
         break;
 
     case MENU_SETTINGS_VIDEO2 :
-
-        if (down && menusub < 3)
-        {
-            menusub++;
-            menustate = MENU_SETTINGS_VIDEO1;
-        }
-
-        if (up && menusub > 0)
-        {
-            menusub--;
-            menustate = MENU_SETTINGS_VIDEO1;
-        }
-
         if (select)
         {
             if (menusub == 0)
@@ -1540,19 +1525,16 @@ void HandleUI(void)
                 ConfigScanlines(config.scanlines);
             }
 
-
-
-
             else if (menusub == 3)
             {
-                menustate = MENU_SETTINGS1;
+                menustate = MENU_MAIN2_1;
                 menusub = 3;
             }
         }
 
         if (menu)
         {
-            menustate = MENU_SETTINGS1;
+            menustate = MENU_MAIN2_1;
             menusub = 3;
         }
         else if (right)
@@ -1562,7 +1544,7 @@ void HandleUI(void)
         }
         else if (left)
         {
-            menustate = MENU_SETTINGS_DRIVES1;
+            menustate = MENU_SETTINGS_MEMORY1;
             menusub = 0;
         }
         break;
@@ -1576,13 +1558,14 @@ void HandleUI(void)
          // no break intended
 
     case MENU_ROMFILE_SELECTED1 :
-		menumask=0;
- 
+		menumask=0x03;
+		parentstate=menustate;
+ 		OsdSetTitle("Confirm",0);
         OsdWrite(0, "", 0,0);
-        OsdWrite(1, "        Reload Kickstart?", 0,0);
+        OsdWrite(1, "       Reload Kickstart?", 0,0);
         OsdWrite(2, "", 0,0);
-        OsdWrite(3, "               yes", menusub == 0,0);
-        OsdWrite(4, "               no", menusub == 1,0);
+        OsdWrite(3, "              yes", menusub == 0,0);
+        OsdWrite(4, "              no", menusub == 1,0);
         OsdWrite(5, "", 0,0);
         OsdWrite(6, "", 0,0);
         OsdWrite(7, "", 0,0);
@@ -1591,18 +1574,6 @@ void HandleUI(void)
         break;
 
     case MENU_ROMFILE_SELECTED2 :
-
-        if (down && menusub < 1)
-        {
-            menusub++;
-            menustate = MENU_ROMFILE_SELECTED1;
-        }
-
-        if (up && menusub > 0)
-        {
-            menusub--;
-            menustate = MENU_ROMFILE_SELECTED1;
-        }
 
         if (select)
         {
@@ -1995,14 +1966,14 @@ void ScrollLongName(void)
 
         if (len > 30) // scroll name if longer than display size
         {
-            if (scroll_offset >= (len + BLANKSPACE) << 2) // reset scroll position if it exceeds predefined maximum
+            if (scroll_offset >= (len + BLANKSPACE) << 3) // reset scroll position if it exceeds predefined maximum
                 scroll_offset = 0;
 
-            offset = scroll_offset >> 2; // get new starting character of the name (scroll_offset is in 2 pixel unit)
+            offset = scroll_offset >> 3; // get new starting character of the name (scroll_offset is no longer in 2 pixel unit)
 
             len -= offset; // remaing number of characters in the name
 
-            max_len = 31; // number of file name characters to display (one more required for srolling)
+            max_len = 30; // number of file name characters to display (one more required for srolling)
             if (DirEntry[k].Attributes & ATTR_DIRECTORY)
                 max_len = 25; // number of directory name characters to display
 
@@ -2015,7 +1986,7 @@ void ScrollLongName(void)
             if (len < max_len - BLANKSPACE) // file name substring and blank space is shorter than display line size
                 strncpy(s + len + BLANKSPACE, &DirEntryLFN[k][0], max_len - len - BLANKSPACE); // repeat the name after its end and predefined number of blank space
 
-            OSD_PrintText((unsigned char)iSelectedEntry, s, 8, (max_len - 1) << 3, (scroll_offset & 0x3) << 1, 1); // OSD print function with pixel precision
+            OSD_PrintText((unsigned char)iSelectedEntry, s, 22, (max_len - 1) << 3, (scroll_offset & 0x7), 1); // OSD print function with pixel precision
         }
     }
 //    pioa_old = pioa;
@@ -2161,12 +2132,12 @@ void PrintDirectory(void)
             }
 
             if (DirEntry[k].Attributes & ATTR_DIRECTORY) // mark directory with suffix
-                strcpy(&s[25], " <DIR>");
+                strcpy(&s[22], " <DIR>");
         }
         else
         {
             if (i == 0 && nDirEntries == 0) // selected directory is empty
-                strcpy(s, "            No files!");
+                strcpy(s, "          No files!");
         }
 
         OsdWrite(i, s, i == iSelectedEntry,0); // display formatted line text

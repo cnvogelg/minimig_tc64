@@ -276,15 +276,37 @@ void OSD_PrintText(unsigned char line, char *text, unsigned long start, unsigned
 // invert : invertion flag
 
     const unsigned char *p;
+	int i,j;
 
     // select OSD SPI device
     EnableOsd();
 
     // select buffer and line to write to
-    if (invert)
-        SPI(OSDCMDWRITE | 0x10 | line);
-    else
-        SPI(OSDCMDWRITE | line);
+//    if (invert)
+//       SPI(OSDCMDWRITE | 0x10 | line);
+//    else
+    SPI(OSDCMDWRITE | line);
+
+	if(invert)
+		invert=0xff;
+
+    p = &titlebuffer[(7-line)*8];
+	if(start>2)
+	{
+		SPI(0xff); SPI(0xff); start-=2;
+	}
+	
+	i=start>16 ? 16 : start;
+	for(j=0;j<(i/2);++j)
+	{
+		SPI(255^*p); SPI(255^*p++);
+	}
+	if(i&1)
+		SPI(255^*p);
+	start-=i;
+
+	if(start>2)
+		SPI(0xff), SPI(0xff), start-=2;
 
     while (start--)
           SPI(0x00);
@@ -294,20 +316,20 @@ void OSD_PrintText(unsigned char line, char *text, unsigned long start, unsigned
         width -= 8 - offset;
         p = &charfont[*text++][offset];
         for (; offset < 8; offset++)
-            SPI(*p++);
+            SPI(*p++^invert);
     }
 
     while (width > 8)
     {
             p = &charfont[*text++][0];
-            SPI(*p++);
-            SPI(*p++);
-            SPI(*p++);
-            SPI(*p++);
-            SPI(*p++);
-            SPI(*p++);
-            SPI(*p++);
-            SPI(*p++);
+            SPI(*p++^invert);
+            SPI(*p++^invert);
+            SPI(*p++^invert);
+            SPI(*p++^invert);
+            SPI(*p++^invert);
+            SPI(*p++^invert);
+            SPI(*p++^invert);
+            SPI(*p++^invert);
             width -= 8;
     }
 
@@ -315,7 +337,7 @@ void OSD_PrintText(unsigned char line, char *text, unsigned long start, unsigned
     {
         p = &charfont[*text++][0];
         while (width--)
-              SPI(*p++);
+              SPI(*p++^invert);
     }
 
     DisableOsd();
