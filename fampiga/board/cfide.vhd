@@ -65,9 +65,11 @@ entity cfide is
 	ir: buffer std_logic;
 	ena1MHz: out std_logic;
 	irq_d: in std_logic;
-	led: in std_logic_vector(1 downto 0)
-
-
+	led: in std_logic_vector(1 downto 0);
+	
+	amiser_txd: in std_logic;	-- CV: amiga serial txd		
+	amiser_rxd: out std_logic  -- CV: amiga serial rxd
+	
    );
 
 end cfide;
@@ -263,6 +265,8 @@ end process;
 					kb_clk <= mux_q(1);
 					ms_data <= mux_q(2);
 					ms_clk <= mux_q(3);
+				when X"D" =>
+					amiser_rxd <= mux_q(1); -- IEC_CLK = amiga serial rxd
 				when others =>
 					null;
 				end case;
@@ -293,7 +297,8 @@ end process;
 						mux_d_regd <= "10" & led(0) & led(1);
 						mux_regd <= X"B";
 					when X"B" =>
-						mux_d_regd(3 downto 1) <= "111";
+						mux_d_regd(2 downto 1) <= "11";
+						mux_d_regd(3) <= amiser_txd; -- CV: IEC ATN is amiga serial txd
 						mux_d_regd(0) <= not shiftout; -- CV: invert serial signal to fit USB2serial dongle
 --						mux_d_regd(0) <= '1';
 						mux_regd <= X"D";
