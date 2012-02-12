@@ -122,6 +122,8 @@ __geta4 void main(void)
     sprintf(s, "** ARM firmware %s **\n", version + 5);
     BootPrint(s);
 
+	OsdDisable();
+
 //    SPI_Init();
 
 //    if (CheckButton()) // if menu button pressed fall back to slow SPI mode

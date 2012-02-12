@@ -53,6 +53,15 @@ const char keycode_table[128] =
       0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
 };
 
+// time delay after which file/dir name starts to scroll
+#define SCROLL_DELAY 2000
+#define SCROLL_DELAY2 50
+
+static unsigned long scroll_offset=0; // file/dir name scrolling position
+static unsigned long scroll_timer=0;  // file/dir name scrolling timer
+
+extern char s[40];
+
 static int arrow;
 static char titlebuffer[64];
 
@@ -265,6 +274,95 @@ void OsdWrite(unsigned char n, char *s, unsigned char invert, unsigned char stip
     // deselect OSD SPI device
     DisableOsd();
 }
+
+
+// write a null-terminated string <s> to the OSD buffer starting at line <n>
+void OsdWriteDoubleSize(unsigned char n, char *s, unsigned char pass)
+{
+    unsigned short i;
+    unsigned char b;
+    const unsigned char *p;
+	int linelimit=OSDLINELEN;
+
+    // select OSD SPI device
+    EnableOsd();
+
+    // select buffer and line to write to
+    SPI(OSDCMDWRITE | n);
+
+    i = 0;
+    // send all characters in string to OSD
+    while (1)
+    {
+		if(i==0)	// Render sidestripe
+		{
+	        p = &titlebuffer[(7-n)*8];
+			SPI(0xff);
+			SPI(0xff);
+	        SPI(255^*p); SPI(255^*p++);
+	        SPI(255^*p); SPI(255^*p++);
+	        SPI(255^*p); SPI(255^*p++);
+	        SPI(255^*p); SPI(255^*p++);
+	        SPI(255^*p); SPI(255^*p++);
+	        SPI(255^*p); SPI(255^*p++);
+	        SPI(255^*p); SPI(255^*p++);
+	        SPI(255^*p); SPI(255^*p++);
+			SPI(0xff);
+			SPI(0xff);
+			SPI(0x00);
+			SPI(0x00);
+	        i += 22;
+		}
+		else
+		{
+		    b = *s++;
+
+		    if (b == 0) // end of string
+		        break;
+
+			else if(i<(linelimit-16)) // normal character
+		    {
+				int c;
+		        p = &charfont[b][0];
+				if(pass)	// Draw the bottom half..
+				{
+					int j;
+					for(j=0;j<8;++j)
+					{
+						c=*p++;
+						c=(c&0xf0)>>4;
+						c=(c&0x08)<<1 | c;	// ....ABCD => ...AABCD
+						c=(c&0x1c)<<1 | (c & 0x07);	// ...AABCD => ..AABBCD
+						c=(c&0x3e)<<1 | (c & 0x03); // ..AABBCD => .AABBCCD
+						c=c<<1 | (c&0x01); // .AABBCCD => AABBCCDD
+						SPI(c); SPI(c);
+					}
+				}
+				else	// Draw the top half...
+				{
+					int j;
+					for(j=0;j<8;++j)
+					{
+						c=*p++;
+						c=c&0xf;
+						c=(c&0x08)<<1 | c;	// ....ABCD => ...AABCD
+						c=(c&0x1c)<<1 | (c & 0x07);	// ...AABCD => ..AABBCD
+						c=(c&0x3e)<<1 | (c & 0x03); // ..AABBCD => .AABBCCD
+						c=c<<1 | (c&0x01); // .AABBCCD => AABBCCDD
+						SPI(c); SPI(c);
+					}
+				}				
+		        i += 16;
+		    }
+		}
+    }
+    for (; i < linelimit; i++) // clear end of line
+       SPI(0);
+
+    // deselect OSD SPI device
+    DisableOsd();
+}
+
 
 void OSD_PrintText(unsigned char line, char *text, unsigned long start, unsigned long width, unsigned long offset, unsigned char invert)
 {
@@ -523,4 +621,49 @@ unsigned char GetASCIIKey(unsigned char keycode)
     return keycode_table[keycode & 0x7F];
 }
 
+
+void ScrollText(char n,const char *str, int len,unsigned char invert)
+{
+// this function is called periodically when a string longer than the window is displayed.
+
+    #define BLANKSPACE 10 // number of spaces between the end and start of repeated name
+
+    long offset;
+    long max_len=30;
+
+    if (str && str[0] && CheckTimer(scroll_timer)) // scroll if long name and timer delay elapsed
+    {
+        scroll_timer = GetTimer(SCROLL_DELAY2); // reset scroll timer to repeat delay
+
+        scroll_offset++; // increase scroll position (1 pixel unit)
+        memset(s, ' ', 32); // clear buffer
+
+		if(!len)
+	        len = strlen(str); // get name length
+
+        if (len > 30) // scroll name if longer than display size
+        {
+            if (scroll_offset >= (len + BLANKSPACE) << 3) // reset scroll position if it exceeds predefined maximum
+                scroll_offset = 0;
+
+            offset = scroll_offset >> 3; // get new starting character of the name (scroll_offset is no longer in 2 pixel unit)
+
+            len -= offset; // remaing number of characters in the name
+
+            if (len > 0)
+                strncpy(s, &str[offset], len); // copy name substring
+
+            if (len < max_len - BLANKSPACE) // file name substring and blank space is shorter than display line size
+                strncpy(s + len + BLANKSPACE, str, max_len - len - BLANKSPACE); // repeat the name after its end and predefined number of blank space
+
+            OSD_PrintText(n, s, 22, (max_len - 1) << 3, (scroll_offset & 0x7), invert); // OSD print function with pixel precision
+        }
+    }
+}
+
+void ScrollReset()
+{
+    scroll_timer = GetTimer(SCROLL_DELAY); // set timer to start name scrolling after predefined time delay
+    scroll_offset = 0; // start scrolling from the start
+}
 

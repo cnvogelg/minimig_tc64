@@ -127,7 +127,7 @@ unsigned char LoadConfiguration(char *filename)
         else
             printf("Wrong configuration file size: %lu (expected: %u)\r", file.size, sizeof(config));
     }
-    else
+    if(!result)
 	{
         BootPrint("Can not open configuration file!\n");
 

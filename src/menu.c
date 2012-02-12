@@ -38,12 +38,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "config.h"
 #include "menu.h"
 
-// time delay after which file/dir name starts to scroll
-#define SCROLL_DELAY 2000
-#define SCROLL_DELAY2 40
-
-unsigned long scroll_offset; // file/dir name scrolling position
-unsigned long scroll_timer;  // file/dir name scrolling timer
 
 // other constants
 #define DIRSIZE 8 // number of items in directory display window
@@ -80,7 +74,7 @@ const char *config_memory_slow_msg[] = {"none  ", "0.5 MB", "1.0 MB", "1.5 MB"};
 const char *config_scanlines_msg[] = {"off", "dim", "blk"};
 const char *config_memory_fast_msg[] = {"none  ", "2.0 MB", "4.0 MB", "8.0 MB"};
 const char *config_cpu_msg[] = {"68000 ", "68010", "-----","020 alpha"};
-const char *config_hdf_msg[] = {"Disabled", "Hardfile", "MMC/SD card", "MMC/SD partition 1", "MMC/SD partition 2", "MMC/SD partition 3", "MMC/SD partition 4"};
+const char *config_hdf_msg[] = {"Disabled", "Hardfile (disk img)", "MMC/SD card", "MMC/SD partition 1", "MMC/SD partition 2", "MMC/SD partition 3", "MMC/SD partition 4"};
 
 const char *config_chipset_msg[] = {"OCS-A500", "OCS-A1000", "ECS", "---"};
 
@@ -473,14 +467,14 @@ void HandleUI(void)
         break;
 
     case MENU_MISC1 :
-		menumask=0x09;	// Just reset and exit for now...
+		menumask=0x0d;	// Reset, about and exit.
  		OsdSetTitle("Misc",OSD_ARROW_LEFT);
         OsdWrite(0, "    Reset", menusub == 0,0);
         OsdWrite(1, "", 0,0);
         OsdWrite(2, "    Return to Chameleon", menusub == 1,1);
         OsdWrite(3, "    (Not yet implemented)", 0,1);
         OsdWrite(4, "", 0,0);
-        OsdWrite(5, "    About", menusub == 2,1);
+        OsdWrite(5, "    About", menusub == 2,0);
         OsdWrite(6, "", 0,0);
         OsdWrite(7, STD_EXIT, menusub == 3,0);
 
@@ -501,13 +495,46 @@ void HandleUI(void)
                 menusub = 0;
 				menustate=MENU_RESET1;
 			}
-            if (menusub == 1)	// About
+            if (menusub == 2)	// About
             {
+				menusub=0;
+				menustate=MENU_ABOUT1;
 				// FIXME - display an about message...
 			}
-            if (menusub == 2)	// Exit
+            if (menusub == 3)	// Exit
             {
 				menustate=MENU_NONE1;
+			}
+		}
+		break;
+
+	case MENU_ABOUT1 :
+		menumask=0x01;	// Just Exit
+ 		OsdSetTitle("About",0);
+        OsdWrite(0, "", 0,0);
+        OsdWrite(1, "", 0,0);
+        OsdWriteDoubleSize(2,"   Minimig",0);
+        OsdWriteDoubleSize(3,"   Minimig",1);
+        OsdWrite(4, "", 0,0);
+        OsdWrite(5, "", 0,0);
+        OsdWrite(6, "", 0,0);
+        OsdWrite(6, "", 0,0);
+        OsdWrite(7, STD_EXIT, menusub == 0,0);
+
+		ScrollReset();
+
+		parentstate = menustate;
+        menustate = MENU_ABOUT2;
+        break;
+
+	case MENU_ABOUT2 :
+		ScrollText(5,"                                 Minimig by Dennis van Weeren.  Chipset improvements by Jakub Bednarski and Sacha Boing.  TG68 softcore by Tobias Gubener.  Menu / disk code by Dennis van Weeren, Jakub Bednarski and Alastair M. Robinson.  Minimig is distributed under the terms of the GNU General Public License version 3.",0,0);
+        if (select)
+        {
+            if (menusub == 0)	// Exit
+            {
+                menusub = 2;
+				menustate=MENU_MISC1;
 			}
 		}
 		break;
@@ -1205,8 +1232,11 @@ void HandleUI(void)
         OsdWrite(0, s, menusub == 0,0);
         OsdWrite(1, "", 0,0);
 
-        strcpy(s, "     Master : ");
-        strcat(s, config_hdf_msg[config.hardfile[0].enabled & HDF_TYPEMASK]);
+        strcpy(s, " Master : ");
+		if(config.hardfile[0].enabled==(HDF_FILE|HDF_SYNTHRDB))
+			strcat(s,"Hardfile (filesys)");
+		else
+	        strcat(s, config_hdf_msg[config.hardfile[0].enabled & HDF_TYPEMASK]);
         OsdWrite(2, s, config.enable_ide ? (menusub == 1) : 0 ,config.enable_ide==0);
 
         if (config.hardfile[0].present)
@@ -1225,8 +1255,11 @@ void HandleUI(void)
 			menumask|=0x04;	// Make hardfile selectable
 	    OsdWrite(3, s, enable ? (menusub == 2) : 0 , enable==0);
 
-        strcpy(s, "      Slave : ");
-        strcat(s, config_hdf_msg[config.hardfile[1].enabled & HDF_TYPEMASK]);
+        strcpy(s, "  Slave : ");
+		if(config.hardfile[1].enabled==(HDF_FILE|HDF_SYNTHRDB))
+			strcat(s,"Hardfile (filesys)");
+		else
+	        strcat(s, config_hdf_msg[config.hardfile[1].enabled & HDF_TYPEMASK]);
         OsdWrite(4, s, config.enable_ide ? (menusub == 3) : 0 ,config.enable_ide==0);
         if (config.hardfile[1].present)
         {
@@ -1256,14 +1289,26 @@ void HandleUI(void)
         {
             if (menusub == 0)
             {
-                   config.enable_ide=(config.enable_ide==0);
-                   menustate = MENU_SETTINGS_HARDFILE1;
+				config.enable_ide=(config.enable_ide==0);
+				menustate = MENU_SETTINGS_HARDFILE1;
             }
             if (menusub == 1)
             {
-                   config.hardfile[0].enabled +=1;
-				   config.hardfile[0].enabled %=HDF_CARDPART0+partitioncount;
-                   menustate = MENU_SETTINGS_HARDFILE1;
+				if(config.hardfile[0].enabled==HDF_FILE)
+				{
+					config.hardfile[0].enabled|=HDF_SYNTHRDB;
+				}
+				else if(config.hardfile[0].enabled==(HDF_FILE|HDF_SYNTHRDB))
+				{
+					config.hardfile[0].enabled&=~HDF_SYNTHRDB;
+					config.hardfile[0].enabled +=1;
+				}
+				else
+				{
+					config.hardfile[0].enabled +=1;
+					config.hardfile[0].enabled %=HDF_CARDPART0+partitioncount;
+				}
+                menustate = MENU_SETTINGS_HARDFILE1;
             }
             else if (menusub == 2)
             {
@@ -1271,9 +1316,21 @@ void HandleUI(void)
             }
             else if (menusub == 3)
             {
-                   config.hardfile[1].enabled +=1;
-				   config.hardfile[1].enabled %=HDF_CARDPART0+partitioncount;
-                   menustate = MENU_SETTINGS_HARDFILE1;
+				if(config.hardfile[1].enabled==HDF_FILE)
+				{
+					config.hardfile[1].enabled|=HDF_SYNTHRDB;
+				}
+				else if(config.hardfile[1].enabled==(HDF_FILE|HDF_SYNTHRDB))
+				{
+					config.hardfile[1].enabled&=~HDF_SYNTHRDB;
+					config.hardfile[1].enabled +=1;
+				}
+				else
+				{
+					config.hardfile[1].enabled +=1;
+					config.hardfile[1].enabled %=HDF_CARDPART0+partitioncount;
+				}
+				menustate = MENU_SETTINGS_HARDFILE1;
             }
             else if (menusub == 4)
             {
@@ -1298,6 +1355,7 @@ void HandleUI(void)
 
         if (menusub == 2) // master drive selected
         {
+			// Read RDB from selected drive and determine type...
             memcpy((void*)config.hardfile[0].name, (void*)file.name, sizeof(config.hardfile[0].name));
             memcpy((void*)config.hardfile[0].long_name, (void*)file.long_name, sizeof(config.hardfile[0].long_name));
             config.hardfile[0].present = 1;
@@ -1483,13 +1541,13 @@ void HandleUI(void)
 		OsdSetTitle("Video",OSD_ARROW_LEFT|OSD_ARROW_RIGHT);
         OsdWrite(0, "", 0,0);
         strcpy(s, "   Lores Filter : ");
-        strcat(s, config_filter_msg[config.filter.lores]);
+        strcat(s, config_filter_msg[config.filter.lores & 0x03]);
         OsdWrite(1, s, menusub == 0,0);
         strcpy(s, "   Hires Filter : ");
-        strcat(s, config_filter_msg[config.filter.hires]);
+        strcat(s, config_filter_msg[config.filter.hires & 0x03]);
         OsdWrite(2, s, menusub == 1,0);
         strcpy(s, "   Scanlines    : ");
-        strcat(s, config_scanlines_msg[config.scanlines]);
+        strcat(s, config_scanlines_msg[config.scanlines % 3]);
         OsdWrite(3, s, menusub == 2,0);
         OsdWrite(4, "", 0,0);
         OsdWrite(5, "", 0,0);
@@ -1935,63 +1993,36 @@ void HandleUI(void)
     }
 }
 
+
 void ScrollLongName(void)
 {
 // this function is called periodically when file selection window is displayed
 // it checks if predefined period of time has elapsed and scrolls the name if necessary
 
-    #define BLANKSPACE 10 // number of spaces between the end and start of repeated name
-
-    long offset;
-    long len;
-    long max_len;
     char k = sort_table[iSelectedEntry];
-//    static unsigned long pioa_old;
-//    unsigned long pioa;
-//
-//    pioa = *AT91C_PIOA_PDSR;
+	static int len;
+	int max_len;
 
-    if (DirEntryLFN[k][0] && CheckTimer(scroll_timer)) // scroll if long name and timer delay elapsed
-//    if ((pioa ^ pioa_old) & INIT_B)
+    if (DirEntryLFN[k][0]) // && CheckTimer(scroll_timer)) // scroll if long name and timer delay elapsed
     {
-        scroll_timer = GetTimer(SCROLL_DELAY2); // reset scroll timer to repeat delay
-
-        scroll_offset++; // increase scroll position (2 pixel unit)
-        memset(s, ' ', 32); // clear buffer
-
+		// FIXME - yuk, we don't want to do this every frame!
         len = strlen(DirEntryLFN[k]); // get name length
 
         if (len > 4)
             if (DirEntryLFN[k][len - 4] == '.')
                 len -= 4; // remove extension
 
-        if (len > 30) // scroll name if longer than display size
-        {
-            if (scroll_offset >= (len + BLANKSPACE) << 3) // reset scroll position if it exceeds predefined maximum
-                scroll_offset = 0;
+        max_len = 30; // number of file name characters to display (one more required for scrolling)
+        if (DirEntry[k].Attributes & ATTR_DIRECTORY)
+            max_len = 25; // number of directory name characters to display
 
-            offset = scroll_offset >> 3; // get new starting character of the name (scroll_offset is no longer in 2 pixel unit)
+        if (len > max_len)
+            len = max_len; // trim length to the maximum value
 
-            len -= offset; // remaing number of characters in the name
-
-            max_len = 30; // number of file name characters to display (one more required for srolling)
-            if (DirEntry[k].Attributes & ATTR_DIRECTORY)
-                max_len = 25; // number of directory name characters to display
-
-            if (len > max_len)
-                len = max_len; // trim length to the maximum value
-
-            if (len > 0)
-                strncpy(s, &DirEntryLFN[k][offset], len); // copy name substring
-
-            if (len < max_len - BLANKSPACE) // file name substring and blank space is shorter than display line size
-                strncpy(s + len + BLANKSPACE, &DirEntryLFN[k][0], max_len - len - BLANKSPACE); // repeat the name after its end and predefined number of blank space
-
-            OSD_PrintText((unsigned char)iSelectedEntry, s, 22, (max_len - 1) << 3, (scroll_offset & 0x7), 1); // OSD print function with pixel precision
-        }
+		ScrollText(iSelectedEntry,DirEntryLFN[k],len,1);
     }
-//    pioa_old = pioa;
 }
+
 
 char* GetDiskInfo(char* lfn, long len)
 {
@@ -2062,8 +2093,6 @@ char* GetDiskInfo(char* lfn, long len)
 // print directory contents
 void PrintDirectory(void)
 {
-
-
     unsigned char i;
     unsigned char k;
     unsigned long len;
@@ -2074,8 +2103,7 @@ void PrintDirectory(void)
 
     s[32] = 0; // set temporary string length to OSD line length
 
-    scroll_timer = GetTimer(SCROLL_DELAY); // set timer to start name scrolling after predefined time delay
-    scroll_offset = 0; // start scrolling from the start
+	ScrollReset();
 
     for (i = 0; i < 8; i++)
     {

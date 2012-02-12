@@ -255,6 +255,7 @@ void WriteTaskFile(unsigned char error, unsigned char sector_count, unsigned cha
     SPI(0x00); // dummy
     SPI(0x00);
 
+
     SPI(0x00); // dummy
 
     SPI(0x00);
@@ -374,7 +375,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
             if (sector_count == 0)
                sector_count = 0x100;
 
-			switch(config.hardfile[unit].enabled)
+			switch(hdf[unit].type)
 			{
 				case HDF_FILE | HDF_SYNTHRDB:
 				case HDF_FILE:
@@ -509,7 +510,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
             if (sector_count == 0)
                sector_count = 0x100;
 
-			switch(config.hardfile[unit].enabled)
+			switch(hdf[unit].type)
 			{
 				case HDF_FILE | HDF_SYNTHRDB:
 				case HDF_FILE:
@@ -963,6 +964,7 @@ unsigned char OpenHardfile(unsigned char unit)
 }
 
 
+// FIXME - need to use a different sector buffer for this, otherwise we're in danger of interfering with regular usage.
 unsigned char FindRDB(unsigned char unit)
 {
 	int i;
