@@ -455,7 +455,7 @@ void OsdWaitVBL(void)
 void OsdEnable(unsigned char mode)
 {
     EnableOsd();
-    SPI(OSDCMDENABLE | mode & DISABLE_KEYBOARD);
+    SPI(OSDCMDENABLE | (mode & DISABLE_KEYBOARD));
     DisableOsd();
 }
 

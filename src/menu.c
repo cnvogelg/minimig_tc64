@@ -224,6 +224,9 @@ void HandleUI(void)
 
         if (menu)
         {
+			// CV: hack to make menu work?!
+			puts("open menu\n");
+
             menustate = MENU_MAIN1;
             menusub = 0;
             OsdClear();
