@@ -95,7 +95,7 @@ unsigned char OsdGetCtrl(void);
 unsigned char GetASCIIKey(unsigned char c);
 void OSD_PrintText(unsigned char line, char *text, unsigned long start, unsigned long width, unsigned long offset, unsigned char invert);
 void OsdWriteDoubleSize(unsigned char n, char *s, unsigned char pass);
-void ScrollText(char n,const char *str, int len, unsigned char invert);
+void ScrollText(char n,const char *str, int len, int max_len,unsigned char invert);
 void ScrollReset();
 #endif
 

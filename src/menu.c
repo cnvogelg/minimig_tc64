@@ -42,6 +42,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // other constants
 #define DIRSIZE 8 // number of items in directory display window
 
+#define SCROLL_DELAY 1000
+#define SCROLL_DELAY2 50
+
+static unsigned long scroll_offset=0; // file/dir name scrolling position
+static unsigned long scroll_timer=0;  // file/dir name scrolling timer
+
+
 unsigned char menustate = MENU_NONE1;
 unsigned char parentstate;
 unsigned char menusub = 0;
@@ -405,7 +412,7 @@ void HandleUI(void)
         /* second part of the main menu                                   */
         /******************************************************************/
     case MENU_MAIN2_1 :
-		menumask=0x7f;
+		menumask=0x3f;
  		OsdSetTitle("Settings",OSD_ARROW_LEFT|OSD_ARROW_RIGHT);
         OsdWrite(0, "    load configuration", menusub == 0,0);
         OsdWrite(1, "    save configuration", menusub == 1,0);
@@ -528,7 +535,7 @@ void HandleUI(void)
         break;
 
 	case MENU_ABOUT2 :
-		ScrollText(5,"                                 Minimig by Dennis van Weeren.  Chipset improvements by Jakub Bednarski and Sacha Boing.  TG68 softcore by Tobias Gubener.  Menu / disk code by Dennis van Weeren, Jakub Bednarski and Alastair M. Robinson.  Minimig is distributed under the terms of the GNU General Public License version 3.",0,0);
+		ScrollText(5,"                                 Minimig by Dennis van Weeren.  Chipset improvements by Jakub Bednarski and Sacha Boing.  TG68 softcore and Chameleon port by Tobias Gubener.  Menu / disk code by Dennis van Weeren, Jakub Bednarski and Alastair M. Robinson.  Minimig is distributed under the terms of the GNU General Public License version 3.",0,0,0);
         if (select)
         {
             if (menusub == 0)	// Exit
@@ -1993,6 +2000,66 @@ void HandleUI(void)
     }
 }
 
+/*
+void ScrollLongName(void)
+{
+// this function is called periodically when file selection window is displayed
+// it checks if predefined period of time has elapsed and scrolls the name if necessary
+
+    #define BLANKSPACE 10 // number of spaces between the end and start of repeated name
+
+    long offset;
+    long len;
+    long max_len;
+    char k = sort_table[iSelectedEntry];
+//    static unsigned long pioa_old;
+//    unsigned long pioa;
+//
+//    pioa = *AT91C_PIOA_PDSR;
+
+    if (DirEntryLFN[k][0] && CheckTimer(scroll_timer)) // scroll if long name and timer delay elapsed
+//    if ((pioa ^ pioa_old) & INIT_B)
+    {
+        scroll_timer = GetTimer(SCROLL_DELAY2); // reset scroll timer to repeat delay
+
+        scroll_offset++; // increase scroll position (2 pixel unit)
+        memset(s, ' ', 32); // clear buffer
+
+        len = strlen(DirEntryLFN[k]); // get name length
+
+        if (len > 4)
+            if (DirEntryLFN[k][len - 4] == '.')
+                len -= 4; // remove extension
+
+        if (len > 30) // scroll name if longer than display size
+        {
+            if (scroll_offset >= (len + BLANKSPACE) << 3) // reset scroll position if it exceeds predefined maximum
+                scroll_offset = 0;
+
+            offset = scroll_offset >> 3; // get new starting character of the name (scroll_offset is no longer in 2 pixel unit)
+
+            len -= offset; // remaing number of characters in the name
+
+            max_len = 30; // number of file name characters to display (one more required for srolling)
+            if (DirEntry[k].Attributes & ATTR_DIRECTORY)
+                max_len = 25; // number of directory name characters to display
+
+            if (len > max_len)
+                len = max_len; // trim length to the maximum value
+
+            if (len > 0)
+                strncpy(s, &DirEntryLFN[k][offset], len); // copy name substring
+
+            if (len < max_len - BLANKSPACE) // file name substring and blank space is shorter than display line size
+                strncpy(s + len + BLANKSPACE, &DirEntryLFN[k][0], max_len - len - BLANKSPACE); // repeat the name after its end and predefined number of blank space
+
+            OSD_PrintText((unsigned char)iSelectedEntry, s, 22, (max_len - 1) << 3, (scroll_offset & 0x7), 1); // OSD print function with pixel precision
+        }
+    }
+//    pioa_old = pioa;
+}
+*/
+
 
 void ScrollLongName(void)
 {
@@ -2016,10 +2083,7 @@ void ScrollLongName(void)
         if (DirEntry[k].Attributes & ATTR_DIRECTORY)
             max_len = 25; // number of directory name characters to display
 
-        if (len > max_len)
-            len = max_len; // trim length to the maximum value
-
-		ScrollText(iSelectedEntry,DirEntryLFN[k],len,1);
+		ScrollText(iSelectedEntry,DirEntryLFN[k],len,max_len,1);
     }
 }
 

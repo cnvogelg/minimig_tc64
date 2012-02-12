@@ -54,7 +54,7 @@ const char keycode_table[128] =
 };
 
 // time delay after which file/dir name starts to scroll
-#define SCROLL_DELAY 2000
+#define SCROLL_DELAY 1000
 #define SCROLL_DELAY2 50
 
 static unsigned long scroll_offset=0; // file/dir name scrolling position
@@ -622,14 +622,15 @@ unsigned char GetASCIIKey(unsigned char keycode)
 }
 
 
-void ScrollText(char n,const char *str, int len,unsigned char invert)
+void ScrollText(char n,const char *str, int len,int max_len,unsigned char invert)
 {
 // this function is called periodically when a string longer than the window is displayed.
 
     #define BLANKSPACE 10 // number of spaces between the end and start of repeated name
 
     long offset;
-    long max_len=30;
+	if(!max_len)
+		max_len=30;
 
     if (str && str[0] && CheckTimer(scroll_timer)) // scroll if long name and timer delay elapsed
     {
