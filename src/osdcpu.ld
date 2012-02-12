@@ -10,7 +10,9 @@ SECTIONS
 	}
 	.extra : {
 	  *(.bss)
-	  *(COMMON)
+	}
+	.eh_frame : {
+	  *(.eh_frame)
 	}
 	heap_low = .; /* for _sbrk */
 	. = . + 0x1000; /* 64kB of heap memory */

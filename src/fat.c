@@ -88,8 +88,12 @@ extern void ErrorMessage(const char *message, unsigned char code);
 
 unsigned long SwapEndianL(unsigned long l)
 {
-  unsigned char *c=(unsigned char *)&l;
-  return((c[3]<<24)+(c[2]<<16)+(c[1]<<8)+c[0]);
+	unsigned char c[4];
+	c[0] = (unsigned char)(l & 0xff);
+	c[1] = (unsigned char)((l >> 8) & 0xff);
+	c[2] = (unsigned char)((l >> 16) & 0xff);
+	c[3] = (unsigned char)((l >> 24) & 0xff);
+	return((c[0]<<24)+(c[1]<<16)+(c[2]<<8)+c[3]);
 }
 
 void SwapPartitionBytes(int i)
