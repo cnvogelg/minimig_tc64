@@ -256,6 +256,7 @@ void WriteTaskFile(unsigned char error, unsigned char sector_count, unsigned cha
     SPI(0x00);
 
 
+
     SPI(0x00); // dummy
 
     SPI(0x00);
@@ -964,7 +965,34 @@ unsigned char OpenHardfile(unsigned char unit)
 }
 
 
-// FIXME - need to use a different sector buffer for this, otherwise we're in danger of interfering with regular usage.
+fileTYPE rdbfile;	// We scan for RDB without mounting the file as a unit, so need a file struct specifically for this task.
+
+unsigned char GetHDFFileType(unsigned char *filename)
+{
+	if(FileOpen(&rdbfile,filename))
+	{
+		int i;
+		DebugMessage("Hunting for RDB...");
+		for(i=0;i<16;++i)
+		{
+			FileRead(&rdbfile,sector_buffer);
+			FileSeek(&rdbfile,512,SEEK_CUR);
+			if(sector_buffer[0]=='R' && sector_buffer[1]=='D' && sector_buffer[2]=='S' && sector_buffer[3]=='K')
+				return(HDF_FILETYPE_RDB);
+			if(sector_buffer[0]=='D' && sector_buffer[1]=='O' && sector_buffer[2]=='S')
+				return(HDF_FILETYPE_DOS);
+			if(sector_buffer[0]=='P' && sector_buffer[1]=='F' && sector_buffer[2]=='S')
+				return(HDF_FILETYPE_DOS);
+			if(sector_buffer[0]=='S' && sector_buffer[1]=='F' && sector_buffer[2]=='S')
+				return(HDF_FILETYPE_DOS);
+		}
+		return(HDF_FILETYPE_UNKNOWN);
+	}
+	return(HDF_FILETYPE_NOTFOUND);
+}
+
+
+/*
 unsigned char FindRDB(unsigned char unit)
 {
 	int i;
@@ -987,4 +1015,4 @@ unsigned char FindRDB(unsigned char unit)
 	}
 	return(0);
 }
-
+*/

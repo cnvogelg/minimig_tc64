@@ -260,6 +260,16 @@ void HandleUI(void)
         }
 	}
 
+	if(menustate>7)
+	{
+		static int prev=0;
+		if(menustate!=prev)
+		{
+			sprintf(s,"Menustate %d",menustate);
+			DebugMessage(s);
+		}
+		prev=menustate;
+	}
 
     switch (menustate)
     {
@@ -535,14 +545,11 @@ void HandleUI(void)
         break;
 
 	case MENU_ABOUT2 :
-		ScrollText(5,"                                 Minimig by Dennis van Weeren.  Chipset improvements by Jakub Bednarski and Sacha Boing.  TG68 softcore and Chameleon port by Tobias Gubener.  Menu / disk code by Dennis van Weeren, Jakub Bednarski and Alastair M. Robinson.  Minimig is distributed under the terms of the GNU General Public License version 3.",0,0,0);
-        if (select)
+		ScrollText(5,"                                 Minimig by Dennis van Weeren.  Chipset improvements by Jakub Bednarski and Sacha Boing.  TG68 softcore and Chameleon port by Tobias Gubener.  Menu / disk code by Dennis van Weeren, Jakub Bednarski and Alastair M. Robinson.  Build process, repository, and tooling by Christian Vogelgsang.  Minimig is distributed under the terms of the GNU General Public License version 3.",0,0,0);
+        if (select || menu)
         {
-            if (menusub == 0)	// Exit
-            {
-                menusub = 2;
-				menustate=MENU_MISC1;
-			}
+			menusub = 2;
+			menustate=MENU_MISC1;
 		}
 		break;
 
@@ -1359,25 +1366,71 @@ void HandleUI(void)
         /* hardfile selected menu                                         */
         /******************************************************************/
     case MENU_HARDFILE_SELECTED :
-
         if (menusub == 2) // master drive selected
         {
 			// Read RDB from selected drive and determine type...
             memcpy((void*)config.hardfile[0].name, (void*)file.name, sizeof(config.hardfile[0].name));
             memcpy((void*)config.hardfile[0].long_name, (void*)file.long_name, sizeof(config.hardfile[0].long_name));
-            config.hardfile[0].present = 1;
-			config.hardfile[0].enabled=HDF_FILE;
+			switch(GetHDFFileType(file.name))
+			{
+				case HDF_FILETYPE_RDB:
+					config.hardfile[0].enabled=HDF_FILE;
+		            config.hardfile[0].present = 1;
+			        menustate = MENU_SETTINGS_HARDFILE1;
+					break;
+				case HDF_FILETYPE_DOS:
+					config.hardfile[0].enabled=HDF_FILE|HDF_SYNTHRDB;
+		            config.hardfile[0].present = 1;
+			        menustate = MENU_SETTINGS_HARDFILE1;
+					break;
+				case HDF_FILETYPE_UNKNOWN:
+		            config.hardfile[0].present = 1;
+					if(config.hardfile[0].enabled==HDF_FILE)	// Warn if we can't detect the type
+						menustate=MENU_SYNTHRDB1;
+					else
+						menustate=MENU_SYNTHRDB2_1;
+					menusub=0;
+					break;
+				case HDF_FILETYPE_NOTFOUND:
+				default:
+		            config.hardfile[0].present = 0;
+			        menustate = MENU_SETTINGS_HARDFILE1;
+					break;
+			}
+			
         }
 
         if (menusub == 4) // slave drive selected
         {
             memcpy((void*)config.hardfile[1].name, (void*)file.name, sizeof(config.hardfile[1].name));
             memcpy((void*)config.hardfile[1].long_name, (void*)file.long_name, sizeof(config.hardfile[1].long_name));
-            config.hardfile[1].present = 1;
-			config.hardfile[1].enabled=HDF_FILE;
+			switch(GetHDFFileType(file.name))
+			{
+				case HDF_FILETYPE_RDB:
+					config.hardfile[1].enabled=HDF_FILE;
+		            config.hardfile[1].present = 1;
+			        menustate = MENU_SETTINGS_HARDFILE1;
+					break;
+				case HDF_FILETYPE_DOS:
+					config.hardfile[1].enabled=HDF_FILE|HDF_SYNTHRDB;
+		            config.hardfile[1].present = 1;
+			        menustate = MENU_SETTINGS_HARDFILE1;
+					break;
+				case HDF_FILETYPE_UNKNOWN:
+		            config.hardfile[1].present = 1;
+					if(config.hardfile[1].enabled==HDF_FILE)	// Warn if we can't detect the type...
+						menustate=MENU_SYNTHRDB1;
+					else
+						menustate=MENU_SYNTHRDB2_1;
+					menusub=0;
+					break;
+				case HDF_FILETYPE_NOTFOUND:
+				default:
+		            config.hardfile[1].present = 0;
+			        menustate = MENU_SETTINGS_HARDFILE1;
+					break;
+			}
         }
-
-        menustate = MENU_SETTINGS_HARDFILE1;
         break;
 
      // check if hardfile configuration has changed
@@ -1425,16 +1478,16 @@ void HandleUI(void)
 					|| (strncmp(config.hardfile[0].name, t_hardfile[0].name, sizeof(t_hardfile[0].name)) != 0))
 				{
                     OpenHardfile(0);
-					if((config.hardfile[0].enabled == HDF_FILE) && !FindRDB(0))
-						menustate = MENU_SYNTHRDB1;
+//					if((config.hardfile[0].enabled == HDF_FILE) && !FindRDB(0))
+//						menustate = MENU_SYNTHRDB1;
 				}
 
                 if (config.hardfile[1].enabled != t_hardfile[1].enabled
 					|| (strncmp(config.hardfile[1].name, t_hardfile[1].name, sizeof(t_hardfile[1].name)) != 0))
 				{
                     OpenHardfile(1);
-					if((config.hardfile[1].enabled == HDF_FILE) && !FindRDB(1))
-						menustate = MENU_SYNTHRDB2_1;
+//					if((config.hardfile[1].enabled == HDF_FILE) && !FindRDB(1))
+//						menustate = MENU_SYNTHRDB2_1;
 				}
 
 				if(menustate==MENU_HARDFILE_CHANGED2)
@@ -1462,78 +1515,45 @@ void HandleUI(void)
         break;
 
     case MENU_SYNTHRDB1 :
-		menumask=0x03;
+		menumask=0x01;
 		parentstate=menustate;
-		menumask=0;
- 		OsdSetTitle("Confirm",0);
+ 		OsdSetTitle("Warning",0);
         OsdWrite(0, "", 0,0);
-        OsdWrite(1, "   No partitions found -", 0,0);
-        OsdWrite(2, " Open in compatibility mode?", 0,0);
-        OsdWrite(3, " (Say no if you plan to use", 0,0);
-        OsdWrite(4, " HDToolBox to prep this HDF)", 0,0);
+        OsdWrite(1, " No partition table found -", 0,0);
+        OsdWrite(2, " Hardfile image may need", 0,0);
+        OsdWrite(3, " to be prepped with HDToolbox,", 0,0);
+        OsdWrite(4, " then formatted.", 0,0);
         OsdWrite(5, "", 0,0);
-        OsdWrite(6, "             yes", menusub == 0,0);
-        OsdWrite(7, "             no", menusub == 1,0);
+        OsdWrite(6, "", 0,0);
+        OsdWrite(7, "             OK", menusub == 0,0);
 
         menustate = MENU_SYNTHRDB2;
         break;
 
-    case MENU_SYNTHRDB2 :
-        if (select)
-        {
-            if (menusub == 0) // yes
-            {
-				config.hardfile[0].enabled |= HDF_SYNTHRDB;
-                OpenHardfile(0);
-            }
-            ConfigIDE(config.enable_ide, config.hardfile[0].present && config.hardfile[0].enabled, config.hardfile[1].present && config.hardfile[1].enabled);
-            OsdReset(RESET_NORMAL);
-
-            menustate = MENU_NONE1;
-        }
-
-        if (menu)
-        {
-            memcpy(config.hardfile, t_hardfile, sizeof(t_hardfile)); // restore configuration
-            menustate = MENU_MAIN1;
-            menusub = 3;
-        }
-        break;
 
     case MENU_SYNTHRDB2_1 :
-		menumask=0x03;
-		parentstate=menustate;
-        OsdWrite(0, "", 0,0);
-        OsdWrite(1, "    No partitions found -", 0,0);
-        OsdWrite(2, " Open in compatibility mode?", 0,0);
-        OsdWrite(3, " (Say no if you plan to use", 0,0);
-        OsdWrite(4, " HDToolBox to prep this HDF)", 0,0);
-        OsdWrite(5, "", 0,0);
-        OsdWrite(6, "             yes", menusub == 0,0);
-        OsdWrite(7, "             no", menusub == 1,0);
 
-        menustate = MENU_SYNTHRDB2_2;
+		menumask=0x01;
+		parentstate=menustate;
+ 		OsdSetTitle("Warning",0);
+        OsdWrite(0, "", 0,0);
+        OsdWrite(1, " No filesystem recognised.", 0,0);
+        OsdWrite(2, " Hardfile may need formatting", 0,0);
+        OsdWrite(3, " (or may simply be an", 0,0);
+        OsdWrite(4, " unrecognised filesystem)", 0,0);
+        OsdWrite(5, "", 0,0);
+        OsdWrite(6, "", 0,0);
+        OsdWrite(7, "             OK", menusub == 0,0);
+
+        menustate = MENU_SYNTHRDB2;
         break;
 
-    case MENU_SYNTHRDB2_2 :
-        if (select)
-        {
-            if (menusub == 0) // yes
-            {
-				config.hardfile[1].enabled |= HDF_SYNTHRDB;
-                OpenHardfile(1);
-                ConfigIDE(config.enable_ide, config.hardfile[0].present && config.hardfile[0].enabled, config.hardfile[1].present && config.hardfile[1].enabled);
-			}
-            OsdReset(RESET_NORMAL);
 
-            menustate = MENU_NONE1;
-        }
-
-        if (menu)
+    case MENU_SYNTHRDB2 :
+        if (select || menu)
         {
-            memcpy(config.hardfile, t_hardfile, sizeof(t_hardfile)); // restore configuration
-            menustate = MENU_MAIN1;
-            menusub = 3;
+            if (menusub == 0) // OK
+		        menustate = MENU_SETTINGS_HARDFILE1;
         }
         break;
 

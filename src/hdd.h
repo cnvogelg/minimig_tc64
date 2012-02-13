@@ -56,7 +56,13 @@ void GetHardfileGeometry(hdfTYPE *hdf);
 void BuildHardfileIndex(hdfTYPE *hdf);
 unsigned char HardFileSeek(hdfTYPE *hdf, unsigned long lba);
 unsigned char OpenHardfile(unsigned char unit);
-unsigned char FindRDB(unsigned char unit);	// Returns 1 if RDB found, 0 otherwise
+
+#define HDF_FILETYPE_UNKNOWN 0
+#define HDF_FILETYPE_NOTFOUND 1
+#define HDF_FILETYPE_RDB 2
+#define HDF_FILETYPE_DOS 3
+
+unsigned char GetHDFFileType(unsigned char *filename);
 
 extern char debugmsg[40];
 extern char debugmsg2[40];

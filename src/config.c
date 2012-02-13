@@ -220,10 +220,6 @@ void ApplyConfiguration(char reloadkickstart)
         BootPrint(s);
         sprintf(s, "Offset: %ld", hdf[0].offset);
 		BootPrint(s);
-		if(FindRDB(0))
-			BootPrint("Hardfile 0 has a RigidDiskBlock");
-		else
-			BootPrint("Hardfile 0 has no RigidDiskBlock");
 	}
    	if(OpenHardfile(1))
 	{
@@ -249,10 +245,6 @@ void ApplyConfiguration(char reloadkickstart)
         BootPrint(s);
         sprintf(s, "Offset: %ld", hdf[1].offset);
         BootPrint(s);
-		if(FindRDB(1))
-			BootPrint("Hardfile 1 has a RigidDiskBlock");
-		else
-			BootPrint("Hardfile 1 has no RigidDiskBlock");
 	}
 
     ConfigIDE(config.enable_ide, config.hardfile[0].present && config.hardfile[0].enabled, config.hardfile[1].present && config.hardfile[1].enabled);

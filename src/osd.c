@@ -642,14 +642,17 @@ void ScrollText(char n,const char *str, int len,int max_len,unsigned char invert
 		if(!len)
 	        len = strlen(str); // get name length
 
-        if (len > 30) // scroll name if longer than display size
+        if (len > max_len) // scroll name if longer than display size
         {
             if (scroll_offset >= (len + BLANKSPACE) << 3) // reset scroll position if it exceeds predefined maximum
                 scroll_offset = 0;
 
             offset = scroll_offset >> 3; // get new starting character of the name (scroll_offset is no longer in 2 pixel unit)
 
-            len -= offset; // remaing number of characters in the name
+            len -= offset; // remaining number of characters in the name
+
+			if(len>max_len)
+				len=max_len;
 
             if (len > 0)
                 strncpy(s, &str[offset], len); // copy name substring
