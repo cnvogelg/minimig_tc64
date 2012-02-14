@@ -8,10 +8,11 @@ C_OBJ+=$(patsubst %.c,$(BUILD_DIR)/%.o,$(KLIBC_SRC))
 A_OBJ=$(patsubst %.s,$(BUILD_DIR)/%.o,$(A_SRC))
 OBJ=$(C_OBJ) $(A_OBJ)
 
+ARCH=68000
 CC=m68k-elf-gcc
 OBJCOPY=m68k-elf-objcopy
-CFLAGS=-m68000 -Os -fno-common -fomit-frame-pointer
-LDFLAGS=-Xlinker -Map=menu.map -nostartfiles
+CFLAGS=-m$(ARCH) -Os -fno-common -fomit-frame-pointer
+LDFLAGS=-m$(ARCH) -Xlinker -Map=menu.map -nostartfiles
 
 ELF=menu.elf
 OUTPUT=OSD_CA01.sys

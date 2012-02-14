@@ -12,7 +12,7 @@
 #include <limits.h>
 #include <stdio.h>
 
- enum flags {
+enum flags {
 	FL_ZERO		= 0x01,	/* Zero modifier */
 	FL_MINUS	= 0x02,	/* Minus modifier */
 	FL_PLUS		= 0x04,	/* Plus modifier */
@@ -50,7 +50,7 @@ format_int(char *q, size_t n, uintmax_t val, enum flags flags,
 	static const char lcdigits[] = "0123456789abcdef";
 	static const char ucdigits[] = "0123456789ABCDEF";
 	const char *digits;
-	unsigned long tmpval; /* CV hack: use long not uintmax_t */
+	uintmax_t tmpval;
 	int minus = 0;
 	int ndigits = 0, nchars;
 	int tickskip, b4tick;
@@ -65,8 +65,7 @@ format_int(char *q, size_t n, uintmax_t val, enum flags flags,
 	}
 
 	/* Count the number of digits needed.  This returns zero for 0. */
-	/* CV hack: use unsigned long */
-	tmpval = (unsigned long)val;
+	tmpval = val;
 	while (tmpval) {
 		tmpval /= base;
 		ndigits++;
@@ -140,8 +139,6 @@ format_int(char *q, size_t n, uintmax_t val, enum flags flags,
 	oo = o;			/* Temporary values */
 
 	b4tick = tickskip;
-	/* CV Hack: use tmpval with unsigned long */
-	tmpval = (unsigned long)val;
 	while (ndigits > 0) {
 		if (!b4tick--) {
 			qq--;
@@ -155,8 +152,8 @@ format_int(char *q, size_t n, uintmax_t val, enum flags flags,
 		oo--;
 		ndigits--;
 		if (oo < n)
-			*qq = digits[tmpval % base];
-		tmpval /= base;
+			*qq = digits[val % base];
+		val /= base;
 	}
 
 	/* Emit late space padding */
