@@ -9,7 +9,9 @@ SECTIONS
 	  *(.data)
 	}
 	.extra : {
+		__s_bss = . ;
 	  *(.bss)
+	  	__e_bss = . ;
 	}
 	.eh_frame : {
 	  *(.eh_frame)
