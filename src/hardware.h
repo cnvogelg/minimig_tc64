@@ -29,12 +29,16 @@
 #define SPI_slow()  *(volatile unsigned short *)0xda4008=0x20
 #define SPI_fast()  *(volatile unsigned short *)0xda4008=0x01   //14MHz/2
 
+#ifdef __GNUC__
 static inline unsigned char SPI(unsigned char o)
 {	
 	volatile unsigned char *ptr = (volatile unsigned char *)0xda4000;
 	*ptr = o;
 	return *ptr;
 }
+#else
+#define SPI  *(unsigned char *)0xda4000=
+#endif
 	
 #define RDSPI  *(volatile unsigned char *)0xda4001
 #define RS232  *(volatile unsigned char *)0xda8001=

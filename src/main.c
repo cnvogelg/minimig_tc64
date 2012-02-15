@@ -103,7 +103,11 @@ void HandleFpga(void)
     UpdateDriveStatus();
 }
 
+#ifdef __GNUC__
 void c_entry(void)
+#else
+__geta4 void main(void)
+#endif
 {
 	debugmsg[0]=0;
 	debugmsg2[0]=0;
