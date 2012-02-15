@@ -1,3 +1,4 @@
+#include "fat.h"
 
 typedef struct
 {
@@ -43,6 +44,9 @@ typedef struct
 	unsigned char pad2;
 } configTYPE;
 
+extern fileTYPE file;	// Temporary file available for use by other modules, to avoid repeated memory usage.
+						// Shouldn't be considered persistent.
+
 extern configTYPE config; 
 extern char DebugMode;
 
@@ -51,5 +55,6 @@ char UploadActionReplay();
 void SetConfigurationFilename(int config);	// Set configuration filename by slot number
 unsigned char LoadConfiguration(char *filename);	// Can supply NULL to use filename previously set by slot number
 unsigned char SaveConfiguration(char *filename);	// Can supply NULL to use filename previously set by slot number
+unsigned char ConfigurationExists(char *filename);
 void ApplyConfiguration(char reloadkickstart);
 

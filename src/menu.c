@@ -260,16 +260,6 @@ void HandleUI(void)
         }
 	}
 
-	if(menustate>7)
-	{
-		static int prev=0;
-		if(menustate!=prev)
-		{
-			sprintf(s,"Menustate %d",menustate);
-			DebugMessage(s);
-		}
-		prev=menustate;
-	}
 
     switch (menustate)
     {
@@ -545,7 +535,7 @@ void HandleUI(void)
         break;
 
 	case MENU_ABOUT2 :
-		ScrollText(5,"                                 Minimig by Dennis van Weeren.  Chipset improvements by Jakub Bednarski and Sacha Boing.  TG68 softcore and Chameleon port by Tobias Gubener.  Menu / disk code by Dennis van Weeren, Jakub Bednarski and Alastair M. Robinson.  Build process, repository, and tooling by Christian Vogelgsang.  Minimig is distributed under the terms of the GNU General Public License version 3.",0,0,0);
+		ScrollText(5,"                                 Minimig by Dennis van Weeren.  Chipset improvements by Jakub Bednarski and Sacha Boing.  TG68 softcore and Chameleon port by Tobias Gubener.  Menu / disk code by Dennis van Weeren, Jakub Bednarski and Alastair M. Robinson.  Build process, repository and tooling by Christian Vogelgsang.  Minimig is distributed under the terms of the GNU General Public License version 3.",0,0,0);
         if (select || menu)
         {
 			menusub = 2;
@@ -554,18 +544,25 @@ void HandleUI(void)
 		break;
 
     case MENU_LOADCONFIG_1 :
-		menumask=0x3f;
+		if(parentstate!=menustate)	// First run?
+		{
+			menumask=0x20;
+			SetConfigurationFilename(0); if(ConfigurationExists(0)) menumask|=0x01;
+			SetConfigurationFilename(1); if(ConfigurationExists(0)) menumask|=0x02;
+			SetConfigurationFilename(2); if(ConfigurationExists(0)) menumask|=0x04;
+			SetConfigurationFilename(3); if(ConfigurationExists(0)) menumask|=0x08;
+			SetConfigurationFilename(4); if(ConfigurationExists(0)) menumask|=0x10;
+		}
 		parentstate=menustate;
  		OsdSetTitle("Load",0);
 
         OsdWrite(0, "", 0,0);
-        OsdWrite(1, "          Default", menusub == 0,0);
-        OsdWrite(2, "          1", menusub == 1,0);
-        OsdWrite(3, "          2", menusub == 2,0);
-        OsdWrite(4, "          3", menusub == 3,0);
-        OsdWrite(5, "          4", menusub == 4,0);
+        OsdWrite(1, "          Default", menusub == 0,(menumask & 1)==0);
+        OsdWrite(2, "          1", menusub == 1,(menumask & 2)==0);
+        OsdWrite(3, "          2", menusub == 2,(menumask & 4)==0);
+        OsdWrite(4, "          3", menusub == 3,(menumask & 8)==0);
+        OsdWrite(5, "          4", menusub == 4,(menumask & 0x10)==0);
         OsdWrite(6, "", 0,0);
-//        OsdWrite(7, "              exit", menusub == 3);
         OsdWrite(7, STD_EXIT, menusub == 5,0);
 
         menustate = MENU_LOADCONFIG_2;

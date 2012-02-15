@@ -84,6 +84,19 @@ void SetConfigurationFilename(int config)
 }
 
 
+
+unsigned char ConfigurationExists(char *filename)
+{
+	if(!filename)
+		filename=configfilename;	// Use slot-based filename if none provided.
+    if (FileOpen(&file, filename))
+    {
+		return(1);
+	}
+	return(0);
+}
+
+
 unsigned char LoadConfiguration(char *filename)
 {
     static const char config_id[] = "MNMGCFG0";
