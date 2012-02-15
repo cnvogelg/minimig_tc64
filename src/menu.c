@@ -1765,6 +1765,7 @@ void HandleUI(void)
 //        OsdWrite(7, "               no", menusub == 1);
 //
 //        menustate = MENU_FIRMWARE_UPDATE2;
+
 //        break;
 //
 //    case MENU_FIRMWARE_UPDATE2 :

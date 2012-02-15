@@ -1,4 +1,5 @@
 CHACOCMD=chacocmd
+SLOT=2
 
 clean:
 	for a in rpt summary done jdi smsg pin rbf sof ; do \
@@ -13,7 +14,7 @@ clean_bak:
 run: flash start
 
 flash:
-	$(CHACOCMD) --flashrbf 2 chameleon/fampiga_top.rbf
+	$(CHACOCMD) --flashrbf $(SLOT) chameleon/fampiga_top.rbf
 
 start:
-	$(CHACOCMD) --start 2
+	$(CHACOCMD) --start $(SLOT)

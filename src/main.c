@@ -1,4 +1,4 @@
- /*
+/*
 Copyright 2005, 2006, 2007 Dennis van Weeren
 Copyright 2008, 2009 Jakub Bednarski
 
@@ -53,6 +53,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "menu.h"
 #include "config.h"
 
+#include <stdio.h>
+
 const char version[] = {"$VER:AYQ100818_RB2"};
 
 extern adfTYPE df[4];
@@ -101,7 +103,7 @@ void HandleFpga(void)
     UpdateDriveStatus();
 }
 
-__geta4 void main(void)
+void c_entry(void)
 {
 	debugmsg[0]=0;
 	debugmsg2[0]=0;
@@ -177,3 +179,4 @@ __geta4 void main(void)
     }
 
 }
+

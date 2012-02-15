@@ -32,6 +32,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "fdd.h"
 #include "config.h"
 
+#include <stdio.h>
+
 unsigned char DEBUG = 0;
 
 unsigned char drives = 0; // number of active drives reported by FPGA (may change only during reset)
@@ -656,3 +658,4 @@ void HandleFDD(unsigned char c1, unsigned char c2)
         DISKLED_OFF;
     }
 }
+

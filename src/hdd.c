@@ -31,6 +31,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //#include "FPGA.h"
 #include "config.h"
 
+#include <stdio.h>
+#include <string.h>
+
 // hardfile structure
 hdfTYPE hdf[2];
 
@@ -118,7 +121,7 @@ static void FakeRDB(int unit,int block)
 				strcpy(rdb->rdb_DiskVendor,"Do not ");
 				strcpy(rdb->rdb_DiskProduct, "repartition!");
 
-				RDBChecksum((unsigned int *)rdb);
+				RDBChecksum((unsigned long *)rdb);
 			}
 			break;
 		case 1: // Partition
@@ -148,7 +151,7 @@ static void FakeRDB(int unit,int block)
 				pb->pb_Environment.de_Mask=0x7ffffffe;
 				pb->pb_Environment.de_DosType=0x444f5301;
 
-				RDBChecksum((unsigned int *)pb);
+				RDBChecksum((unsigned long *)pb);
 			}
 			break;
 			break;
@@ -1016,3 +1019,4 @@ unsigned char FindRDB(unsigned char unit)
 	return(0);
 }
 */
+

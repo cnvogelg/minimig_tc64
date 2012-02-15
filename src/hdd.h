@@ -1,4 +1,3 @@
-
 #define CMD_IDECMD 0x04
 #define CMD_IDEDAT 0x08
 

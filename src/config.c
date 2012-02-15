@@ -10,6 +10,8 @@
 #include "menu.h"
 #include "config.h"
 
+#include <stdio.h>
+#include <string.h>
 
 configTYPE config;
 fileTYPE file;
@@ -126,7 +128,7 @@ unsigned char LoadConfiguration(char *filename)
 				{
 					// If either the old config and new config have a different kickstart file,
 					// or this is the first boot, we need to upload a kickstart image.
-					if(strcmp(tmpconf->kickstart.name,config.kickstart.name)!=0)
+					if(strncmp(tmpconf->kickstart.name,config.kickstart.name,8)!=0)
 						updatekickstart=true;
 	                memcpy((void*)&config, (void*)sector_buffer, sizeof(config));
 					result=1; // We successfully loaded the config.

@@ -1,0 +1,44 @@
+serial.txt - Serial Connection on the MiniMig TC64 Core
+-------------------------------------------------------
+
+The core currently supports two serial ports all wired to pins on the IEC 
+connector of the Chameleon.
+
+The protocol for both is RS 232 but the levels are _NOT_ (!!!)
+
+Both tolerate signal levels from 0V up to 5V and therefore need a serial device 
+connected with TTL 5V levels.
+
+!!! NEVER USE AN ORDINARY RS232 SERIAL DEVICE WITH -12V TO 12V LEVELS DIRECTLY 
+AT THE IEC CONNECTOR - YOU HAVE BEEN WARNED!!!
+
+E.g. I use a FT232 USB-to-serial break out board that provides TxD and RxD with 
+5V levels.
+
+
+1.) Amiga Paula Serial
+
+The RS232 port available in a real Amiga (provided by custom chip Paula) is wired on this
+Minimig core, too. The RxD and TxD are available as IEC_CLK (Rxd) and IEC_ATN (Txd).
+
+IEC Connector:
+
+Pin 2	- GND
+Pin 3   - IEC_ATN  = Amiga Serial TxD
+Pin 4   - IEC_CLK  = Amiga Serial RxD
+
+The serial paramters of this port depend on the values you set up on your Amiga.
+
+
+2.) Debug Serial for OSD Menu Code Diagnosis
+
+This port is a transmit (TxD) only port and provides debugging information from
+the 68K SoftCore running the Menu Code. Its mainly useful for menu code or core
+developers.
+
+IEC Connector:
+
+Pin 2   - GND
+Pin 5   - IEC_DATA = Debug Serial TxD
+
+The serial parameters are 115200 Baud, 8 N 1, no flow control
