@@ -312,7 +312,8 @@ void HandleUI(void)
 				    if (df[i].status & DSK_INSERTED) // floppy disk is inserted
 				    {
 				        strncpy(&s[6], df[i].name, sizeof(df[0].name));
-				        strcpy(&s[6 + sizeof(df[0].name)], df[i].status & DSK_WRITABLE ? " RW" : " RO"); // floppy disk is writable or read-only
+						if(!(df[i].status & DSK_WRITABLE))
+					        strcpy(&s[6 + sizeof(df[i].name)-1], " \x17"); // padlock icon for write-protected disks
 				    }
 				    else // no floppy disk
 					{
@@ -535,7 +536,7 @@ void HandleUI(void)
         break;
 
 	case MENU_ABOUT2 :
-		ScrollText(5,"                                 Minimig by Dennis van Weeren.  Chipset improvements by Jakub Bednarski and Sacha Boing.  TG68 softcore and Chameleon port by Tobias Gubener.  Menu / disk code by Dennis van Weeren, Jakub Bednarski and Alastair M. Robinson.  Build process, repository and tooling by Christian Vogelgsang.  Minimig is distributed under the terms of the GNU General Public License version 3.",0,0,0);
+		ScrollText(5,"                                 Minimig by Dennis van Weeren.  Chipset improvements by Jakub Bednarski and Sascha Boing.  TG68 softcore and Chameleon port by Tobias Gubener.  Menu / disk code by Dennis van Weeren, Jakub Bednarski and Alastair M. Robinson.  Build process, repository and tooling by Christian Vogelgsang.  Minimig is distributed under the terms of the GNU General Public License version 3.",0,0,0);
         if (select || menu)
         {
 			menusub = 2;
