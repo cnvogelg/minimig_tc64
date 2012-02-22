@@ -314,6 +314,8 @@ void HandleUI(void)
 				        strncpy(&s[6], df[i].name, sizeof(df[0].name));
 						if(!(df[i].status & DSK_WRITABLE))
 					        strcpy(&s[6 + sizeof(df[i].name)-1], " \x17"); // padlock icon for write-protected disks
+						else
+					        strcpy(&s[6 + sizeof(df[i].name)-1], "  "); // clear padlock icon for write-enabled disks
 				    }
 				    else // no floppy disk
 					{
@@ -403,9 +405,9 @@ void HandleUI(void)
 
          InsertFloppy(&df[menusub]);
          menustate = MENU_MAIN1;
-         menusub++;
-         if (menusub > drives)
-             menusub = 4;
+//         menusub++;
+//         if (menusub > drives)
+             menusub = 6;
 
          break;
 
@@ -2338,8 +2340,10 @@ void ErrorMessage(char *message, unsigned char code)
 
     if (menustate == MENU_ERROR)
     {
-        OsdClear();
+//        OsdClear();
+ 		OsdSetTitle("Error",0);
         OsdWrite(0, "         *** ERROR ***", 1,0);
+	    OsdWrite(1, "", 0,0);
         strncpy(s, message, 32);
         s[32] = 0;
         OsdWrite(2, s, 0,0);
@@ -2348,7 +2352,12 @@ void ErrorMessage(char *message, unsigned char code)
         if (code)
             sprintf(s, "    #%d", code);
 
+	    OsdWrite(3, "", 0,0);
         OsdWrite(4, s, 0,0);
+
+	    OsdWrite(5, "", 0,0);
+	    OsdWrite(6, "", 0,0);
+	    OsdWrite(7, "", 0,0);
 
         OsdEnable(0); // do not disable KEYBOARD
     }
@@ -2359,10 +2368,18 @@ void InfoMessage(char *message)
     OsdWaitVBL();
     if (menustate != MENU_INFO)
     {
-        OsdClear();
+//        OsdClear();
+ 		OsdSetTitle("Message",0);
         OsdEnable(0); // do not disable keyboard
     }
+    OsdWrite(0, "", 0,0);
     OsdWrite(1, message, 0,0);
+    OsdWrite(2, "", 0,0);
+    OsdWrite(3, "", 0,0);
+    OsdWrite(4, "", 0,0);
+    OsdWrite(5, "", 0,0);
+    OsdWrite(6, "", 0,0);
+    OsdWrite(7, "", 0,0);
     menu_timer = GetTimer(1000);
     menustate = MENU_INFO;
 }
