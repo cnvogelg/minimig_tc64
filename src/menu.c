@@ -405,8 +405,8 @@ void HandleUI(void)
 
          InsertFloppy(&df[menusub]);
          menustate = MENU_MAIN1;
-//         menusub++;
-//         if (menusub > drives)
+         menusub++;
+         if (menusub > drives)
              menusub = 6;
 
          break;
@@ -584,15 +584,22 @@ void HandleUI(void)
         {
 			if(menusub<5)
 			{
+				OsdDisable();
 				SetConfigurationFilename(menusub);
 				LoadConfiguration(NULL);
+				OsdReset(RESET_NORMAL);
 	   	        menustate = MENU_NONE1;
 			}
 			else
 			{
 				menustate = MENU_MAIN2_1;
-				menusub = 2;
+				menusub = 0;
 			}
+        }
+        if (menu) // exit menu
+        {
+            menustate = MENU_MAIN2_1;
+            menusub = 0;
         }
         break;
 
@@ -758,6 +765,8 @@ void HandleUI(void)
         /******************************************************************/
     case MENU_RESET1 :
 		OsdSetTitle("Reset",0);
+		menumask=0x03;	// Yes / No
+		parentstate=menustate;
 
         OsdWrite(0, "", 0,0);
         OsdWrite(1, "         Reset Minimig?", 0,0);
@@ -773,25 +782,13 @@ void HandleUI(void)
 
     case MENU_RESET2 :
 
-        if (down && menusub < 1)
-        {
-            menusub++;
-            menustate = MENU_RESET1;
-        }
-
-        if (up && menusub > 0)
-        {
-            menusub--;
-            menustate = MENU_RESET1;
-        }
-
         if (select && menusub == 0)
         {
             menustate = MENU_NONE1;
             OsdReset(RESET_NORMAL);
         }
 
-        if (menu || (select && menusub == 1)) // exit menu
+        if (menu || (select && (menusub == 1))) // exit menu
         {
             menustate = MENU_MAIN2_1;
             menusub = 0;
@@ -932,8 +929,13 @@ void HandleUI(void)
 			else
 			{
 				menustate = MENU_MAIN2_1;
-				menusub = 0;
+				menusub = 1;
 			}
+        }
+        if (menu) // exit menu
+        {
+            menustate = MENU_MAIN2_1;
+            menusub = 1;
         }
         break;
 
@@ -1011,7 +1013,7 @@ void HandleUI(void)
             else if (menusub == 3)
             {
                 menustate = MENU_MAIN2_1;
-                menusub = 0;
+                menusub = 2;
             }
         }
 
@@ -1109,7 +1111,7 @@ void HandleUI(void)
             else if (menusub == 5)
             {
                 menustate = MENU_MAIN2_1;
-                menusub = 1;
+                menusub = 3;
             }
         }
 
@@ -1444,7 +1446,7 @@ void HandleUI(void)
          else
          {
              menustate = MENU_MAIN1;
-             menusub = 3;
+             menusub = 5;
          }
 
          break;
@@ -1613,7 +1615,7 @@ void HandleUI(void)
             else if (menusub == 3)
             {
                 menustate = MENU_MAIN2_1;
-                menusub = 3;
+                menusub = 4;
             }
         }
 

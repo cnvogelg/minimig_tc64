@@ -30,12 +30,20 @@
 #define SPI_fast()  *(volatile unsigned short *)0xda4008=0x01   //14MHz/2
 
 #ifdef __GNUC__
-static inline unsigned char SPI(unsigned char o)
-{	
-	volatile unsigned char *ptr = (volatile unsigned char *)0xda4000;
-	*ptr = o;
-	return *ptr;
-}
+// Yuk.  The following monstrosity does a dummy read from the timer register, writes, then reads from
+// the SPI register.  Doing it this way works around a timing issue with ADF writing when GCC optimisation is turned on.
+//#define SPI(x) (*(volatile unsigned short *)0xDEE010,*(volatile unsigned char *)0xda4000=x,*(volatile unsigned char *)0xda4000)
+
+#define SPI(x) (*(volatile unsigned char *)0xda4000=x,*(volatile unsigned char *)0xda4000)
+
+#define SPIN (*(volatile unsigned short *)0xDEE010)	// Waste a few cycles to let the FPGA catch up
+
+// static inline unsigned char SPI(unsigned char o)
+//{	
+//	volatile unsigned char *ptr = (volatile unsigned char *)0xda4000;
+//	*ptr = o;
+//	return *ptr;
+//}
 #else
 #define SPI  *(unsigned char *)0xda4000=
 #endif

@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //#include "stdio.h"
 #include "hardware.h"
 
-
 //void __init_hardware(void)
 //{
 //    *AT91C_WDTC_WDMR = AT91C_WDTC_WDDIS; // disable watchdog
