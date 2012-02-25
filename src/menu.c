@@ -1020,7 +1020,7 @@ void HandleUI(void)
         if (menu)
         {
             menustate = MENU_MAIN2_1;
-            menusub = 0;
+            menusub = 2;
         }
         else if (right)
         {
@@ -1118,7 +1118,7 @@ void HandleUI(void)
         if (menu)
         {
             menustate = MENU_MAIN2_1;
-            menusub = 1;
+            menusub = 3;
         }
         else if (right)
         {
@@ -1622,7 +1622,7 @@ void HandleUI(void)
         if (menu)
         {
             menustate = MENU_MAIN2_1;
-            menusub = 3;
+            menusub = 4;
         }
         else if (right)
         {
