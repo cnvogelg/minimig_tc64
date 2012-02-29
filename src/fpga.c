@@ -250,6 +250,71 @@ void SendFile(fileTYPE *file)
 }
 
 
+void SendFileEncrypted(fileTYPE *file,unsigned char *key,int keysize)
+{
+    unsigned char  c1, c2;
+	unsigned int keyidx=0;
+    unsigned long  j;
+    unsigned long  n;
+    unsigned char *p;
+	int kp=0;
+
+    printf("[");
+    n = (file->size - 1) >> 9; // sector count (rounded up but decremented)
+    FileRead(file, &sector_buffer[501]); // Read into second half of sector buffer, 11 bytes short so that the header gets trimmed off...
+    FileNextSector(file);
+    while (n--)
+    {
+		int i=0;
+		for(i=0;i<512;++i)
+			sector_buffer[i]=sector_buffer[512+i];	// Copy the second sector into the first.  The last 11 bytes are junk, and will be overwritten...
+        // read data sector from memory card
+        FileRead(file, &sector_buffer[501]);	// Read the next sector, again starting the write 11 bytes shy of the end of the first sector.
+
+        do
+        {
+            // read FPGA status
+            EnableFpga();
+            c1 = SPI(0);
+            c2 = SPI(0);
+            SPI(0);
+            SPI(0);
+            SPI(0);
+            SPI(0);
+            DisableFpga();
+        }
+        while (!(c1 & CMD_RDTRK));
+
+        if ((n & 15) == 0)
+            printf("*");
+
+        // send data sector to FPGA
+        EnableFpga();
+        c1 = SPI(0);
+        c2 = SPI(0);
+        SPI(0);
+        SPI(0);
+        SPI(0);
+        SPI(0);
+        p = sector_buffer;
+
+        for (j = 0; j < 512; j++)
+		{
+			unsigned char t=*p++;
+			t^=key[keyidx];
+            SPI(t);
+			++keyidx;
+			if(keyidx>=keysize)
+				keyidx-=keysize;
+		}
+        DisableFpga();
+
+        FileNextSector(file);
+    }
+    printf("]\r");
+}
+
+
 // print message on the boot screen
 char BootPrint(const char *text)
 {
@@ -325,7 +390,7 @@ char BootPrint(const char *text)
     return 0;
 }
 
-char BootUpload(fileTYPE *file, unsigned char base, unsigned char size)
+char PrepareBootUpload(unsigned char base, unsigned char size)
 // this function sends given file to Minimig's memory
 // base - memory base address (bits 23..16)
 // size - memory size (bits 23..16)
@@ -371,10 +436,10 @@ char BootUpload(fileTYPE *file, unsigned char base, unsigned char size)
             else
             { // data phase
                 DisableFpga();
-                printf("uploading ROM file...\r");
+                printf("Ready to upload ROM file...\r");
                 // send rom image to FPGA
-                SendFile(file);
-                printf("ROM file uploaded.\r");
+//                SendFile(file);
+//                printf("ROM file uploaded.\r");
                 return 0;
             }
         }

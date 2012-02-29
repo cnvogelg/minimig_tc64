@@ -78,7 +78,7 @@ typedef union {
 
 // global sector buffer, data for read/write actions is stored here.
 // BEWARE, this buffer is also used and thus trashed by all other functions
-extern unsigned char sector_buffer[512]; // sector buffer
+extern unsigned char sector_buffer[1024]; // sector buffer - room for 2 sectors, to ease reading data not sector-aligned...
 extern unsigned char cluster_size;
 extern unsigned long cluster_mask;
 extern unsigned char fat32;

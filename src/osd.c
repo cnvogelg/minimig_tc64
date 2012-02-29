@@ -39,6 +39,7 @@ This is the Minimig OSD (on-screen-display) handler.
 //#include "stdio.h"
 
 #include "charrom.h"
+#include "logo.h"
 
 #include <string.h>
 
@@ -54,6 +55,78 @@ const char keycode_table[128] =
       0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
       0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
 };
+
+/*
+struct star
+{
+	int x, y;
+	int dx, dy;
+};
+
+struct star stars[64];
+
+char framebuffer[8][256];
+void framebuffer_clear()
+{
+	int i,j;
+	for(i=0;i<8;++i)
+	{
+		for(j=0;j<256;++j)
+		{
+			framebuffer[i][j]=0;
+		}
+	}
+}
+
+void framebuffer_plot(int x,int y)
+{
+	framebuffer[y/8][x]|=(1<<(y & 7));
+}
+
+static int quickrand()
+{
+	static int prev;
+	int r=*(volatile unsigned short *)0xDEE010;
+	r^=(prev&0xc75a)<<4;
+	r^=(prev&0x5a7c)>>(prev&7);
+	prev=r;
+	return(r);
+}
+
+
+void StarsInit()
+{
+	int i;
+	for(i=0;i<64;++i)
+	{
+		stars[i].x=(quickrand()%228)<<4;	// X centre
+		stars[i].y=(quickrand()%40)<<4;	// Y centre
+			stars[i].dx=-(quickrand()&7)-3;
+		stars[i].dy=0;
+	}
+}
+
+void StarsUpdate()
+{
+	framebuffer_clear();
+	int i;
+	for(i=0;i<64;++i)
+	{
+		stars[i].x+=stars[i].dx;
+		stars[i].y+=stars[i].dy;
+		if((stars[i].x<0)||(stars[i].x>(228<<4)) ||
+			(stars[i].y<0)||(stars[i].y>(40<<4)))
+		{
+			stars[i].x=228<<4;
+			stars[i].y=(quickrand()%40)<<4;
+			stars[i].dx=-(quickrand()&7)-3;
+			stars[i].dy=0;
+		}			
+		framebuffer_plot(stars[i].x>>4,stars[i].y>>4);
+	}
+}
+*/
+
 
 // time delay after which file/dir name starts to scroll
 #define SCROLL_DELAY 1000
@@ -144,10 +217,13 @@ void OsdSetTitle(unsigned char *s,int a)
 	}
 }
 
-
+void OsdWrite(unsigned char n, char *s, unsigned char invert, unsigned char stipple)
+{
+	OsdWriteOffset(n,s,invert,stipple,0);
+}
 
 // write a null-terminated string <s> to the OSD buffer starting at line <n>
-void OsdWrite(unsigned char n, char *s, unsigned char invert, unsigned char stipple)
+void OsdWriteOffset(unsigned char n, char *s, unsigned char invert, unsigned char stipple,char offset)
 {
     unsigned short i;
     unsigned char b;
@@ -242,14 +318,14 @@ void OsdWrite(unsigned char n, char *s, unsigned char invert, unsigned char stip
 			else if(i<(linelimit-8)) // normal character
 		    {
 		        p = &charfont[b][0];
-		        SPI((*p++&stipplemask)^invert);	stipplemask^=stipple;
-		        SPI((*p++&stipplemask)^invert);	stipplemask^=stipple;
-		        SPI((*p++&stipplemask)^invert);	stipplemask^=stipple;
-		        SPI((*p++&stipplemask)^invert);	stipplemask^=stipple;
-		        SPI((*p++&stipplemask)^invert);	stipplemask^=stipple;
-		        SPI((*p++&stipplemask)^invert);	stipplemask^=stipple;
-		        SPI((*p++&stipplemask)^invert);	stipplemask^=stipple;
-		        SPI((*p++&stipplemask)^invert);	stipplemask^=stipple;
+		        SPI(((*p++<<offset)&stipplemask)^invert);	stipplemask^=stipple;
+		        SPI(((*p++<<offset)&stipplemask)^invert);	stipplemask^=stipple;
+		        SPI(((*p++<<offset)&stipplemask)^invert);	stipplemask^=stipple;
+		        SPI(((*p++<<offset)&stipplemask)^invert);	stipplemask^=stipple;
+		        SPI(((*p++<<offset)&stipplemask)^invert);	stipplemask^=stipple;
+		        SPI(((*p++<<offset)&stipplemask)^invert);	stipplemask^=stipple;
+		        SPI(((*p++<<offset)&stipplemask)^invert);	stipplemask^=stipple;
+		        SPI(((*p++<<offset)&stipplemask)^invert);	stipplemask^=stipple;
 		        i += 8;
 		    }
 		}
@@ -278,7 +354,98 @@ void OsdWrite(unsigned char n, char *s, unsigned char invert, unsigned char stip
 }
 
 
-// write a null-terminated string <s> to the OSD buffer starting at line <n>
+void OsdDrawLogo(unsigned char n, char row)
+{
+    unsigned short i;
+    unsigned char b;
+    const unsigned char *p;
+	int linelimit=OSDLINELEN;
+
+    // select OSD SPI device
+    EnableOsd();
+
+    // select buffer and line to write to
+    SPI(OSDCMDWRITE | n);
+
+	const char *lp=logodata[row];
+	int bytes=sizeof(logodata[row]);
+
+    i = 0;
+    // send all characters in string to OSD
+/*
+	if(superimpose)
+	{
+		char *bg=framebuffer[n];
+		while (bytes)
+		{
+			if(i==0)	// Render sidestripe
+			{
+			    p = &titlebuffer[(7-n)*8];
+				SPI(0xff);
+				SPI(0xff);
+			    SPI(255^*p); SPI(255^*p++);
+			    SPI(255^*p); SPI(255^*p++);
+			    SPI(255^*p); SPI(255^*p++);
+			    SPI(255^*p); SPI(255^*p++);
+			    SPI(255^*p); SPI(255^*p++);
+			    SPI(255^*p); SPI(255^*p++);
+			    SPI(255^*p); SPI(255^*p++);
+			    SPI(255^*p); SPI(255^*p++);
+				SPI(0xff);
+				SPI(0xff);
+				SPI(0x00);
+				SPI(0x00);
+			    i += 22;
+			}
+			if(i>=linelimit)
+				break;
+			SPI(*lp++ | *bg++);
+			--bytes;
+			++i;
+		}
+	    for (; i < linelimit; i++) // clear end of line
+	       SPI(*bg++);
+    }
+	else
+	{
+*/
+		while (bytes)
+		{
+			if(i==0)	// Render sidestripe
+			{
+			    p = &titlebuffer[(7-n)*8];
+				SPI(0xff);
+				SPI(0xff);
+			    SPI(255^*p); SPI(255^*p++);
+			    SPI(255^*p); SPI(255^*p++);
+			    SPI(255^*p); SPI(255^*p++);
+			    SPI(255^*p); SPI(255^*p++);
+			    SPI(255^*p); SPI(255^*p++);
+			    SPI(255^*p); SPI(255^*p++);
+			    SPI(255^*p); SPI(255^*p++);
+			    SPI(255^*p); SPI(255^*p++);
+				SPI(0xff);
+				SPI(0xff);
+				SPI(0x00);
+				SPI(0x00);
+			    i += 22;
+			}
+			if(i>=linelimit)
+				break;
+			SPI(*lp++);
+			--bytes;
+			++i;
+		}
+	    for (; i < linelimit; i++) // clear end of line
+	       SPI(0);
+/*
+	}
+*/
+    // deselect OSD SPI device
+    DisableOsd();
+}
+
+
 void OsdWriteDoubleSize(unsigned char n, char *s, unsigned char pass)
 {
     unsigned short i;
@@ -365,7 +532,7 @@ void OsdWriteDoubleSize(unsigned char n, char *s, unsigned char pass)
     DisableOsd();
 }
 
-
+// write a null-terminated string <s> to the OSD buffer starting at line <n>
 void OSD_PrintText(unsigned char line, char *text, unsigned long start, unsigned long width, unsigned long offset, unsigned char invert)
 {
 // line : OSD line number (0-7)

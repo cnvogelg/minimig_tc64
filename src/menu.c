@@ -87,6 +87,16 @@ const char *config_chipset_msg[] = {"OCS-A500", "OCS-A1000", "ECS", "---"};
 
 char *config_autofire_msg[] = {"        AUTOFIRE OFF", "        AUTOFIRE FAST", "        AUTOFIRE MEDIUM", "        AUTOFIRE SLOW"};
 
+enum HelpText_Message {HELPTEXT_NONE,HELPTEXT_MAIN,HELPTEXT_HARDFILE,HELPTEXT_CHIPSET,HELPTEXT_MEMORY,HELPTEXT_VIDEO};
+const char *helptexts[]={
+	0,
+	"                                Welcome to Minimig!  Use the cursor keys to navigate the menus.  Use space bar or enter to select an item.  Press Esc or F12 to exit the menus.  Joystick emulation on the numeric keypad can be toggled with the numlock key, while pressing Ctrl-Alt-0 (numeric keypad) toggles autofire mode.",
+	"                                Minimig can emulate an A600 IDE harddisk interface.  The emulation can make use of Minimig-style hardfiles (complete disk images) or UAE-style hardfiles (filesystem images with no partition table).  It is also possible to use either the entire SD card or an individual partition as an emulated harddisk."
+	"                                Minimig's processor core can emulate a 68000 or 68020 processor (though the 68020 mode is still experimental.)  If you're running software built for 68000, there's no advantage to using the 68020 mode, since the 68000 emulation runs just as fast."
+	"                                Minimig can make use of up to 2 megabytes of Chip RAM, up to 1.5 megabytes of Slow RAM (A500 Trapdoor RAM), and up to 8 megabytes of true Fast RAM.  To use the Action Replay feature you will need an Action Replay 3 ROM file on the SD card, named AR3.ROM.  You will also need to set Fast RAM to no more than 2 megabytes."
+	"                                Minimig's video features include a blur filter, to simulate the poorer picture quality on older monitors, and also scanline generation to simulate the appearance of a screen with low vertical resolution."
+};
+
 extern unsigned char DEBUG;
 
 unsigned char config_autofire = 0;
@@ -111,7 +121,6 @@ void _showdebugmessages()
 	}
 }
 
-
 void SelectFile(char* pFileExt, unsigned char Options, unsigned char MenuSelect, unsigned char MenuCancel)
 {
     // this function displays file selection menu
@@ -131,6 +140,9 @@ void SelectFile(char* pFileExt, unsigned char Options, unsigned char MenuSelect,
 }
 
 #define STD_EXIT "            exit"
+#define HELPTEXT_DELAY 5000
+#define FRAME_DELAY 150
+
 void HandleUI(void)
 {
     unsigned char i, c, up, down, select, menu, right, left, plus, minus;
@@ -139,6 +151,9 @@ void HandleUI(void)
     static unsigned char ctrl = false;
     static unsigned char lalt = false;
 	char enable;
+	static long helptext_timer;
+	static const char *helptext;
+	static char helpstate=0;
 
     // get user control codes
     c = OsdGetCtrl();
@@ -238,6 +253,27 @@ void HandleUI(void)
         break;
     }
 
+	if(menu || select || up || down || left || right )
+	{
+		helpstate=0;
+		helptext_timer=GetTimer(HELPTEXT_DELAY);
+	}
+
+	if(helptext)
+	{
+		if(helpstate<9)
+		{
+			if(CheckTimer(helptext_timer))
+			{
+				helptext_timer=GetTimer(FRAME_DELAY);
+				OsdWriteOffset(7,STD_EXIT,0,0,helpstate);
+				helpstate+=1;
+			}
+		}
+		else
+			ScrollText(7,helptext,0,0,0);
+	}
+
 	// Standardised menu up/down.
 	// The screen should set menumask, bit 0 to make the top line selectable, bit 1 for the 2nd line, etc.
 	// Also set parentstate to the appropriate menustate.
@@ -267,9 +303,13 @@ void HandleUI(void)
         /* no menu selected                                               */
         /******************************************************************/
     case MENU_NONE1 :
+		helptext=helptexts[HELPTEXT_NONE];
 		menumask=0;
 		if(DebugMode)
+		{
+			helptext=helptexts[HELPTEXT_NONE];
 			OsdEnable(0);
+		}
 		else
 	        OsdDisable();
         menustate = MENU_NONE2;
@@ -293,6 +333,8 @@ void HandleUI(void)
     case MENU_MAIN1 :
 		menumask=0x70;	// b01110000 Floppy turbo, Harddisk options & Exit.
 		OsdSetTitle("Minimig",OSD_ARROW_RIGHT);
+		helptext=helptexts[HELPTEXT_MAIN];
+
         // floppy drive info
 		// We display a line for each drive that's active
 		// in the config file, but grey out any that the FPGA doesn't think are active.
@@ -415,6 +457,7 @@ void HandleUI(void)
         /* second part of the main menu                                   */
         /******************************************************************/
     case MENU_MAIN2_1 :
+		helptext=helptexts[HELPTEXT_MAIN];
 		menumask=0x3f;
  		OsdSetTitle("Settings",OSD_ARROW_LEFT|OSD_ARROW_RIGHT);
         OsdWrite(0, "    load configuration", menusub == 0,0);
@@ -477,6 +520,7 @@ void HandleUI(void)
         break;
 
     case MENU_MISC1 :
+		helptext=helptexts[HELPTEXT_MAIN];
 		menumask=0x0d;	// Reset, about and exit.
  		OsdSetTitle("Misc",OSD_ARROW_LEFT);
         OsdWrite(0, "    Reset", menusub == 0,0);
@@ -519,18 +563,23 @@ void HandleUI(void)
 		break;
 
 	case MENU_ABOUT1 :
+		helptext=helptexts[HELPTEXT_NONE];
 		menumask=0x01;	// Just Exit
  		OsdSetTitle("About",0);
-        OsdWrite(0, "", 0,0);
-        OsdWrite(1, "", 0,0);
-        OsdWriteDoubleSize(2,"   Minimig",0);
-        OsdWriteDoubleSize(3,"   Minimig",1);
-        OsdWrite(4, "", 0,0);
+		OsdDrawLogo(0,0);
+		OsdDrawLogo(1,1);
+		OsdDrawLogo(2,2);
+		OsdDrawLogo(3,3);
+		OsdDrawLogo(4,4);
+//        OsdWrite(1, "", 0,0);
+//        OsdWriteDoubleSize(2,"   Minimig",0);
+//        OsdWriteDoubleSize(3,"   Minimig",1);
+//        OsdWrite(4, "", 0,0);
         OsdWrite(5, "", 0,0);
-        OsdWrite(6, "", 0,0);
         OsdWrite(6, "", 0,0);
         OsdWrite(7, STD_EXIT, menusub == 0,0);
 
+//		StarsInit();
 		ScrollReset();
 
 		parentstate = menustate;
@@ -538,6 +587,12 @@ void HandleUI(void)
         break;
 
 	case MENU_ABOUT2 :
+//		StarsUpdate();
+//		OsdDrawLogo(0,0,1);
+//		OsdDrawLogo(1,1,1);
+//		OsdDrawLogo(2,2,1);
+//		OsdDrawLogo(3,3,1);
+//		OsdDrawLogo(4,4,1);
 		ScrollText(5,"                                 Minimig by Dennis van Weeren.  Chipset improvements by Jakub Bednarski and Sascha Boing.  TG68 softcore and Chameleon port by Tobias Gubener.  Menu / disk code by Dennis van Weeren, Jakub Bednarski and Alastair M. Robinson.  Build process, repository and tooling by Christian Vogelgsang.  Minimig is distributed under the terms of the GNU General Public License version 3.",0,0,0);
         if (select || menu)
         {
@@ -547,6 +602,7 @@ void HandleUI(void)
 		break;
 
     case MENU_LOADCONFIG_1 :
+		helptext=helptexts[HELPTEXT_NONE];
 		if(parentstate!=menustate)	// First run?
 		{
 			menumask=0x20;
@@ -607,6 +663,7 @@ void HandleUI(void)
         /* file selection menu                                            */
         /******************************************************************/
     case MENU_FILE_SELECT1 :
+		helptext=helptexts[HELPTEXT_NONE];
  		OsdSetTitle("Select",0);
         PrintDirectory();
         menustate = MENU_FILE_SELECT2;
@@ -764,6 +821,7 @@ void HandleUI(void)
         /* reset menu                                                     */
         /******************************************************************/
     case MENU_RESET1 :
+		helptext=helptexts[HELPTEXT_NONE];
 		OsdSetTitle("Reset",0);
 		menumask=0x03;	// Yes / No
 		parentstate=menustate;
@@ -880,6 +938,7 @@ void HandleUI(void)
 */
 
     case MENU_SAVECONFIG_1 :
+		helptext=helptexts[HELPTEXT_NONE];
 		menumask=0x3f;
 		parentstate=menustate;
  		OsdSetTitle("Save",0);
@@ -945,6 +1004,7 @@ void HandleUI(void)
         /* chipset settings menu                                          */
         /******************************************************************/
     case MENU_SETTINGS_CHIPSET1 :
+		helptext=helptexts[HELPTEXT_CHIPSET];
 		menumask=0;
  		OsdSetTitle("Chipset",OSD_ARROW_LEFT|OSD_ARROW_RIGHT);
 
@@ -1038,6 +1098,7 @@ void HandleUI(void)
         /* memory settings menu                                           */
         /******************************************************************/
     case MENU_SETTINGS_MEMORY1 :
+		helptext=helptexts[HELPTEXT_MEMORY];
 		menumask=0x3f;
 		parentstate=menustate;
 
@@ -1064,7 +1125,7 @@ void HandleUI(void)
         OsdWrite(5, s, menusub == 3,0);
         strcpy(s, "      AR3  : ");
         strcat(s, config.disable_ar3 ? "disabled" : "enabled ");
-        OsdWrite(6, s, menusub == 4,0);
+        OsdWrite(6, s, menusub == 4,config.memory&0x20);	// Grey out AR3 if more than 2MB fast memory
 
         OsdWrite(7, STD_EXIT, menusub == 5,0);
 
@@ -1237,6 +1298,7 @@ void HandleUI(void)
 		// Make the menu work on the copy, not the original, and copy on acceptance,
 		// not on rejection.
     case MENU_SETTINGS_HARDFILE1 :
+		helptext=helptexts[HELPTEXT_HARDFILE];
 		OsdSetTitle("Harddisks",0);
 
 		parentstate = menustate;
@@ -1566,6 +1628,7 @@ void HandleUI(void)
     case MENU_SETTINGS_VIDEO1 :
 		menumask=0x0f;
 		parentstate=menustate;
+		helptext=helptexts[HELPTEXT_VIDEO];
  
 		OsdSetTitle("Video",OSD_ARROW_LEFT|OSD_ARROW_RIGHT);
         OsdWrite(0, "", 0,0);

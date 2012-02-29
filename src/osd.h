@@ -78,6 +78,7 @@
 /*functions*/
 void OsdSetTitle(unsigned char *s,int arrow);	// arrow > 0 = display right arrow in bottom right, < 0 = display left arrow
 void OsdWrite(unsigned char n, char *s, unsigned char inver, unsigned char stipple);
+void OsdWriteOffset(unsigned char n, char *s, unsigned char inver, unsigned char stipple, char offset);
 void OsdClear(void);
 void OsdEnable(unsigned char mode);
 void OsdDisable(void);
@@ -95,7 +96,11 @@ unsigned char OsdGetCtrl(void);
 unsigned char GetASCIIKey(unsigned char c);
 void OSD_PrintText(unsigned char line, char *text, unsigned long start, unsigned long width, unsigned long offset, unsigned char invert);
 void OsdWriteDoubleSize(unsigned char n, char *s, unsigned char pass);
+void OsdDrawLogo(unsigned char n, char row);
+//void OsdDrawLogo(unsigned char n, char row,char superimpose);
 void ScrollText(char n,const char *str, int len, int max_len,unsigned char invert);
 void ScrollReset();
+// void StarsInit();
+// void StarsUpdate();
 #endif
 

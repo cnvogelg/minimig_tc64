@@ -46,6 +46,7 @@
 //}
 #else
 #define SPI  *(unsigned char *)0xda4000=
+#define SPIN
 #endif
 	
 #define RDSPI  *(volatile unsigned char *)0xda4001

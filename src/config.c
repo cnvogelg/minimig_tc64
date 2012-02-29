@@ -19,11 +19,33 @@ extern char s[40];
 char configfilename[12];
 char DebugMode=0;
 
+unsigned char romkey[3072];
+
 char UploadKickstart(char *name)
 {
+	char keysize=0;
     char filename[12];
     strncpy(filename, name, 8); // copy base name
     strcpy(&filename[8], "ROM"); // add extension
+
+	BootPrint("Checking for Amiga Forever key file:");
+	if(FileOpen(&file,"ROM     KEY"))
+	{
+		if(file.size<sizeof(romkey))
+		{
+			int c=0;
+			while(c<file.size)
+			{
+		        FileRead(&file, &romkey[c]);
+				c+=512;
+				FileNextSector(&file);
+			}
+			keysize=file.size;
+			BootPrint("Loaded Amiga Forever key file");
+		}
+		else
+			BootPrint("Amiga Forever keyfile is too large!");
+	}
 
 	BootPrint("Loading file: ");
 	BootPrint(filename);
@@ -33,13 +55,29 @@ char UploadKickstart(char *name)
         if (file.size == 0x80000)
         { // 512KB Kickstart ROM
             BootPrint("Uploading 512 KB Kickstart...");
-            BootUpload(&file, 0xF8, 0x08);
+            PrepareBootUpload(0xF8, 0x08);
+			SendFile(&file);
+            return(1);
+        }
+        if ((file.size == 0x8000b) && keysize)
+        { // 512KB Kickstart ROM
+            BootPrint("Uploading 512 KB Kickstart (Probably Amiga Forever encrypted...)");
+            PrepareBootUpload(0xF8, 0x08);
+			SendFileEncrypted(&file,romkey,keysize);
             return(1);
         }
         else if (file.size == 0x40000)
         { // 256KB Kickstart ROM
             BootPrint("Uploading 256 KB Kickstart...");
-            BootUpload(&file, 0xF8, 0x04);
+            PrepareBootUpload(0xF8, 0x04);
+			SendFile(&file);
+            return(1);
+        }
+        else if ((file.size == 0x4000b) && keysize)
+        { // 256KB Kickstart ROM
+            BootPrint("Uploading 256 KB Kickstart (Probably Amiga Forever encrypted...");
+            PrepareBootUpload(0xF8, 0x04);
+			SendFileEncrypted(&file,romkey,keysize);
             return(1);
         }
         else
@@ -63,7 +101,8 @@ char UploadActionReplay()
         if (file.size == 0x40000)
         { // 256 KB Action Replay 3 ROM
             BootPrint("\nUploading Action Replay ROM...");
-            BootUpload(&file, 0x40, 0x04);
+            PrepareBootUpload(0x40, 0x04);
+			SendFile(&file);
             ClearMemory(0x440000, 0x40000);
 			return(1);
         }
