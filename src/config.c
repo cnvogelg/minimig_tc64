@@ -23,7 +23,7 @@ unsigned char romkey[3072];
 
 char UploadKickstart(char *name)
 {
-	char keysize=0;
+	int keysize=0;
     char filename[12];
     strncpy(filename, name, 8); // copy base name
     strcpy(&filename[8], "ROM"); // add extension
@@ -31,16 +31,16 @@ char UploadKickstart(char *name)
 	BootPrint("Checking for Amiga Forever key file:");
 	if(FileOpen(&file,"ROM     KEY"))
 	{
+		keysize=file.size;
 		if(file.size<sizeof(romkey))
 		{
 			int c=0;
-			while(c<file.size)
+			while(c<keysize)
 			{
 		        FileRead(&file, &romkey[c]);
 				c+=512;
 				FileNextSector(&file);
 			}
-			keysize=file.size;
 			BootPrint("Loaded Amiga Forever key file");
 		}
 		else

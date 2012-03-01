@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 //#include "AT91SAM7S256.h"
 #include "stdio.h"
+#include "string.h"
 #include "errors.h"
 #include "hardware.h"
 #include "fat.h"
@@ -250,6 +251,8 @@ void SendFile(fileTYPE *file)
 }
 
 
+fileTYPE debugfile;
+
 void SendFileEncrypted(fileTYPE *file,unsigned char *key,int keysize)
 {
     unsigned char  c1, c2;
@@ -257,7 +260,12 @@ void SendFileEncrypted(fileTYPE *file,unsigned char *key,int keysize)
     unsigned long  j;
     unsigned long  n;
     unsigned char *p;
-	int kp=0;
+	char flag=0;
+
+	strncpy(debugfile.name, "romdebugtst", 11);
+	debugfile.attributes = 0;
+	debugfile.size = 8192;
+	FileCreate(0,&debugfile);
 
     printf("[");
     n = (file->size - 1) >> 9; // sector count (rounded up but decremented)
@@ -270,6 +278,20 @@ void SendFileEncrypted(fileTYPE *file,unsigned char *key,int keysize)
 			sector_buffer[i]=sector_buffer[512+i];	// Copy the second sector into the first.  The last 11 bytes are junk, and will be overwritten...
         // read data sector from memory card
         FileRead(file, &sector_buffer[501]);	// Read the next sector, again starting the write 11 bytes shy of the end of the first sector.
+
+        for (j = 0; j < 512; j++)
+		{
+			sector_buffer[j]^=key[keyidx++];
+			if(keyidx>=keysize)
+				keyidx-=keysize;
+		}
+
+		if(flag<16)
+		{
+			FileWrite(&debugfile,sector_buffer);
+			FileNextSector(&debugfile);
+			flag++;
+		}
 
         do
         {
@@ -299,14 +321,7 @@ void SendFileEncrypted(fileTYPE *file,unsigned char *key,int keysize)
         p = sector_buffer;
 
         for (j = 0; j < 512; j++)
-		{
-			unsigned char t=*p++;
-			t^=key[keyidx];
-            SPI(t);
-			++keyidx;
-			if(keyidx>=keysize)
-				keyidx-=keysize;
-		}
+            SPI(*p++);
         DisableFpga();
 
         FileNextSector(file);
