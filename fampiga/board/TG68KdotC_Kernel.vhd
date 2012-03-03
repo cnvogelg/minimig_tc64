@@ -2241,7 +2241,7 @@ PROCESS (clk, cpu, OP1out, OP2out, opcode, exe_condition, nextpass, micro_state,
 				
 -- 0111 ----------------------------------------------------------------------------		
 			WHEN "0111" =>				--moveq
-				IF opcode(8)='0' THEN
+--				IF opcode(8)='0' THEN	-- Cloanto's Amiga Forver ROMs have mangled movq instructions with a 1 here...
 					IF trap_interrupt='0' AND trap_trace='0' THEN
 						datatype <= "10";		--Long
 						set_exec(Regwrena) <= '1';
@@ -2249,10 +2249,10 @@ PROCESS (clk, cpu, OP1out, OP2out, opcode, exe_condition, nextpass, micro_state,
 						set_exec(opcMOVE) <= '1';
 						dest_hbits <= '1';
 					END IF;	
-				ELSE
-					trap_illegal <= '1';
-					trapmake <= '1';
-				END IF;
+--				ELSE
+--					trap_illegal <= '1';
+--					trapmake <= '1';
+--				END IF;
 				
 ---- 1000 ----------------------------------------------------------------------------		
 			WHEN "1000" => 								--or	

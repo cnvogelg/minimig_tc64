@@ -33,6 +33,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define CMD_HDRID 0xAACA
 
 extern fileTYPE file;
+extern char s[40];
+
+char BootPrint(const char *text);
 
 // single byte serialization of FPGA configuration datastream
 //void ShiftFpga(unsigned char data)
@@ -251,33 +254,40 @@ void SendFile(fileTYPE *file)
 }
 
 
-fileTYPE debugfile;
+//fileTYPE debugfile;
+//unsigned char debugbuffer[512];
 
 void SendFileEncrypted(fileTYPE *file,unsigned char *key,int keysize)
 {
     unsigned char  c1, c2;
+	unsigned char headersize;
 	unsigned int keyidx=0;
     unsigned long  j;
     unsigned long  n;
     unsigned char *p;
-	char flag=0;
+	int badbyte=0;
+//	char flag=0;
 
-	strncpy(debugfile.name, "romdebugtst", 11);
-	debugfile.attributes = 0;
-	debugfile.size = 8192;
-	FileCreate(0,&debugfile);
+//	strncpy(debugfile.name, "ref     rom", 11);
+//	strncpy(debugfile.name, "romdebugtst", 11);
+//	debugfile.attributes = 0;
+//	debugfile.size = 8192;
+//	FileCreate(0,&debugfile);
+
+//	FileOpen(&debugfile,"ref     rom");
 
     printf("[");
-    n = (file->size - 1) >> 9; // sector count (rounded up but decremented)
-    FileRead(file, &sector_buffer[501]); // Read into second half of sector buffer, 11 bytes short so that the header gets trimmed off...
+	headersize=file->size&255;	// ROM should be a round number of kilobytes; overspill will likely be the Amiga Forever header.
+    n = (file->size + (511-headersize)) >> 9; // sector count (rounded up)
+    FileRead(file, &sector_buffer[512-headersize]); // Read into second half of sector buffer, 11 bytes short so that the header gets trimmed off...
     FileNextSector(file);
     while (n--)
     {
-		int i=0;
+		int i;
 		for(i=0;i<512;++i)
 			sector_buffer[i]=sector_buffer[512+i];	// Copy the second sector into the first.  The last 11 bytes are junk, and will be overwritten...
         // read data sector from memory card
-        FileRead(file, &sector_buffer[501]);	// Read the next sector, again starting the write 11 bytes shy of the end of the first sector.
+        FileRead(file, &sector_buffer[512-headersize]);	// Read the next sector, again starting the write 11 bytes shy of the end of the first sector.
 
         for (j = 0; j < 512; j++)
 		{
@@ -286,12 +296,26 @@ void SendFileEncrypted(fileTYPE *file,unsigned char *key,int keysize)
 				keyidx-=keysize;
 		}
 
-		if(flag<16)
-		{
-			FileWrite(&debugfile,sector_buffer);
-			FileNextSector(&debugfile);
-			flag++;
-		}
+//        FileRead(&debugfile, debugbuffer);	// Read the next sector, again starting the write 11 bytes shy of the end of the first sector.
+//		FileNextSector(&debugfile);
+
+//		badbyte=0;
+//		for(j=0;j<512;++j)
+//		{
+//			if(debugbuffer[j]!=sector_buffer[j])
+//			{
+//				sprintf(s,"%d, %c / %c, %d\n",n,debugbuffer[j],sector_buffer[j],j);
+//				BootPrint(s);
+//				break;
+//			}
+//		}
+
+//		if(flag<16)
+//		{
+//			FileWrite(&debugfile,sector_buffer);
+//			FileNextSector(&debugfile);
+//			flag++;
+//		}
 
         do
         {

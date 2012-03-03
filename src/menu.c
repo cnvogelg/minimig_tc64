@@ -75,10 +75,10 @@ char DiskInfo[5]; // disk number info of selected entry
 
 extern const char version[];
 
-const char *config_filter_msg[] =  {"none", "HOR ", "VER ", "H+V "};
+const char *config_filter_msg[] =  {"none", "HORIZONTAL", "VERTICAL", "H+V"};
 const char *config_memory_chip_msg[] = {"0.5 MB", "1.0 MB", "1.5 MB", "2.0 MB"};
 const char *config_memory_slow_msg[] = {"none  ", "0.5 MB", "1.0 MB", "1.5 MB"};
-const char *config_scanlines_msg[] = {"off", "dim", "blk"};
+const char *config_scanlines_msg[] = {"off", "dim", "black"};
 const char *config_memory_fast_msg[] = {"none  ", "2.0 MB", "4.0 MB", "8.0 MB"};
 const char *config_cpu_msg[] = {"68000 ", "68010", "-----","020 alpha"};
 const char *config_hdf_msg[] = {"Disabled", "Hardfile (disk img)", "MMC/SD card", "MMC/SD partition 1", "MMC/SD partition 2", "MMC/SD partition 3", "MMC/SD partition 4"};
@@ -91,10 +91,11 @@ enum HelpText_Message {HELPTEXT_NONE,HELPTEXT_MAIN,HELPTEXT_HARDFILE,HELPTEXT_CH
 const char *helptexts[]={
 	0,
 	"                                Welcome to Minimig!  Use the cursor keys to navigate the menus.  Use space bar or enter to select an item.  Press Esc or F12 to exit the menus.  Joystick emulation on the numeric keypad can be toggled with the numlock key, while pressing Ctrl-Alt-0 (numeric keypad) toggles autofire mode.",
-	"                                Minimig can emulate an A600 IDE harddisk interface.  The emulation can make use of Minimig-style hardfiles (complete disk images) or UAE-style hardfiles (filesystem images with no partition table).  It is also possible to use either the entire SD card or an individual partition as an emulated harddisk."
-	"                                Minimig's processor core can emulate a 68000 or 68020 processor (though the 68020 mode is still experimental.)  If you're running software built for 68000, there's no advantage to using the 68020 mode, since the 68000 emulation runs just as fast."
-	"                                Minimig can make use of up to 2 megabytes of Chip RAM, up to 1.5 megabytes of Slow RAM (A500 Trapdoor RAM), and up to 8 megabytes of true Fast RAM.  To use the Action Replay feature you will need an Action Replay 3 ROM file on the SD card, named AR3.ROM.  You will also need to set Fast RAM to no more than 2 megabytes."
-	"                                Minimig's video features include a blur filter, to simulate the poorer picture quality on older monitors, and also scanline generation to simulate the appearance of a screen with low vertical resolution."
+	"                                Minimig can emulate an A600 IDE harddisk interface.  The emulation can make use of Minimig-style hardfiles (complete disk images) or UAE-style hardfiles (filesystem images with no partition table).  It is also possible to use either the entire SD card or an individual partition as an emulated harddisk.",
+	"                                Minimig's processor core can emulate a 68000 or 68020 processor (though the 68020 mode is still experimental.)  If you're running software built for 68000, there's no advantage to using the 68020 mode, since the 68000 emulation runs just as fast.",
+	"                                Minimig can make use of up to 2 megabytes of Chip RAM, up to 1.5 megabytes of Slow RAM (A500 Trapdoor RAM), and up to 8 megabytes of true Fast RAM.  To use the Action Replay feature you will need an Action Replay 3 ROM file on the SD card, named AR3.ROM.  You will also need to set Fast RAM to no more than 2 megabytes.",
+	"                                Minimig's video features include a blur filter, to simulate the poorer picture quality on older monitors, and also scanline generation to simulate the appearance of a screen with low vertical resolution.",
+	0
 };
 
 extern unsigned char DEBUG;
@@ -267,8 +268,13 @@ void HandleUI(void)
 			{
 				helptext_timer=GetTimer(FRAME_DELAY);
 				OsdWriteOffset(7,STD_EXIT,0,0,helpstate);
-				helpstate+=1;
+				++helpstate;
 			}
+		}
+		else if(helpstate==9)
+		{
+			ScrollReset();
+			++helpstate;
 		}
 		else
 			ScrollText(7,helptext,0,0,0);
@@ -553,7 +559,6 @@ void HandleUI(void)
             {
 				menusub=0;
 				menustate=MENU_ABOUT1;
-				// FIXME - display an about message...
 			}
             if (menusub == 3)	// Exit
             {
@@ -643,7 +648,7 @@ void HandleUI(void)
 				OsdDisable();
 				SetConfigurationFilename(menusub);
 				LoadConfiguration(NULL);
-				OsdReset(RESET_NORMAL);
+//				OsdReset(RESET_NORMAL);
 	   	        menustate = MENU_NONE1;
 			}
 			else
