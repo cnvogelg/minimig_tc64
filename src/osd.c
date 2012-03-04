@@ -56,7 +56,6 @@ const char keycode_table[128] =
       0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
 };
 
-/*
 struct star
 {
 	int x, y;
@@ -100,7 +99,7 @@ void StarsInit()
 	for(i=0;i<64;++i)
 	{
 		stars[i].x=(quickrand()%228)<<4;	// X centre
-		stars[i].y=(quickrand()%40)<<4;	// Y centre
+		stars[i].y=(quickrand()%56)<<4;	// Y centre
 			stars[i].dx=-(quickrand()&7)-3;
 		stars[i].dy=0;
 	}
@@ -115,17 +114,16 @@ void StarsUpdate()
 		stars[i].x+=stars[i].dx;
 		stars[i].y+=stars[i].dy;
 		if((stars[i].x<0)||(stars[i].x>(228<<4)) ||
-			(stars[i].y<0)||(stars[i].y>(40<<4)))
+			(stars[i].y<0)||(stars[i].y>(56<<4)))
 		{
 			stars[i].x=228<<4;
-			stars[i].y=(quickrand()%40)<<4;
+			stars[i].y=(quickrand()%56)<<4;
 			stars[i].dx=-(quickrand()&7)-3;
 			stars[i].dy=0;
 		}			
 		framebuffer_plot(stars[i].x>>4,stars[i].y>>4);
 	}
 }
-*/
 
 
 // time delay after which file/dir name starts to scroll
@@ -230,6 +228,7 @@ void OsdWriteOffset(unsigned char n, char *s, unsigned char invert, unsigned cha
     const unsigned char *p;
 	unsigned char stipplemask=0xff;
 	int linelimit=OSDLINELEN;
+	int arrowmask=arrow;
 	if(n==7 && (arrow & OSD_ARROW_RIGHT))
 		linelimit-=22;
 
@@ -276,24 +275,24 @@ void OsdWriteOffset(unsigned char n, char *s, unsigned char invert, unsigned cha
 			SPI(0x00);
 	        i += 22;
 		}
-		else if(n==7 && (arrow & OSD_ARROW_LEFT))	// Draw final arrow
+		else if(n==7 && (arrowmask & OSD_ARROW_LEFT))	// Draw initial arrow
 		{
 			SPI(0);
 			SPI(0);
 			SPI(0);
 		    p = &charfont[0x10][0];
-		    SPI(*p++); SPI(*p++); SPI(*p++); SPI(*p++);
-		    SPI(*p++); SPI(*p++); SPI(*p++); SPI(*p++);
+	        SPI(*p++<<offset); SPI(*p++<<offset); SPI(*p++<<offset); SPI(*p++<<offset);
+	        SPI(*p++<<offset); SPI(*p++<<offset); SPI(*p++<<offset); SPI(*p++<<offset);
 		    p = &charfont[0x14][0];
-		    SPI(*p++); SPI(*p++); SPI(*p++); SPI(*p++);
-		    SPI(*p++); SPI(*p++); SPI(*p++); SPI(*p++);
+	        SPI(*p++<<offset); SPI(*p++<<offset); SPI(*p++<<offset); SPI(*p++<<offset);
+	        SPI(*p++<<offset); SPI(*p++<<offset); SPI(*p++<<offset); SPI(*p++<<offset);
 			SPI(0);
 			SPI(0);
 			SPI(0);
 			SPI(invert);
 			SPI(invert);
 			i+=24;
-			arrow&=~OSD_ARROW_LEFT;
+			arrowmask&=~OSD_ARROW_LEFT;
 			if(*s++ == 0) break;	// Skip 3 characters, to keep alignent the same.
 			if(*s++ == 0) break;
 			if(*s++ == 0) break;
@@ -332,17 +331,17 @@ void OsdWriteOffset(unsigned char n, char *s, unsigned char invert, unsigned cha
     }
     for (; i < linelimit; i++) // clear end of line
        SPI(invert);
-	if(n==7 && (arrow & OSD_ARROW_RIGHT))	// Draw final arrow if needed
+	if(n==7 && (arrowmask & OSD_ARROW_RIGHT))	// Draw final arrow if needed
 	{
 		SPI(0);
 		SPI(0);
 		SPI(0);
         p = &charfont[0x15][0];
-        SPI(*p++); SPI(*p++); SPI(*p++); SPI(*p++);
-        SPI(*p++); SPI(*p++); SPI(*p++); SPI(*p++);
+        SPI(*p++<<offset); SPI(*p++<<offset); SPI(*p++<<offset); SPI(*p++<<offset);
+        SPI(*p++<<offset); SPI(*p++<<offset); SPI(*p++<<offset); SPI(*p++<<offset);
         p = &charfont[0x11][0];
-        SPI(*p++); SPI(*p++); SPI(*p++); SPI(*p++);
-        SPI(*p++); SPI(*p++); SPI(*p++); SPI(*p++);
+        SPI(*p++<<offset); SPI(*p++<<offset); SPI(*p++<<offset); SPI(*p++<<offset);
+        SPI(*p++<<offset); SPI(*p++<<offset); SPI(*p++<<offset); SPI(*p++<<offset);
 		SPI(0);
 		SPI(0);
 		SPI(0);
@@ -354,7 +353,7 @@ void OsdWriteOffset(unsigned char n, char *s, unsigned char invert, unsigned cha
 }
 
 
-void OsdDrawLogo(unsigned char n, char row)
+void OsdDrawLogo(unsigned char n, char row,char superimpose)
 {
     unsigned short i;
     unsigned char b;
@@ -368,11 +367,12 @@ void OsdDrawLogo(unsigned char n, char row)
     SPI(OSDCMDWRITE | n);
 
 	const char *lp=logodata[row];
-	int bytes=sizeof(logodata[row]);
-
+	int bytes=sizeof(logodata[0]);
+	if(row>=(sizeof(logodata)/bytes))
+		lp=0;
     i = 0;
     // send all characters in string to OSD
-/*
+
 	if(superimpose)
 	{
 		char *bg=framebuffer[n];
@@ -399,7 +399,10 @@ void OsdDrawLogo(unsigned char n, char row)
 			}
 			if(i>=linelimit)
 				break;
-			SPI(*lp++ | *bg++);
+			if(lp)
+				SPI(*lp++ | *bg++);
+			else
+				SPI(*bg++);
 			--bytes;
 			++i;
 		}
@@ -408,7 +411,6 @@ void OsdDrawLogo(unsigned char n, char row)
     }
 	else
 	{
-*/
 		while (bytes)
 		{
 			if(i==0)	// Render sidestripe
@@ -438,9 +440,7 @@ void OsdDrawLogo(unsigned char n, char row)
 		}
 	    for (; i < linelimit; i++) // clear end of line
 	       SPI(0);
-/*
 	}
-*/
     // deselect OSD SPI device
     DisableOsd();
 }

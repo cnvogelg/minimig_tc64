@@ -256,6 +256,8 @@ void HandleUI(void)
 
 	if(menu || select || up || down || left || right )
 	{
+		if(helpstate)
+			OsdWrite(7,STD_EXIT,(menumask-((1<<(menusub+1))-1))<=0,0); // Redraw the Exit line...
 		helpstate=0;
 		helptext_timer=GetTimer(HELPTEXT_DELAY);
 	}
@@ -282,6 +284,7 @@ void HandleUI(void)
 
 	// Standardised menu up/down.
 	// The screen should set menumask, bit 0 to make the top line selectable, bit 1 for the 2nd line, etc.
+	// (Lines in this context don't have to correspond to rows on the OSD.)
 	// Also set parentstate to the appropriate menustate.
 	if(menumask)
 	{
@@ -571,11 +574,12 @@ void HandleUI(void)
 		helptext=helptexts[HELPTEXT_NONE];
 		menumask=0x01;	// Just Exit
  		OsdSetTitle("About",0);
-		OsdDrawLogo(0,0);
-		OsdDrawLogo(1,1);
-		OsdDrawLogo(2,2);
-		OsdDrawLogo(3,3);
-		OsdDrawLogo(4,4);
+		OsdDrawLogo(0,0,1);
+		OsdDrawLogo(1,1,1);
+		OsdDrawLogo(2,2,1);
+		OsdDrawLogo(3,3,1);
+		OsdDrawLogo(4,4,1);
+		OsdDrawLogo(6,6,1);
 //        OsdWrite(1, "", 0,0);
 //        OsdWriteDoubleSize(2,"   Minimig",0);
 //        OsdWriteDoubleSize(3,"   Minimig",1);
@@ -584,7 +588,7 @@ void HandleUI(void)
         OsdWrite(6, "", 0,0);
         OsdWrite(7, STD_EXIT, menusub == 0,0);
 
-//		StarsInit();
+		StarsInit();
 		ScrollReset();
 
 		parentstate = menustate;
@@ -592,12 +596,13 @@ void HandleUI(void)
         break;
 
 	case MENU_ABOUT2 :
-//		StarsUpdate();
-//		OsdDrawLogo(0,0,1);
-//		OsdDrawLogo(1,1,1);
-//		OsdDrawLogo(2,2,1);
-//		OsdDrawLogo(3,3,1);
-//		OsdDrawLogo(4,4,1);
+		StarsUpdate();
+		OsdDrawLogo(0,0,1);
+		OsdDrawLogo(1,1,1);
+		OsdDrawLogo(2,2,1);
+		OsdDrawLogo(3,3,1);
+		OsdDrawLogo(4,4,1);
+		OsdDrawLogo(6,6,1);
 		ScrollText(5,"                                 Minimig by Dennis van Weeren.  Chipset improvements by Jakub Bednarski and Sascha Boing.  TG68 softcore and Chameleon port by Tobias Gubener.  Menu / disk code by Dennis van Weeren, Jakub Bednarski and Alastair M. Robinson.  Build process, repository and tooling by Christian Vogelgsang.  Minimig is distributed under the terms of the GNU General Public License version 3.",0,0,0);
         if (select || menu)
         {
