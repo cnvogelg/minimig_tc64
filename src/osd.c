@@ -356,7 +356,6 @@ void OsdWriteOffset(unsigned char n, char *s, unsigned char invert, unsigned cha
 void OsdDrawLogo(unsigned char n, char row,char superimpose)
 {
     unsigned short i;
-    unsigned char b;
     const unsigned char *p;
 	int linelimit=OSDLINELEN;
 
