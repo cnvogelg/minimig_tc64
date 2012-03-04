@@ -433,7 +433,10 @@ void OsdDrawLogo(unsigned char n, char row,char superimpose)
 			}
 			if(i>=linelimit)
 				break;
-			SPI(*lp++);
+			if(lp)
+				SPI(*lp++);
+			else
+				SPI(0);
 			--bytes;
 			++i;
 		}

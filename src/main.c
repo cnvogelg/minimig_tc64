@@ -113,6 +113,9 @@ __geta4 void main(void)
 	debugmsg2[0]=0;
 //    unsigned long time;
 //    unsigned short spiclk;
+
+	ShowSplash();
+
     BootPrint("OSD_CA01.SYS is here...\n");
 
     DISKLED_ON;
@@ -128,7 +131,7 @@ __geta4 void main(void)
     sprintf(s, "** ARM firmware %s **\n", version + 5);
     BootPrint(s);
 
-	OsdDisable();
+//	OsdDisable();
 
 //    SPI_Init();
 
@@ -175,7 +178,8 @@ __geta4 void main(void)
 
 //    sprintf(s, "SPI clock: %u MHz\n", spiclk);
 //    BootPrint(s);
- 
+ 	HideSplash();
+
     while (1)
     {
         HandleFpga();

@@ -80,5 +80,7 @@ void ErrorMessage(char *message, unsigned char code);
 void InfoMessage(char *message);
 void DebugMessage(char *message);
 void _showdebugmessages();
+void ShowSplash();
+void HideSplash();
 
 

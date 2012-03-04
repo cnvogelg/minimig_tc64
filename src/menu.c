@@ -144,6 +144,28 @@ void SelectFile(char* pFileExt, unsigned char Options, unsigned char MenuSelect,
 #define HELPTEXT_DELAY 5000
 #define FRAME_DELAY 150
 
+
+void ShowSplash()
+{
+	OsdSetTitle("Welcome",0);
+    OsdWrite(0, "", 0,0);
+	OsdDrawLogo(1,0,0);
+	OsdDrawLogo(2,1,0);
+	OsdDrawLogo(3,2,0);
+	OsdDrawLogo(4,3,0);
+	OsdDrawLogo(5,4,0);
+    OsdWrite(6, "", 0,0);
+    OsdWrite(7, "", 0,0);
+	OsdEnable(0);
+}
+
+
+void HideSplash()
+{
+	OsdDisable();
+}
+
+
 void HandleUI(void)
 {
     unsigned char i, c, up, down, select, menu, right, left, plus, minus;
