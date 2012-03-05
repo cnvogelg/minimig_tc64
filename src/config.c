@@ -224,6 +224,8 @@ unsigned char LoadConfiguration(char *filename)
 
 void ApplyConfiguration(char reloadkickstart)
 {
+    ConfigCPU(config.cpu);	// Maybe late CPU config us why 40.68 doesn't work?
+
 	if(reloadkickstart)
 	{
 		ConfigChipset(config.chipset | CONFIG_TURBO); // set CPU in turbo mode
