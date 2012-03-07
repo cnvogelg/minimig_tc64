@@ -42,6 +42,9 @@ JB:
 //#include <ctype.h>
 #include "mmc.h"
 #include "fat.h"
+#include "swap.h"
+
+int tolower(int c);
 
 unsigned short directory_cluster;       // first cluster of directory (0 if root)
 unsigned short entries_per_cluster;     // number of directory entries per cluster
@@ -85,6 +88,7 @@ unsigned char t_sort_table[MAXDIRENTRIES];
 // external functions
 extern unsigned long GetTimer(unsigned long);
 extern void ErrorMessage(const char *message, unsigned char code);
+
 
 unsigned long SwapEndianL(unsigned long l)
 {
@@ -278,7 +282,7 @@ unsigned char FindDrive(void)
     return(1);
 }
 
-unsigned char FileOpen(fileTYPE *file, char *name)
+unsigned char FileOpen(fileTYPE *file, const char *name)
 {
     unsigned long  iDirectory = 0;       // only root directory is supported
     DIRENTRY      *pEntry = NULL;        // pointer to current entry in sector buffer
@@ -598,7 +602,7 @@ char ScanDirectory(unsigned long mode, char *extension, unsigned char options)
 
                     if (!(pEntry->Attributes & (ATTR_VOLUME | ATTR_HIDDEN)) && (pEntry->Name[0] != '.' || pEntry->Name[1] != ' ')) // if not VOLUME label (also filter current directory entry)
                     {
-                        if (extension[0] == '*' || strncmp((const char*)&pEntry->Name[8], extension, 3) == 0 || options & SCAN_DIR && pEntry->Attributes & ATTR_DIRECTORY)
+                        if ((extension[0] == '*') || (strncmp((const char*)&pEntry->Name[8], extension, 3) == 0) || (options & SCAN_DIR && pEntry->Attributes & ATTR_DIRECTORY))
                         {
                             if (mode == SCAN_INIT)
                             { // scan the directory table and return first MAXDIRENTRIES alphabetically sorted entries

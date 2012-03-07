@@ -110,7 +110,7 @@ extern unsigned char fat32;
 unsigned char FindDrive(void);
 unsigned long GetFATLink(unsigned long cluster);
 unsigned char FileNextSector(fileTYPE *file);
-unsigned char FileOpen(fileTYPE *file, char *name);
+unsigned char FileOpen(fileTYPE *file, const char *name);
 unsigned char FileSeek(fileTYPE *file, unsigned long offset, unsigned long origin);
 unsigned char FileRead(fileTYPE *file, unsigned char *pBuffer);
 unsigned char FileWrite(fileTYPE *file, unsigned char *pBuffer);

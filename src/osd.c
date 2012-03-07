@@ -136,7 +136,7 @@ static unsigned long scroll_timer=0;  // file/dir name scrolling timer
 extern char s[40];
 
 static int arrow;
-static char titlebuffer[64];
+static unsigned char titlebuffer[64];
 
 static void rotatechar(unsigned char *in,unsigned char *out)
 {
@@ -156,7 +156,7 @@ static void rotatechar(unsigned char *in,unsigned char *out)
 }
 
 
-void OsdSetTitle(unsigned char *s,int a)
+void OsdSetTitle(char *s,int a)
 {
 	// Compose the title, condensing character gaps
 	arrow=a;
@@ -206,7 +206,7 @@ void OsdSetTitle(unsigned char *s,int a)
 	// Finally rotate it.
 	for(i=0;i<64;i+=8)
 	{
-		char tmp[8];
+		unsigned char tmp[8];
 		rotatechar(&titlebuffer[i],tmp);
 		for(c=0;c<8;++c)
 		{
@@ -365,7 +365,7 @@ void OsdDrawLogo(unsigned char n, char row,char superimpose)
     // select buffer and line to write to
     SPI(OSDCMDWRITE | n);
 
-	const char *lp=logodata[row];
+	const unsigned char *lp=logodata[row];
 	int bytes=sizeof(logodata[0]);
 	if(row>=(sizeof(logodata)/bytes))
 		lp=0;
@@ -647,7 +647,7 @@ void OsdWaitVBL(void)
 void OsdEnable(unsigned char mode)
 {
     EnableOsd();
-    SPI(OSDCMDENABLE | mode & DISABLE_KEYBOARD);
+    SPI(OSDCMDENABLE | (mode & DISABLE_KEYBOARD));
     DisableOsd();
 }
 

@@ -1,4 +1,4 @@
-C_SRC=fat.c fdd.c fpga.c hardware.c  hdd.c main.c menu.c mmc.c osd.c printf.c swap.c config.c
+C_SRC=fat.c fdd.c fpga.c hardware.c  hdd.c main.c menu.c mmc.c osd.c printf.c swap.c config.c rafile.c
 KLIBC_SRC=vsnprintf.c sprintf.c memcpy.c memcmp.c strcpy.c strcat.c strncat.c strncmp.c strlen.c memset.c strncpy.c strchr.c
 A_SRC=startup.s
 
@@ -12,7 +12,7 @@ ARCH=68000
 CC=m68k-elf-gcc
 AR=m68k-elf-ar
 OBJCOPY=m68k-elf-objcopy
-CFLAGS+=-m$(ARCH) -Os -fno-common -fomit-frame-pointer -I./include
+CFLAGS+=-m$(ARCH) -Wall -Wno-char-subscripts -Os -fno-common -fomit-frame-pointer -I./include
 LDFLAGS+=-m$(ARCH) -Xlinker -Map=menu.map -nostartfiles -L.
 
 ELF=menu.elf
