@@ -21,14 +21,15 @@
 
 #include "fat.h"
 
-struct RAFile
+typedef struct
 {
 	fileTYPE file;
+	unsigned long size;
 	unsigned long ptr;
 	unsigned char buffer[512];	// Each RandomAccessFile has its own sector_buffer
-};
+} RAFile;
 
-int RARead(struct RAFile *file,unsigned char *pBuffer, unsigned long bytes);
-int RASeek(struct RAFile *file,unsigned long offset,unsigned long origin);
-int RAOpen(struct RAFile *file,const char *filename);
+int RARead(RAFile *file,unsigned char *pBuffer, unsigned long bytes);
+int RASeek(RAFile *file,unsigned long offset,unsigned long origin);
+int RAOpen(RAFile *file,const char *filename);
 #endif

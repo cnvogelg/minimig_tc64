@@ -1,6 +1,6 @@
 #include "rafile.h"
 
-int RARead(struct RAFile *file,unsigned char *pBuffer, unsigned long bytes)
+int RARead(RAFile *file,unsigned char *pBuffer, unsigned long bytes)
 {
 	int result=1;
 	// Since we can only read from the SD card on 512-byte aligned boundaries,
@@ -48,7 +48,7 @@ int RARead(struct RAFile *file,unsigned char *pBuffer, unsigned long bytes)
 }
 
 
-int RASeek(struct RAFile *file,unsigned long offset,unsigned long origin)
+int RASeek(RAFile *file,unsigned long offset,unsigned long origin)
 {
 	int result=1;
 	unsigned long blockoffset;
@@ -68,13 +68,14 @@ int RASeek(struct RAFile *file,unsigned long offset,unsigned long origin)
 }
 
 
-int RAOpen(struct RAFile *file,const char *filename)
+int RAOpen(RAFile *file,const char *filename)
 {
 	int result=1;
 	if(!file)
 		return(0);
-	file->ptr=0;
 	result=FileOpen(&file->file,filename);
+	file->size=file->file.size;
+	file->ptr=0;
 	return(result);
 }
 

@@ -21,6 +21,8 @@ char DebugMode=0;
 
 unsigned char romkey[3072];
 
+RAFile romfile;
+
 char UploadKickstart(char *name)
 {
 	int keysize=0;
@@ -50,34 +52,34 @@ char UploadKickstart(char *name)
 	BootPrint("Loading file: ");
 	BootPrint(filename);
 
-    if (FileOpen(&file, filename))
+    if (RAOpen(&romfile, filename))
     {
-        if (file.size == 0x80000)
+        if (romfile.size == 0x80000)
         { // 512KB Kickstart ROM
             BootPrint("Uploading 512 KB Kickstart...");
             PrepareBootUpload(0xF8, 0x08);
-			SendFile(&file);
+			SendFile(&romfile);
             return(1);
         }
-        if ((file.size == 0x8000b) && keysize)
+        if ((romfile.size == 0x8000b) && keysize)
         { // 512KB Kickstart ROM
             BootPrint("Uploading 512 KB Kickstart (Probably Amiga Forever encrypted...)");
             PrepareBootUpload(0xF8, 0x08);
-			SendFileEncrypted(&file,romkey,keysize);
+			SendFileEncrypted(&romfile,romkey,keysize);
             return(1);
         }
-        else if (file.size == 0x40000)
+        else if (romfile.size == 0x40000)
         { // 256KB Kickstart ROM
             BootPrint("Uploading 256 KB Kickstart...");
             PrepareBootUpload(0xF8, 0x04);
-			SendFile(&file);
+			SendFile(&romfile);
             return(1);
         }
-        else if ((file.size == 0x4000b) && keysize)
+        else if ((romfile.size == 0x4000b) && keysize)
         { // 256KB Kickstart ROM
             BootPrint("Uploading 256 KB Kickstart (Probably Amiga Forever encrypted...");
             PrepareBootUpload(0xF8, 0x04);
-			SendFileEncrypted(&file,romkey,keysize);
+			SendFileEncrypted(&romfile,romkey,keysize);
             return(1);
         }
         else
@@ -96,13 +98,13 @@ char UploadKickstart(char *name)
 
 char UploadActionReplay()
 {
-    if (FileOpen(&file, "AR3     ROM"))
+    if (RAOpen(&romfile, "AR3     ROM"))
     {
-        if (file.size == 0x40000)
+        if (romfile.file.size == 0x40000)
         { // 256 KB Action Replay 3 ROM
             BootPrint("\nUploading Action Replay ROM...");
             PrepareBootUpload(0x40, 0x04);
-			SendFile(&file);
+			SendFile(&romfile);
             ClearMemory(0x440000, 0x40000);
 			return(1);
         }
@@ -113,6 +115,7 @@ char UploadActionReplay()
 			return(0);
         }
     }
+	return(0);
 }
 
 
@@ -179,7 +182,7 @@ unsigned char LoadConfiguration(char *filename)
                 BootPrint("Wrong configuration file format!\n");
         }
         else
-            printf("Wrong configuration file size: %lu (expected: %u)\r", file.size, sizeof(config));
+            printf("Wrong configuration file size: %lu (expected: %lu)\r", file.size, sizeof(config));
     }
     if(!result)
 	{

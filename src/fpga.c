@@ -29,6 +29,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "hardware.h"
 #include "fat.h"
 #include "fdd.h"
+#include "rafile.h"
+
+#include "fpga.h"
 
 #define CMD_HDRID 0xAACA
 
@@ -202,7 +205,7 @@ char BootPrint(const char *text);
 //}
 
 
-void SendFile(fileTYPE *file)
+void SendFile(RAFile *file)
 {
     unsigned char  c1, c2;
     unsigned long  j;
@@ -210,11 +213,11 @@ void SendFile(fileTYPE *file)
     unsigned char *p;
 
     printf("[");
-    n = (file->size + 511) >> 9; // sector count (rounded up)
+    n = (file->file.size + 511) >> 9; // sector count (rounded up)
     while (n--)
     {
         // read data sector from memory card
-        FileRead(file, sector_buffer);
+		RARead(file,sector_buffer,512);
 
         do
         {
@@ -247,17 +250,12 @@ void SendFile(fileTYPE *file)
             SPI(*p++);
 
         DisableFpga();
-
-        FileNextSector(file);
     }
     printf("]\r");
 }
 
 
-//fileTYPE debugfile;
-//unsigned char debugbuffer[512];
-
-void SendFileEncrypted(fileTYPE *file,unsigned char *key,int keysize)
+void SendFileEncrypted(RAFile *file,unsigned char *key,int keysize)
 {
     unsigned char  c1, c2;
 	unsigned char headersize;
@@ -266,56 +264,22 @@ void SendFileEncrypted(fileTYPE *file,unsigned char *key,int keysize)
     unsigned long  n;
     unsigned char *p;
 	int badbyte=0;
-//	char flag=0;
-
-//	strncpy(debugfile.name, "ref     rom", 11);
-//	strncpy(debugfile.name, "romdebugtst", 11);
-//	debugfile.attributes = 0;
-//	debugfile.size = 8192;
-//	FileCreate(0,&debugfile);
-
-//	FileOpen(&debugfile,"ref     rom");
 
     printf("[");
 	headersize=file->size&255;	// ROM should be a round number of kilobytes; overspill will likely be the Amiga Forever header.
+
+	RARead(file,sector_buffer,headersize);	// Read extra bytes
+
     n = (file->size + (511-headersize)) >> 9; // sector count (rounded up)
-    FileRead(file, &sector_buffer[512-headersize]); // Read into second half of sector buffer, 11 bytes short so that the header gets trimmed off...
-    FileNextSector(file);
     while (n--)
     {
-		int i;
-		for(i=0;i<512;++i)
-			sector_buffer[i]=sector_buffer[512+i];	// Copy the second sector into the first.  The last 11 bytes are junk, and will be overwritten...
-        // read data sector from memory card
-        FileRead(file, &sector_buffer[512-headersize]);	// Read the next sector, again starting the write 11 bytes shy of the end of the first sector.
-
+		RARead(file,sector_buffer,512);
         for (j = 0; j < 512; j++)
 		{
 			sector_buffer[j]^=key[keyidx++];
 			if(keyidx>=keysize)
 				keyidx-=keysize;
 		}
-
-//        FileRead(&debugfile, debugbuffer);	// Read the next sector, again starting the write 11 bytes shy of the end of the first sector.
-//		FileNextSector(&debugfile);
-
-//		badbyte=0;
-//		for(j=0;j<512;++j)
-//		{
-//			if(debugbuffer[j]!=sector_buffer[j])
-//			{
-//				sprintf(s,"%d, %c / %c, %d\n",n,debugbuffer[j],sector_buffer[j],j);
-//				BootPrint(s);
-//				break;
-//			}
-//		}
-
-//		if(flag<16)
-//		{
-//			FileWrite(&debugfile,sector_buffer);
-//			FileNextSector(&debugfile);
-//			flag++;
-//		}
 
         do
         {
@@ -347,8 +311,6 @@ void SendFileEncrypted(fileTYPE *file,unsigned char *key,int keysize)
         for (j = 0; j < 512; j++)
             SPI(*p++);
         DisableFpga();
-
-        FileNextSector(file);
     }
     printf("]\r");
 }
