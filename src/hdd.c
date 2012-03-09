@@ -27,8 +27,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "fat.h"
 #include "hdd.h"
 #include "hdd_internal.h"
-//#include "MMC.h"
-//#include "FPGA.h"
+#include "mmc.h"
+#include "menu.h"
+#include "fpga.h"
 #include "config.h"
 
 #include <stdio.h>
@@ -44,17 +45,18 @@ char debugmsg2[40];
 
 //unsigned char DIRECT_TRANSFER_MODE = 0;
 // helper function for byte swapping
-void SwapBytes(char *ptr, unsigned long len)
-{
-    char x;
-    len >>= 1;
-    while (len--)
-    {
-        x = *ptr;
-        *ptr++ = ptr[1];
-        *ptr++ = x;
-    }
-}
+
+// void SwapBytes(char *ptr, unsigned long len)
+// {
+//    char x;
+//    len >>= 1;
+//    while (len--)
+//    {
+//        x = *ptr;
+//        *ptr = ptr[1]; ++ptr;
+//        *ptr++ = x;
+//    }
+//}
 
 
 static void RDBChecksum(unsigned long *p)
@@ -410,7 +412,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 			
 						if((lba+hdf[unit].offset)<0)
 						{
-							DEBUG2("RDB %d",lba);
+							DEBUG2("RDB %ld",lba);
 
 							FakeRDB(unit,lba);
 
@@ -803,7 +805,7 @@ void HandleHDD(unsigned char c1, unsigned char c2)
 void GetHardfileGeometry(hdfTYPE *pHDF)
 { // this function comes from WinUAE, should return the same CHS as WinUAE
 
-    unsigned long total;
+    unsigned long total=0;
     unsigned long i, head, cyl, spt;
     unsigned long sptt[] = { 63, 127, 255, -1 };
 
@@ -970,7 +972,7 @@ unsigned char OpenHardfile(unsigned char unit)
 
 fileTYPE rdbfile;	// We scan for RDB without mounting the file as a unit, so need a file struct specifically for this task.
 
-unsigned char GetHDFFileType(unsigned char *filename)
+unsigned char GetHDFFileType(char *filename)
 {
 	if(FileOpen(&rdbfile,filename))
 	{

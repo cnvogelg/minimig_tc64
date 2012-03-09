@@ -1,4 +1,7 @@
+#ifndef MENU_H
+#define MENU_H
 
+#include "fdd.h" // for adfTYPE definition
 
 /*menu states*/
 enum MENU
@@ -83,4 +86,5 @@ void _showdebugmessages();
 void ShowSplash();
 void HideSplash();
 
+#endif
 

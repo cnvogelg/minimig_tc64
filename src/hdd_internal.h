@@ -78,7 +78,7 @@ struct PartitionBlock {
     unsigned long   pb_Flags;		// 1 - Bootable
     unsigned long   pb_Reserved1[2];	// 0
     unsigned long   pb_DevFlags;	 // 0
-    unsigned char   pb_DriveName[32];	// 0x03"DH0"
+    char   pb_DriveName[32];	// 0x03"DH0"
     unsigned long   pb_Reserved2[15];
     struct DosEnvec pb_Environment;
     unsigned long   pb_EReserved[12];	/* reserved for future environment vector */

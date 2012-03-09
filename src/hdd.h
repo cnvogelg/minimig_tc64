@@ -61,7 +61,7 @@ unsigned char OpenHardfile(unsigned char unit);
 #define HDF_FILETYPE_RDB 2
 #define HDF_FILETYPE_DOS 3
 
-unsigned char GetHDFFileType(unsigned char *filename);
+unsigned char GetHDFFileType(char *filename);
 
 extern char debugmsg[40];
 extern char debugmsg2[40];

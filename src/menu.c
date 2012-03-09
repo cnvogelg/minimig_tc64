@@ -42,10 +42,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // other constants
 #define DIRSIZE 8 // number of items in directory display window
 
-static unsigned long scroll_offset=0; // file/dir name scrolling position
-static unsigned long scroll_timer=0;  // file/dir name scrolling timer
-
-
 unsigned char menustate = MENU_NONE1;
 unsigned char parentstate;
 unsigned char menusub = 0;
@@ -90,8 +86,11 @@ const char *helptexts[]={
 	"                                Welcome to Minimig!  Use the cursor keys to navigate the menus.  Use space bar or enter to select an item.  Press Esc or F12 to exit the menus.  Joystick emulation on the numeric keypad can be toggled with the numlock key, while pressing Ctrl-Alt-0 (numeric keypad) toggles autofire mode.",
 	"                                Minimig can emulate an A600 IDE harddisk interface.  The emulation can make use of Minimig-style hardfiles (complete disk images) or UAE-style hardfiles (filesystem images with no partition table).  It is also possible to use either the entire SD card or an individual partition as an emulated harddisk.",
 	"                                Minimig's processor core can emulate a 68000 or 68020 processor (though the 68020 mode is still experimental.)  If you're running software built for 68000, there's no advantage to using the 68020 mode, since the 68000 emulation runs just as fast.",
-//	"                                Minimig can make use of up to 2 megabytes of Chip RAM, up to 1.5 megabytes of Slow RAM (A500 Trapdoor RAM), and up to 8 megabytes of true Fast RAM.  To use the Action Replay feature you will need an Action Replay 3 ROM file on the SD card, named AR3.ROM.  You will also need to set Fast RAM to no more than 2 megabytes.",
+#ifdef ACTIONREPLAY_BROKEN
 	"                                Minimig can make use of up to 2 megabytes of Chip RAM, up to 1.5 megabytes of Slow RAM (A500 Trapdoor RAM), and up to 8 megabytes of true Fast RAM.",
+#else
+	"                                Minimig can make use of up to 2 megabytes of Chip RAM, up to 1.5 megabytes of Slow RAM (A500 Trapdoor RAM), and up to 8 megabytes of true Fast RAM.  To use the Action Replay feature you will need an Action Replay 3 ROM file on the SD card, named AR3.ROM.  You will also need to set Fast RAM to no more than 2 megabytes.",
+#endif
 	"                                Minimig's video features include a blur filter, to simulate the poorer picture quality on older monitors, and also scanline generation to simulate the appearance of a screen with low vertical resolution.",
 	0
 };
@@ -1173,19 +1172,19 @@ void HandleUI(void)
         {
             if (menusub == 0)
             {
-                config.memory = config.memory + 1 & 0x03 | config.memory & ~0x03;
+                config.memory = ((config.memory + 1) & 0x03) | (config.memory & ~0x03);
                 menustate = MENU_SETTINGS_MEMORY1;
                 ConfigMemory(config.memory);
             }
             else if (menusub == 1)
             {
-                config.memory = config.memory + 4 & 0x0C | config.memory & ~0x0C;
+                config.memory = ((config.memory + 4) & 0x0C) | (config.memory & ~0x0C);
                 menustate = MENU_SETTINGS_MEMORY1;
                 ConfigMemory(config.memory);
             }
             else if (menusub == 2)
             {
-                config.memory = config.memory + 0x10 & 0x30 | config.memory & ~0x30;
+                config.memory = ((config.memory + 0x10) & 0x30) | (config.memory & ~0x30);
 //                if ((config.memory & 0x30) == 0x30)
 //					config.memory -= 0x30;
 //				if (!(config.disable_ar3 & 0x01)&&(config.memory & 0x20))
