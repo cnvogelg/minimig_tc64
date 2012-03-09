@@ -227,7 +227,7 @@ unsigned char LoadConfiguration(char *filename)
 
 void ApplyConfiguration(char reloadkickstart)
 {
-    ConfigCPU(config.cpu);	// Maybe late CPU config us why 40.68 doesn't work?
+    ConfigCPU(config.cpu);
 
 	if(reloadkickstart)
 	{
@@ -244,10 +244,12 @@ void ApplyConfiguration(char reloadkickstart)
 
 		if (!CheckButton() && !config.disable_ar3) // if menu button pressed don't load Action Replay
 		{
+#ifndef ACTIONREPLAY_BROKEN
 			if(config.memory & 0x20)
 				BootPrint("More than 2MB of Fast RAM configured - disabling Action Replay!");
 			else
 				UploadActionReplay();
+#endif
 		}
 	}
 	else

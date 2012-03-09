@@ -12,7 +12,7 @@ ARCH=68000
 CC=m68k-elf-gcc
 AR=m68k-elf-ar
 OBJCOPY=m68k-elf-objcopy
-CFLAGS+=-m$(ARCH) -Wall -Wno-char-subscripts -Os -fno-common -fomit-frame-pointer -I./include
+CFLAGS+=-m$(ARCH) -Wall -Wno-char-subscripts -Os -fno-common -fomit-frame-pointer -I./include -DACTIONREPLAY_BROKEN
 LDFLAGS+=-m$(ARCH) -Xlinker -Map=menu.map -nostartfiles -L.
 
 ELF=menu.elf

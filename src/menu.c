@@ -90,7 +90,8 @@ const char *helptexts[]={
 	"                                Welcome to Minimig!  Use the cursor keys to navigate the menus.  Use space bar or enter to select an item.  Press Esc or F12 to exit the menus.  Joystick emulation on the numeric keypad can be toggled with the numlock key, while pressing Ctrl-Alt-0 (numeric keypad) toggles autofire mode.",
 	"                                Minimig can emulate an A600 IDE harddisk interface.  The emulation can make use of Minimig-style hardfiles (complete disk images) or UAE-style hardfiles (filesystem images with no partition table).  It is also possible to use either the entire SD card or an individual partition as an emulated harddisk.",
 	"                                Minimig's processor core can emulate a 68000 or 68020 processor (though the 68020 mode is still experimental.)  If you're running software built for 68000, there's no advantage to using the 68020 mode, since the 68000 emulation runs just as fast.",
-	"                                Minimig can make use of up to 2 megabytes of Chip RAM, up to 1.5 megabytes of Slow RAM (A500 Trapdoor RAM), and up to 8 megabytes of true Fast RAM.  To use the Action Replay feature you will need an Action Replay 3 ROM file on the SD card, named AR3.ROM.  You will also need to set Fast RAM to no more than 2 megabytes.",
+//	"                                Minimig can make use of up to 2 megabytes of Chip RAM, up to 1.5 megabytes of Slow RAM (A500 Trapdoor RAM), and up to 8 megabytes of true Fast RAM.  To use the Action Replay feature you will need an Action Replay 3 ROM file on the SD card, named AR3.ROM.  You will also need to set Fast RAM to no more than 2 megabytes.",
+	"                                Minimig can make use of up to 2 megabytes of Chip RAM, up to 1.5 megabytes of Slow RAM (A500 Trapdoor RAM), and up to 8 megabytes of true Fast RAM.",
 	"                                Minimig's video features include a blur filter, to simulate the poorer picture quality on older monitors, and also scanline generation to simulate the appearance of a screen with low vertical resolution.",
 	0
 };
@@ -1152,9 +1153,15 @@ void HandleUI(void)
         else
             strncat(s, config.kickstart.name, sizeof(config.kickstart.name));
         OsdWrite(5, s, menusub == 3,0);
+
+#ifdef ACTIONREPLAY_BROKEN
+        OsdWrite(0, "", 0,0);
+		menumask&=0xef;	// Remove bit 4
+#else
         strcpy(s, "      AR3  : ");
         strcat(s, config.disable_ar3 ? "disabled" : "enabled ");
         OsdWrite(6, s, menusub == 4,config.memory&0x20);	// Grey out AR3 if more than 2MB fast memory
+#endif
 
         OsdWrite(7, STD_EXIT, menusub == 5,0);
 
