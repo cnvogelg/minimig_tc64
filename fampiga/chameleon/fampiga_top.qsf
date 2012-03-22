@@ -206,3 +206,4 @@ set_global_assignment -name VERILOG_FILE ../minimig/Sprites.v
 set_global_assignment -name VHDL_FILE ../board/chameleon_docking_station.vhd
 set_global_assignment -name SDC_FILE fampiga.sdc
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name OPTIMIZE_POWER_DURING_SYNTHESIS OFF

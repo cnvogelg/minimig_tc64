@@ -515,7 +515,7 @@ end process;
 myReconfig : entity work.chameleon_reconfigure
 	port map (
 		clk => sysclk,
-		reset => n_reset,
+		--reset => n_reset,
 		reconfigure => reconfigure,	
 		serial_clk => usart_clk,
 		serial_txd => usart_rx,
