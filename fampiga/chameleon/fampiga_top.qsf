@@ -155,6 +155,22 @@ set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
 set_global_assignment -name CYCLONEII_OPTIMIZATION_TECHNIQUE BALANCED
 set_global_assignment -name GENERATE_RBF_FILE ON
 set_global_assignment -name FORCE_CONFIGURATION_VCCIO ON
+set_global_assignment -name MISC_FILE "D:/_chameleon/dockingstation/chameleon/fampiga_top.dpf"
+set_global_assignment -name FMAX_REQUIREMENT "108 MHz"
+set_global_assignment -name ENABLE_CLOCK_LATENCY ON
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_global_assignment -name EDA_SIMULATION_TOOL "ModelSim-Altera (VHDL)"
+set_global_assignment -name EDA_OUTPUT_DATA_FORMAT VHDL -section_id eda_simulation
+set_global_assignment -name PHYSICAL_SYNTHESIS_EFFORT EXTRA
+set_global_assignment -name SYNTH_TIMING_DRIVEN_SYNTHESIS ON
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
+set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_DUPLICATION ON
+
+set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "2.5 V"
+set_global_assignment -name VHDL_FILE ../board/chameleon_reconfigure.vhd
 set_global_assignment -name VHDL_FILE ../board/chameleon_cdtv_remote.vhd
 set_global_assignment -name VHDL_FILE ../board/palclk.vhd
 set_global_assignment -name VHDL_FILE ../board/cfide.vhd
@@ -187,20 +203,7 @@ set_global_assignment -name VERILOG_FILE ../minimig/Minimig1.v
 set_global_assignment -name VERILOG_FILE ../minimig/Paula.v
 set_global_assignment -name VERILOG_FILE ../minimig/PS2Keyboard.v
 set_global_assignment -name VERILOG_FILE ../minimig/Sprites.v
-set_global_assignment -name MISC_FILE "D:/_chameleon/dockingstation/chameleon/fampiga_top.dpf"
 set_global_assignment -name VHDL_FILE ../board/chameleon_docking_station.vhd
-set_global_assignment -name FMAX_REQUIREMENT "108 MHz"
-set_global_assignment -name ENABLE_CLOCK_LATENCY ON
-set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
-set_global_assignment -name EDA_SIMULATION_TOOL "ModelSim-Altera (VHDL)"
-set_global_assignment -name EDA_OUTPUT_DATA_FORMAT VHDL -section_id eda_simulation
-set_global_assignment -name PHYSICAL_SYNTHESIS_EFFORT EXTRA
-set_global_assignment -name SYNTH_TIMING_DRIVEN_SYNTHESIS ON
-set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
-set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 set_global_assignment -name SDC_FILE fampiga.sdc
-set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
-set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
-set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_DUPLICATION ON
-
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name OPTIMIZE_POWER_DURING_SYNTHESIS OFF

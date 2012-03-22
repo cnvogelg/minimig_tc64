@@ -212,9 +212,8 @@ module Minimig1
 	input	sysclock,
 	input	[8:0]ascancode,		// Amiga Scancode form Dockingstation
 	input	[5:0]_joy3,			// joystick 3 [fire2,fire,right,left,down,up] (joystick port)
-	input	[5:0]_joy4			// joystick 4 [fire2,fire,right,left,down,up] (joystick port)
-	
-				
+	input	[5:0]_joy4,			// joystick 4 [fire2,fire,right,left,down,up] (joystick port)
+	output reconfigure		// reconfigure chameleon
 );
 
 //--------------------------------------------------------------------------------------
@@ -595,7 +594,8 @@ userio USERIO1
 	.ide_config(ide_config),
 	.cpu_config(cpu_config),
 	.usrrst(usrrst),
-	.bootrst(bootrst)
+	.bootrst(bootrst),
+	.reconfigure(reconfigure)
 );
 
 //assign cpu_speed = (chipset_config[0]);
