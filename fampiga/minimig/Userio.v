@@ -106,7 +106,8 @@ module userio
 	output	[2:0] ide_config,
 	output	[1:0] cpu_config,
 	output	usrrst,					// user reset from osd module
-	output	bootrst					// user reset to bootloader
+	output	bootrst,					// user reset to bootloader
+	output	reconfigure
 );
 
 // local signals	
@@ -353,7 +354,8 @@ osd	osd1
 	.cpu_config(cpu_config),
 	.autofire_config(autofire_config),
 	.usrrst(usrrst),
-	.bootrst(bootrst)
+	.bootrst(bootrst),
+	.reconfigure(reconfigure)
 );
 
 //--------------------------------------------------------------------------------------
@@ -395,7 +397,8 @@ module osd
 	output	reg [1:0] cpu_config = 0,
 	output	reg [1:0] autofire_config = 0,
 	output	usrrst,
-	output	bootrst
+	output	bootrst,
+	output	reconfigure
 );
 
 // local signals
@@ -417,6 +420,8 @@ reg 	[5:0] t_memory_config = 0;
 reg		[2:0] t_ide_config = 0;
 reg		[1:0] t_cpu_config = 0;
 reg 	[3:0] t_chipset_config = 0;
+
+reg		reconfig_reg;
 
 //--------------------------------------------------------------------------------------
 // memory configuration select signal
@@ -543,8 +548,10 @@ spi8 spi0
 // 8'b001H0NNN 	write data to osd buffer line <NNN> (H - highlight)
 // 8'b0100--KE	enable OSD display (E) and disable Amiga keyboard (K)
 // 8'b1000000B	reset Minimig (B - reset to bootloader)
+// 8'b10000010 reconfigure FPGA (reset to chameleon core)
 // 8'b100001AA	set autofire rate
-// 8'b1001---S	set cpu speed
+// 8'b10001xxx Currently spare...
+// 8'b1001---S	set cpu speed  -  doesn't seem to be decoded?
 // 8'b1010--SS	set scanline mode
 // 8'b1011-SMC	set hard disk config (C - enable HDC, M - enable Master HDD, S - enable Slave HDD)
 // 8'b1100FF-S	set floppy speed and drive number
@@ -633,6 +640,15 @@ assign usrrst = rx && cmd && wrdat[7:1]==7'b1000_000 ? 1'b1 : 1'b0;
 // reset to bootloader
 assign bootrst = rx && cmd && wrdat[7:0]==8'b1000_0001 ? 1'b1 : 1'b0;
 
+// reconfigure chameleon
+always @(posedge clk)
+	if(rx && cmd && wrdat[7:0]==8'b1000_0010)
+	  reconfig_reg<=1;
+	else if(reset)
+	  reconfig_reg<=0;
+
+assign reconfigure = reconfig_reg;
+	  
 endmodule
 
 //--------------------------------------------------------------------------------------

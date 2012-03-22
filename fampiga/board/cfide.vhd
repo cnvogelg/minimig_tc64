@@ -66,9 +66,14 @@ entity cfide is
 	ena1MHz: out std_logic;
 	irq_d: in std_logic;
 	led: in std_logic_vector(1 downto 0);
-	
+
 	amiser_txd: in std_logic;	-- CV: amiga serial txd		
-	amiser_rxd: out std_logic  -- CV: amiga serial rxd
+	amiser_rxd: out std_logic;  -- CV: amiga serial rxd
+
+-- USART
+	usart_clk : in std_logic;
+	usart_rts : in std_logic;
+	reconfigure: in std_logic	-- reset Chameleon to core 0
 	
    );
 
@@ -137,6 +142,8 @@ signal timeprecnt: std_logic_vector(15 downto 0);
 --signal led_red	 : std_logic;
 --signal ir	 : std_logic;
 signal enacnt: std_logic_vector(6 downto 0);
+
+signal usart_rx : std_logic :='1';
 
 -- MUX
 	signal mux_clk_reg : std_logic := '0';
@@ -281,7 +288,7 @@ end process;
 		if rising_edge(sysclk) then
 			if mux_clk_reg = '1' then
 				mux_reg <= X"C";
-				mux_d_reg(3) <= '1';
+				mux_d_reg(3) <= usart_rx;	-- AMR transmit to Chameleons uC
 				mux_d_reg(2) <= NOT scs(1);
 				mux_d_reg(1) <= sd_out(15);
 				mux_d_reg(0) <= NOT sck;
@@ -501,4 +508,20 @@ begin
 	end if;
 end process; 
 
+-----------------------------------------------------------------
+-- reconfigure chameleon
+-----------------------------------------------------------------
+
+myReconfig : entity work.chameleon_reconfigure
+	port map (
+		clk => sysclk,
+		reset => n_reset,
+		reconfigure => reconfigure,	
+		serial_clk => usart_clk,
+		serial_txd => usart_rx,
+		serial_cts_n => usart_rts
+	);
+
+
 end;  
+
