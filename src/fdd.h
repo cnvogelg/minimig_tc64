@@ -1,3 +1,6 @@
+#ifndef FDD_H
+#define FDD_H
+
 // floppy disk interface defs
 #define CMD_RDTRK 0x01
 #define CMD_WRTRK 0x02
@@ -30,4 +33,6 @@ unsigned char GetData(void);
 void WriteTrack(adfTYPE *drive);
 void UpdateDriveStatus(void);
 void HandleFDD(unsigned char c1, unsigned char c2);
+
+#endif
 

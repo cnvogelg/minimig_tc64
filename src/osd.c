@@ -666,6 +666,13 @@ void OsdReset(unsigned char boot)
     DisableOsd();
 }
 
+void OsdReconfig()
+{
+	EnableOsd();
+	SPI(OSDCMDRECONFIG);
+	DisableOsd();
+}
+
 void ConfigFilter(unsigned char lores, unsigned char hires)
 {
     EnableOsd();
@@ -699,8 +706,8 @@ void ConfigCPU(unsigned char cpu)
 void ConfigChipset(unsigned char chipset)
 {
     EnableOsd();
-//    SPI(OSDCMDCFGCHP | (chipset & 0x0F));
-    SPI(OSDCMDCFGCHP | (chipset & 0x0E));
+    SPI(OSDCMDCFGCHP | (chipset & 0x0F));
+//    SPI(OSDCMDCFGCHP | (chipset & 0x0E));
     DisableOsd();
 }
 

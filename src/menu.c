@@ -549,14 +549,15 @@ void HandleUI(void)
 
     case MENU_MISC1 :
 		helptext=helptexts[HELPTEXT_MAIN];
-		menumask=0x0d;	// Reset, about and exit.
+		menumask=0x0f;	// Reset, about and exit.
  		OsdSetTitle("Misc",OSD_ARROW_LEFT);
         OsdWrite(0, "    Reset", menusub == 0,0);
         OsdWrite(1, "", 0,0);
-        OsdWrite(2, "    Return to Chameleon", menusub == 1,1);
-        OsdWrite(3, "    (Not yet implemented)", 0,1);
-        OsdWrite(4, "", 0,0);
-        OsdWrite(5, "    About", menusub == 2,0);
+        OsdWrite(2, "    Return to Chameleon", menusub == 1,0);
+//        OsdWrite(3, "    (Not yet implemented)", 0,1);
+        OsdWrite(3, "", 0,0);
+        OsdWrite(4, "    About", menusub == 2,0);
+        OsdWrite(5, "", 0,0);
         OsdWrite(6, "", 0,0);
         OsdWrite(7, STD_EXIT, menusub == 3,0);
 
@@ -576,6 +577,10 @@ void HandleUI(void)
             {
                 menusub = 0;
 				menustate=MENU_RESET1;
+			}
+            if (menusub == 1)	// Reconfig
+            {
+				OsdReconfig();
 			}
             if (menusub == 2)	// About
             {

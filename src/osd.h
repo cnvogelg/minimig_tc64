@@ -17,6 +17,7 @@
 #define OSDCMDENABLE     0x41        // OSD enable command
 #define OSDCMDDISABLE    0x40        // OSD disable command
 #define OSDCMDRST        0x80        // OSD reset command
+#define OSDCMDRECONFIG   0x82        // OSD reset command
 #define OSDCMDAUTOFIRE   0x84        // OSD autofire command
 #define OSDCMDCFGSCL     0xA0        // OSD settings: scanlines effect
 #define OSDCMDCFGIDE     0xB0        // OSD enable HDD command
@@ -84,6 +85,7 @@ void OsdEnable(unsigned char mode);
 void OsdDisable(void);
 void OsdWaitVBL(void);
 void OsdReset(unsigned char boot);
+void OsdReconfig();	// Reset to Chameleon core.
 void ConfigFilter(unsigned char lores, unsigned char hires);
 void ConfigMemory(unsigned char memory);
 void ConfigCPU(unsigned char cpu);
