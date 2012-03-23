@@ -580,7 +580,8 @@ void HandleUI(void)
 			}
             if (menusub == 1)	// Reconfig
             {
-				OsdReconfig();
+				menusub=0;
+				menustate=MENU_RECONF1;
 			}
             if (menusub == 2)	// About
             {
@@ -884,6 +885,41 @@ void HandleUI(void)
         {
             menustate = MENU_MISC1;
             menusub = 0;
+        }
+        break;
+
+        /******************************************************************/
+        /* reconfigure confirmation                                       */
+        /******************************************************************/
+    case MENU_RECONF1 :
+		helptext=helptexts[HELPTEXT_NONE];
+		OsdSetTitle("Exit",0);
+		menumask=0x03;	// Yes / No
+		parentstate=menustate;
+
+        OsdWrite(0, "", 0,0);
+        OsdWrite(1, "     Return to Chameleon?", 0,0);
+        OsdWrite(2, "", 0,0);
+        OsdWrite(3, "               yes", menusub == 0,0);
+        OsdWrite(4, "               no", menusub == 1,0);
+        OsdWrite(5, "", 0,0);
+        OsdWrite(6, "", 0,0);
+        OsdWrite(7, "", 0,0);
+
+        menustate = MENU_RECONF2;
+        break;
+
+    case MENU_RECONF2 :
+
+        if (select && menusub == 0)
+        {
+            OsdReconfig();
+        }
+
+        if (menu || (select && (menusub == 1))) // exit menu
+        {
+            menustate = MENU_MISC1;
+            menusub = 1;
         }
         break;
 
