@@ -157,7 +157,15 @@ BEGIN
 --	toram <= data_write;
 	
     sel_autoconfig <= '1' when cpuaddr(23 downto 19)="11101" AND autoconfig_out='1' ELSE '0'; --$E80000 - $EFFFFF
-	sel_fast <= '1' when state/="01" AND (cpuaddr(23 downto 21)="001" OR cpuaddr(23 downto 21)="010" OR cpuaddr(23 downto 21)="011" OR cpuaddr(23 downto 21)="100") ELSE '0'; --$200000 - $9FFFFF
+	sel_fast <= '1' when state/="01" AND
+		(
+			cpuaddr(23 downto 21)="001"
+			OR cpuaddr(23 downto 21)="010"
+			OR cpuaddr(23 downto 21)="011"
+			OR cpuaddr(23 downto 21)="100"
+			OR cpuaddr(31 downto 24)="01"
+		)
+		ELSE '0'; --$200000 - $9FFFFF
 --	sel_fast <= '1' when cpuaddr(23 downto 21)="001" OR cpuaddr(23 downto 21)="010" ELSE '0'; --$200000 - $5FFFFF
 --	sel_fast <= '1' when cpuaddr(23 downto 19)="11111" ELSE '0'; --$F800000;
 --	sel_fast <= '0'; --$200000 - $9FFFFF
@@ -168,9 +176,46 @@ BEGIN
 	cpustate <= clkena&slower(1 downto 0)&ramcs&state;
 	ramlds <= lds_in;
 	ramuds <= uds_in;
+
 	ramaddr(23 downto 0) <= cpuaddr(23 downto 0);
 	ramaddr(24) <= sel_fast;
 	ramaddr(31 downto 25) <= cpuaddr(31 downto 25);
+	
+	-- map RAM appropriately:
+-- we want 0x200000 to 0x9ffffe to map to 
+-- 0x400000 to 0xbffffe.  Blocks can be bitswapped if need be.
+-- Truth table of bits 23 downto 20
+
+-- 0000 -> 0000 -- chip, 1st meg, 0 -> 0
+-- 0001 -> 0001 -- chip, 2nd meg, 1 -> 1
+-- 0010 -> 0100 -- fast, 1st meg, 2 -> 4
+-- 0011 -> 0101 -- fast, 2nd meg, 3 -> 5
+-- 0100 -> 0110 -- fast, 3rd meg, 4 -> 6
+-- 0101 -> 0111 -- fast, 4th meg, 5 -> 7
+-- 0110 -> 1000 -- fast, 5th meg, 6 -> 8
+-- 0111 -> 1001 -- fast, 6th meg, 7 -> 9
+-- 1000 -> 1010 -- fast, 7th meg, 8 -> A
+-- 1001 -> 1011 -- fast, 8th meg, 9 -> B
+-- 1010 -> (1110) -- A: PCMCIA space, doesn't matter.
+-- 1011 -> (1111) -- B: Peripheral space, doesn't matter
+-- 1100 -> 1100 -- C: slow ram - a good idea to leave this if possible
+-- 1101 -> 1101 -- D: more slow ram, only up to 0xd7fffe
+-- 1110 -> 1110 -- E: OSD processor's RAM
+-- 1111 -> 1111 -- F: Kickstart ROM
+
+-- Bit zero passes through unmodified
+-- Bit 1 becomes (bit 2 and not bit 1) xor bit 3
+-- Bit 2 becomes (bit 3 and bit 2) or (bit 1 xor bit 2)
+-- Bit 3 becomes bit 3 or (bit 2 and bit 1)
+
+--	ramaddr(20 downto 0) <= cpuaddr(20 downto 0);
+--	ramaddr(31 downto 24) <= cpuaddr(31 downto 24);
+--	ramaddr(23 downto 21) <= cpuaddr(23 downto 21) when cpuaddr(24)='1'
+--			else
+--		(cpuaddr(23) or (cpuaddr(22) and cpuaddr(21))) &
+--		((cpuaddr(23) and cpuaddr(22)) or (cpuaddr(22) xor cpuaddr(21))) &
+--		(cpuaddr(23) xor (cpuaddr(22) and not cpuaddr(21)));
+--
 
 
 pf68K_Kernel_inst: TG68KdotC_Kernel 
