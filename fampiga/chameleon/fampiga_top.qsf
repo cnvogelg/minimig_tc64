@@ -170,6 +170,7 @@ set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING OFF
 set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_DUPLICATION ON
 
 set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "2.5 V"
+set_global_assignment -name OPTIMIZE_POWER_DURING_SYNTHESIS OFF
 set_global_assignment -name VHDL_FILE ../board/chameleon_reconfigure.vhd
 set_global_assignment -name VHDL_FILE ../board/chameleon_cdtv_remote.vhd
 set_global_assignment -name VHDL_FILE ../board/palclk.vhd
@@ -205,6 +206,6 @@ set_global_assignment -name VERILOG_FILE ../minimig/PS2Keyboard.v
 set_global_assignment -name VERILOG_FILE ../minimig/Sprites.v
 set_global_assignment -name VHDL_FILE ../board/chameleon_docking_station.vhd
 set_global_assignment -name SDC_FILE fampiga.sdc
-set_global_assignment -name OPTIMIZE_POWER_DURING_SYNTHESIS OFF
 set_global_assignment -name CDF_FILE Chain1.cdf
+set_global_assignment -name QIP_FILE ../board/palclk.qip
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

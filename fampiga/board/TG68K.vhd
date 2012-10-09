@@ -177,9 +177,17 @@ BEGIN
 	ramlds <= lds_in;
 	ramuds <= uds_in;
 
-	ramaddr(23 downto 0) <= cpuaddr(23 downto 0);
-	ramaddr(24) <= sel_fast;
-	ramaddr(31 downto 25) <= cpuaddr(31 downto 25);
+--	ramaddr(23 downto 0) <= cpuaddr(23 downto 0);
+--	ramaddr(24) <= sel_fast;
+--	ramaddr(31 downto 25) <= cpuaddr(31 downto 25);
+
+	ramaddr(20 downto 0) <= cpuaddr(20 downto 0);
+	ramaddr(31 downto 24) <= cpuaddr(31 downto 24);
+	ramaddr(23 downto 21) <= "010" when cpuaddr(23 downto 21)="001" -- 2 -> 4
+		else "011" when cpuaddr(23 downto 21)="010" -- 4 -> 6
+		else "100" when cpuaddr(23 downto 21)="011" -- 6 -> 8
+		else "111" when cpuaddr(23 downto 21)="100" -- 8 -> E
+		else cpuaddr(23 downto 21);	-- pass through others
 	
 	-- map RAM appropriately:
 -- we want 0x200000 to 0x9ffffe to map to 
