@@ -110,6 +110,13 @@ signal cequal		:std_logic;
 signal cpuStated	:std_logic_vector(1 downto 0);
 signal cpuRDd		:std_logic_vector(15 downto 0);
 
+signal dcache		:std_logic_vector(63 downto 0);
+signal dcache_addr	:std_logic_vector(24 downto 0);
+signal dcache_fill	:std_logic;
+signal dcachehit	:std_logic;
+signal dvalid		:std_logic_vector(3 downto 0);
+signal dequal		:std_logic;
+
 signal hostSlot_cnt	:std_logic_vector(7 downto 0);
 signal reset_cnt	:std_logic_vector(7 downto 0);
 signal reset		:std_logic;
@@ -121,6 +128,8 @@ signal c_7mdr		:std_logic;
 signal cpuCycle		:std_logic;
 signal chipCycle	:std_logic;
 signal slow			:std_logic_vector(7 downto 0);
+
+signal refreshcnt : std_logic_vector(8 downto 0);
 
 type sdram_states is (ph0,ph1,ph2,ph3,ph4,ph5,ph6,ph7,ph8,ph9,ph10,ph11,ph12,ph13,ph14,ph15);
 signal sdram_state		: sdram_states;
@@ -155,8 +164,6 @@ begin
 
 	-- Map host processor's address space to 0xA00000
 	zmAddr <= '0'& NOT hostAddr(23) & hostAddr(22) & NOT hostAddr(21) & hostAddr(20 downto 0);
-	-- AMR - changed this to 0xC00000
---	zmAddr <= "0" & NOT hostAddr(23) & not hostAddr(22) & hostAddr(21) & hostAddr(20 downto 0);
 	
 	process (sysclk, zmAddr, hostAddr, zcache_addr, zcache, zequal, zvalid, hostRDd) 
 	begin
@@ -167,21 +174,6 @@ begin
 		end if;	
 		zcachehit <= '0';
 		if zequal='1' and zvalid(0)='1' and hostStated(1)='0' THEN
---			case (hostAddr(2 downto 1)-zcache_addr(2 downto 1)) is
---				when "00"=>
---					zcachehit <= zvalid(0);
---					hostRD <= zcache(63 downto 48);
---				when "01"=>
---					zcachehit <= zvalid(1);
---					hostRD <= zcache(47 downto 32);
---				when "10"=>
---					zcachehit <= zvalid(2);
---					hostRD <= zcache(31 downto 16);
---				when "11"=>
---					zcachehit <= zvalid(3);
---					hostRD <= zcache(15 downto 0);
---				when others=> null;
---			end case;	
 			case (hostAddr(2 downto 1)&zcache_addr(2 downto 1)) is
 				when "0000"|"0101"|"1010"|"1111"=>
 					zcachehit <= zvalid(0);
@@ -215,12 +207,8 @@ begin
 				end if;
 				if sdram_state=ph9 AND hostCycle='1' THEN 
 					hostRDd <= sdata_reg;
---					if zmAddr=casaddr and cas_sd_cas='0' then
---						zena <= '1';
---					end if;
 				end if;
 				if sdram_state=ph11 AND hostCycle='1' THEN 
---					hostRDd <= sdata_reg;
 					if zmAddr=casaddr and cas_sd_cas='0' then
 						zena <= '1';
 					end if;
@@ -232,8 +220,6 @@ begin
 					case sdram_state is	
 						when ph7 =>	
 										if hostStated(1)='0' AND hostCycle='1' THEN	--only instruction cache
---										if cas_sd_we='1' AND hostStated(1)='0' AND hostCycle='1' THEN	--only instruction cache
---										if cas_sd_we='1' AND hostCycle='1' THEN
 											zcache_addr <= casaddr(23 downto 0);
 											zcache_fill <= '1';
 											zvalid <= "0000";
@@ -241,23 +227,18 @@ begin
 						when ph9 =>	
 										if zcache_fill='1' THEN
 											zcache(63 downto 48) <= sdata_reg;
---											zvalid(0) <= '1';
 										end if;
 						when ph10 =>	
 										if zcache_fill='1' THEN
 											zcache(47 downto 32) <= sdata_reg;
---											zvalid(1) <= '1';
 										end if;
 						when ph11 =>	
 										if zcache_fill='1' THEN
 											zcache(31 downto 16) <= sdata_reg;
---											zvalid(2) <= '1';
 										end if;
---										zena <= '0';
 						when ph12 =>	
 										if zcache_fill='1' THEN
 											zcache(15 downto 0) <= sdata_reg;
---											zvalid(3) <= '1';
 											zvalid <= "1111";
 										end if;
 										zcache_fill <= '0';
@@ -269,7 +250,7 @@ begin
 -------------------------------------------------------------------------
 -- cpu cache
 -------------------------------------------------------------------------
-	cpuena <= '1' when cena='1' or ccachehit='1' else '0'; 
+	cpuena <= '1' when cena='1' or ccachehit='1' or dcachehit='1' else '0'; 
 	
 	process (sysclk, cpuAddr, ccache_addr, ccache, cequal, cvalid, cpuRDd) 
 	begin
@@ -278,23 +259,17 @@ begin
 		else	
 			cequal <='0';
 		end if;	
+
+		if cpuAddr(24 downto 3)=dcache_addr(24 downto 3) THEN
+			dequal <='1';
+		else	
+			dequal <='0';
+		end if;	
+
 		ccachehit <= '0';
-		if cequal='1' and cvalid(0)='1' and cpuStated(1)='0' THEN
---			case (cpuAddr(2 downto 1)-ccache_addr(2 downto 1)) is
---				when "00"=>
---					ccachehit <= cvalid(0);
---					cpuRD <= ccache(63 downto 48);
---				when "01"=>
---					ccachehit <= cvalid(1);
---					cpuRD <= ccache(47 downto 32);
---				when "10"=>
---					ccachehit <= cvalid(2);
---					cpuRD <= ccache(31 downto 16);
---				when "11"=>
---					ccachehit <= cvalid(3);
---					cpuRD <= ccache(15 downto 0);
---				when others=> null;
---			end case;	
+		dcachehit <= '0';
+
+		if cequal='1' and cvalid(0)='1' and cpuStated(1)='0' THEN -- instruction cache
 			case (cpuAddr(2 downto 1)&ccache_addr(2 downto 1)) is
 				when "0000"|"0101"|"1010"|"1111"=>
 					ccachehit <= cvalid(0);
@@ -309,8 +284,24 @@ begin
 					ccachehit <= cvalid(3);
 					cpuRD <= ccache(15 downto 0);
 				when others=> null;
+			end case;
+		elsif dequal='1' and dvalid(0)='1' and cpuStated(1 downto 0)="10" THEN -- Read data
+			case (cpuAddr(2 downto 1)&dcache_addr(2 downto 1)) is
+				when "0000"|"0101"|"1010"|"1111"=>
+					dcachehit <= dvalid(0);
+					cpuRD <= dcache(63 downto 48);
+				when "0100"|"1001"|"1110"|"0011"=>
+					dcachehit <= dvalid(1);
+					cpuRD <= dcache(47 downto 32);
+				when "1000"|"1101"|"0010"|"0111"=>
+					dcachehit <= dvalid(2);
+					cpuRD <= dcache(31 downto 16);
+				when "1100"|"0001"|"0110"|"1011"=>
+					dcachehit <= dvalid(3);
+					cpuRD <= dcache(15 downto 0);
+				when others=> null;
 			end case;	
-		else	
+		else
 			cpuRD <= cpuRDd;
 		end if;	
 	end process;		
@@ -321,63 +312,81 @@ begin
 		if reset = '0' THEN
 			ccache_fill <= '0';
 			cena <= '0';
+			dcache_fill <= '0';
 			cvalid <= "0000";
+			dvalid <= "0000";
 		elsif (sysclk'event and sysclk='1') THEN
 				if cpuState(5)='1' THEN
 					cena <= '0';
 				end if;
 				if sdram_state=ph9 AND cpuCycle='1' THEN 
 					cpuRDd <= sdata_reg;
---					if cpuAddr=casaddr(24 downto 1) and cas_sd_cas='0' then
---						cena <= '1';
---					end if;
 				end if;
 				if sdram_state=ph11 AND cpuCycle='1' THEN 
---					cpuRDd <= sdata_reg;
 					if cpuAddr=casaddr(24 downto 1) and cas_sd_cas='0' then
 						cena <= '1';
 					end if;
 				end if;
 				cpuStated <= cpuState(1 downto 0);
+
+				-- Invalidate caches on write
 				if cequal='1' and cpuState(1 downto 0)="11" THEN
 					cvalid <= "0000";
 				end if;
-					case sdram_state is	
+				if dequal='1' and cpuState(1 downto 0)="11" THEN
+					dvalid <= "0000";
+				end if;
+
+				case sdram_state is	
 						when ph7 =>	
-										if cpuStated(1)='0' AND cpuCycle='1' THEN	--only instruction cache
---										if cas_sd_we='1' AND hostStated(1)='0' AND hostCycle='1' THEN	--only instruction cache
---										if cas_sd_we='1' AND hostCycle='1' THEN
-											ccache_addr <= casaddr;
-											ccache_fill <= '1';
-											cvalid <= "0000";
-										end if;
+							if cpuCycle='1' then
+								if cpuStated(1)='0' THEN	-- instruction cache
+									ccache_addr <= casaddr;
+									ccache_fill <= '1';
+									cvalid <= "0000";
+								elsif cpuStated(1 downto 0)="10" THEN	-- data cache
+									dcache_addr <= casaddr;
+									dcache_fill <= '1';
+									dvalid <= "0000";
+								end if;
+							end if;
 						when ph9 =>	
-										if ccache_fill='1' THEN
-											ccache(63 downto 48) <= sdata_reg;
---											cvalid(0) <= '1';
-										end if;
+							if ccache_fill='1' THEN
+								ccache(63 downto 48) <= sdata_reg;
+							end if;
+							if dcache_fill='1' THEN
+								dcache(63 downto 48) <= sdata_reg;
+							end if;
 						when ph10 =>	
-										if ccache_fill='1' THEN
-											ccache(47 downto 32) <= sdata_reg;
---											cvalid(1) <= '1';
-										end if;
+							if ccache_fill='1' THEN
+								ccache(47 downto 32) <= sdata_reg;
+							end if;
+							if dcache_fill='1' THEN
+								dcache(47 downto 32) <= sdata_reg;
+							end if;
 						when ph11 =>	
-										if ccache_fill='1' THEN
-											ccache(31 downto 16) <= sdata_reg;
---											cvalid(2) <= '1';
-										end if;
+							if ccache_fill='1' THEN
+								ccache(31 downto 16) <= sdata_reg;
+							end if;
+							if dcache_fill='1' THEN
+								dcache(31 downto 16) <= sdata_reg;
+							end if;
 						when ph12 =>	
-										if ccache_fill='1' THEN
-											ccache(15 downto 0) <= sdata_reg;
---											cvalid(3) <= '1';
-											cvalid <= "1111";
-										end if;
-										ccache_fill <= '0';
+							if ccache_fill='1' THEN
+								ccache(15 downto 0) <= sdata_reg;
+								cvalid <= "1111";
+							end if;
+							if dcache_fill='1' THEN
+								dcache(15 downto 0) <= sdata_reg;
+								dvalid <= "1111";
+							end if;
+							ccache_fill <= '0';
+							dcache_fill <= '0';
 						when others =>	null;
-					end case;	
+					end case;
 			end if;
 	end process;		
-		
+
 	
 -------------------------------------------------------------------------
 -- chip cache
@@ -440,11 +449,9 @@ begin
 					when ph5 => sdwrite <= '1';
 					when ph6 =>	enaWRreg <= '1';
 								ena7RDreg <= '1';
---					when ph7 =>	c_7m <= '0';
 					when ph10 => enaWRreg <= '1';
 					when ph14 => enaWRreg <= '1';
 								ena7WRreg <= '1';
---					when ph15 => c_7m <= '1';
 					when others => null;
 				end case;	
 			END IF;	
@@ -463,25 +470,11 @@ begin
 			END IF;	
 			IF c_7mdr='1' THEN
 				sdram_state <= ph2;
---			if reset_sdstate = '0' then
---				sdram_state <= ph0;
 			ELSE
 				case sdram_state is	--LATENCY=3
 					when ph0 =>	sdram_state <= ph1;
 					when ph1 =>	sdram_state <= ph2;
---					when ph1 =>	
---							IF c_28md='1' THEN
---								sdram_state <= ph2;
---							ELSE	
---								sdram_state <= ph1;
---							END IF;	
 					when ph2 =>	sdram_state <= ph3;
---				when ph2 =>	--sdram_state <= ph3;
---							IF c_28md='0' THEN
---								sdram_state <= ph3;
---							ELSE	
---								sdram_state <= ph2;
---							END IF;	
 					when ph3 =>	sdram_state <= ph4;
 					when ph4 =>	sdram_state <= ph5;
 					when ph5 =>	sdram_state <= ph6;
@@ -494,7 +487,6 @@ begin
 					when ph12 => sdram_state <= ph13;
 					when ph13 => sdram_state <= ph14;
 					when ph14 => sdram_state <= ph15;
---					when ph15 => sdram_state <= ph0;
 					when others => sdram_state <= ph0;
 				end case;	
 			END IF;	
@@ -534,8 +526,6 @@ begin
 							sd_ras <= '0';
 							sd_cas <= '0';
 							sd_we <= '0';
---							ba <= "00";
-	--						sdaddr <= "0001000100010"; --BURST=4 LATENCY=2
 							sdaddr <= "0001000110010"; --BURST=4 LATENCY=3
 						when others =>	null;	--NOP
 					end case;
@@ -556,17 +546,19 @@ begin
 					ELSE
 						slow <= slow+1;
 					END IF;
---					IF dma='0' OR cpu_dma='0' THEN
+
 					IF hostSlot_cnt /= "00000000" THEN
 						hostSlot_cnt <= hostSlot_cnt-1;
 					END IF;
---					IF chip_dma='1' THEN
+					if refreshcnt /= "000000000" then
+						refreshcnt <= refreshcnt-1;
+					end if;
+
+-- 				We give the chipset first priority...
 					IF chip_dma='0' OR chipRW='0' THEN
 						chipCycle <= '1';
 						sdaddr <= '0'&chipAddr(20 downto 9);
---						ba <= "00";
 						ba <= chipAddr(22 downto 21);
---						cas_dqm <= "00";	--only word access
 						cas_dqm <= chipU& chipL;
 						sd_cs <= "1110"; 	--ACTIVE
 						sd_ras <= '0';
@@ -574,9 +566,18 @@ begin
 						datain <= chipWR;
 						cas_sd_cas <= '0';
 						cas_sd_we <= chipRW;
---					ELSIF cpu_dma='1' AND hostSlot_cnt /= "00000000" THEN
---					ELSIF cpu_dma='0' OR cpuRW='0' THEN
-					ELSIF cpuState(2)='0' AND cpuState(5)='0' THEN	
+
+-- 				Next in line is refresh...
+					elsif refreshcnt="000000000" then
+						sd_cs <="0000"; --AUTOREFRESH
+						sd_ras <= '0';
+						sd_cas <= '0';
+						refreshcnt <= "111111111";
+						
+--					The Amiga CPU gets next bite of the cherry, unless the OSD CPU has been cycle-starved...
+					ELSIF cpuState(2)='0' AND cpuState(5)='0'
+						and (hostslot_cnt/="00000000" or (hostState(2)='1' or hostena='1')) THEN	
+						-- We only yeild to the OSD CPU if it's both cycle-starved and ready to go.
 						cpuCycle <= '1';
 						sdaddr <= cpuAddr(24)&cpuAddr(20 downto 9);
 						ba <= cpuAddr(22 downto 21);
@@ -587,29 +588,26 @@ begin
 						datain <= cpuWR;
 						cas_sd_cas <= '0';
 						cas_sd_we <= NOT cpuState(1) OR NOT cpuState(0);
-					ELSE 
-						hostSlot_cnt <= "00001111";	
---					ELSIF hostState(2)='1' OR hostena='1' OR slow(3 downto 0)="0001" THEN	--refresh cycle
-						IF hostState(2)='1' OR hostena='1' THEN	--refresh cycle
-	--					ELSIF slow(3 downto 0)="0001" THEN	--refresh cycle
-							sd_cs <="0000"; --AUTOREFRESH
-							sd_ras <= '0';
-							sd_cas <= '0';
-						ELSE	
-							hostCycle <= '1';
-							sdaddr <= '0'&zmAddr(20 downto 9);
-							ba <= zmAddr(22 downto 21);
-							cas_dqm <= hostU& hostL;
-							sd_cs <= "1110"; --ACTIVE
-							sd_ras <= '0';
-							casaddr <= zmAddr;
-							datain <= hostWR;
-							cas_sd_cas <= '0';
-							IF hostState="011" THEN
-								cas_sd_we <= '0';
-	--							dqm <= hostU& hostL;
-							END IF;
+					ELSIF hostState(2)='0' AND hostena='0' THEN
+						hostSlot_cnt <= "00001111";
+						hostCycle <= '1';
+						sdaddr <= '0'&zmAddr(20 downto 9);
+						ba <= zmAddr(22 downto 21);
+						cas_dqm <= hostU& hostL;
+						sd_cs <= "1110"; --ACTIVE
+						sd_ras <= '0';
+						casaddr <= zmAddr;
+						datain <= hostWR;
+						cas_sd_cas <= '0';
+						IF hostState="011" THEN
+							cas_sd_we <= '0';
 						END IF;
+					else
+--						If no-one else wants this cycle we refresh the RAM.
+						sd_cs <="0000"; --AUTOREFRESH
+						sd_ras <= '0';
+						sd_cas <= '0';
+						refreshcnt <= "111111111";
 					END IF;
 				END IF;
 				if sdram_state=ph4 then

@@ -25,16 +25,41 @@
 
 create_clock -name "clk8" -period 125.000ns [get_ports {clk8}] -waveform {0.000 62.500}
 
-
 # Automatically constrain PLL and other generated clocks
-derive_pll_clocks -create_base_clocks
+derive_pll_clocks
 
-# Automatically calculate clock uncertainty to jitter and other effects.
-derive_clock_uncertainty
+create_generated_clock -name sdram_clk_pin -source [get_nets {inst|altpll_component|auto_generated|wire_pll1_clk[0]}] [get_ports {sd_clk}]
 
-# tsu/th constraints
+#**************************************************************
+# Set Clock Uncertainty
+#**************************************************************
 
-# tco constraints
+derive_clock_uncertainty;
 
-# tpd constraints
+#**************************************************************
+# Set Input Delay
+#**************************************************************
 
+# Very narrow window here.
+set_input_delay -clock sdram_clk_pin -max [expr 5.4 + 1.0] [get_ports sd_data*]
+set_input_delay -clock sdram_clk_pin -min [expr 3 + 0.1 ] [get_ports sd_data*]
+
+#**************************************************************
+# Set Output Delay
+#**************************************************************
+
+# Routing delay on outputs should pretty much cancel out, since they'll apply to the clock too, yes?
+set_output_delay -clock sdram_clk_pin -max [expr 1.5 + 0.1] [get_ports sd_data*]
+set_output_delay -clock sdram_clk_pin -min [expr -1.0 - 0.1] [get_ports sd_data*]
+
+set_output_delay -clock sdram_clk_pin -max [expr 1.5 + 0.1] [get_ports sd_addr*]
+set_output_delay -clock sdram_clk_pin -min [expr -1.0 - 0.1] [get_ports sd_addr*]
+
+set_output_delay -clock sdram_clk_pin -max [expr 1.5 + 0.1] [get_ports {sd_ba_0 sd_ba_1 sd_cas_n sd_ldqm sd_ras_n sd_udqm sd_we_n}]
+set_output_delay -clock sdram_clk_pin -min [expr -1.0 - 0.1] [get_ports {sd_ba_0 sd_ba_1 sd_cas_n sd_ldqm sd_ras_n sd_udqm sd_we_n}]
+
+
+# Multicycles
+
+# Without this, Quartus shoots for the wrong clock edge on inputs, due to the phase-shifted clock.
+set_multicycle_path -from {sd_data*} -to {sdram:inst5|sdata_reg*} -setup -end 2
