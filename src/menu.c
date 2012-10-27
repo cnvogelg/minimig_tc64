@@ -1195,7 +1195,7 @@ void HandleUI(void)
         OsdWrite(5, s, menusub == 3,0);
 
 #ifdef ACTIONREPLAY_BROKEN
-        OsdWrite(0, "", 0,0);
+        OsdWrite(6, "", 0,0);
 		menumask&=0xef;	// Remove bit 4
 #else
         strcpy(s, "      AR3  : ");
@@ -1702,7 +1702,7 @@ void HandleUI(void)
         /* video settings menu                                            */
         /******************************************************************/
     case MENU_SETTINGS_VIDEO1 :
-		menumask=0x0f;
+		menumask=0x1f;
 		parentstate=menustate;
 		helptext=helptexts[HELPTEXT_VIDEO];
  
@@ -1714,13 +1714,15 @@ void HandleUI(void)
         strcpy(s, "   Hires Filter : ");
         strcat(s, config_filter_msg[config.filter.hires & 0x03]);
         OsdWrite(2, s, menusub == 1,0);
-        strcpy(s, "   Scanlines    : ");
-        strcat(s, config_scanlines_msg[config.scanlines % 3]);
-        OsdWrite(3, s, menusub == 2,0);
-        OsdWrite(4, "", 0,0);
-        OsdWrite(5, "", 0,0);
+        OsdWrite(3, "   Scanlines",0,0);
+        strcpy(s, "     Normal     : ");
+        strcat(s, config_scanlines_msg[config.scanlines & 3]);
+        OsdWrite(4, s, menusub == 2,0);
+        strcpy(s, "     Interlaced : ");
+        strcat(s, config_scanlines_msg[(config.scanlines & 0xc)>>2]);
+        OsdWrite(5, s, menusub == 3,0);
         OsdWrite(6, "", 0,0);
-        OsdWrite(7, STD_EXIT, menusub == 3,0);
+        OsdWrite(7, STD_EXIT, menusub == 4,0);
 
         menustate = MENU_SETTINGS_VIDEO2;
         break;
@@ -1744,14 +1746,24 @@ void HandleUI(void)
             }
             else if (menusub == 2)
             {
-                config.scanlines++;
-                if (config.scanlines > 2)
-                    config.scanlines = 0;
+				short tmp=config.scanlines+1;
+				if((tmp&3)==3)
+					tmp=0;
+                config.scanlines=(config.scanlines&0xfc)|(tmp&3);
+                menustate = MENU_SETTINGS_VIDEO1;
+                ConfigScanlines(config.scanlines);
+            }
+            else if (menusub == 3)
+            {
+ 				short tmp=config.scanlines+4;
+				if((tmp&0xc)==0xc)
+					tmp=0;
+                config.scanlines=(config.scanlines&0xf3)|(tmp&0xc);
                 menustate = MENU_SETTINGS_VIDEO1;
                 ConfigScanlines(config.scanlines);
             }
 
-            else if (menusub == 3)
+            else if (menusub == 4)
             {
                 menustate = MENU_MAIN2_1;
                 menusub = 4;
