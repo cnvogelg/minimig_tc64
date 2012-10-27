@@ -186,7 +186,8 @@ module Agnus
 	input	a1k,						// enable A1000 OCS features
 	input	ecs,						// enabl ECS features
 	input	floppy_speed,				// allocates refresh slots for disk DMA
-	input	turbo						// alows blitter to take extra DMA slots 
+	input	turbo,					// alows blitter to take extra DMA slots 
+	output lace						// Allows Amber to use different settings for laced.
 );
 
 //register names and adresses		
@@ -558,7 +559,8 @@ beamcounter	bc1
 	.eol(sol),
 	.eof(sof),
 	.vbl_int(vbl_int),
-	.htotal(htotal)
+	.htotal(htotal),
+	.lace(lace)
 );
 
 //horizontal strobe for Denise

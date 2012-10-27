@@ -137,6 +137,8 @@ COMPONENT TG68KdotC_Kernel
    SIGNAL autoconfig_out: std_logic;
    SIGNAL autoconfig_data: std_logic_vector(3 downto 0);
    SIGNAL sel_fast: std_logic;
+	SIGNAL sel_chipram: std_logic;
+	SIGNAL turbo_chipram : std_logic := '0';
    SIGNAL slower       : std_logic_vector(3 downto 0);
 
 
@@ -156,10 +158,14 @@ BEGIN
 	datatg68 <= fromram WHEN sel_fast='1' ELSE r_data WHEN sel_autoconfig='0' ELSE autoconfig_data&r_data(11 downto 0); 
 --	toram <= data_write;
 	
-    sel_autoconfig <= '1' when cpuaddr(23 downto 19)="11101" AND autoconfig_out='1' ELSE '0'; --$E80000 - $EFFFFF
+   sel_autoconfig <= '1' when cpuaddr(23 downto 19)="11101" AND autoconfig_out='1' ELSE '0'; --$E80000 - $EFFFFF
+
+	sel_chipram <= '1' when state/="01" AND (cpuaddr(23 downto 21)="000") ELSE '0'; --$000000 - $1FFFFF
+
 	sel_fast <= '1' when state/="01" AND
 		(
-			cpuaddr(23 downto 21)="001"
+			(turbo_chipram='1' AND cpuaddr(23 downto 21)="000" )
+			OR cpuaddr(23 downto 21)="001"
 			OR cpuaddr(23 downto 21)="010"
 			OR cpuaddr(23 downto 21)="011"
 			OR cpuaddr(23 downto 21)="100"
@@ -278,9 +284,12 @@ pf68K_Kernel_inst: TG68KdotC_Kernel
 		IF rising_edge(clk) THEN
 			IF reset='0' THEN
 				autoconfig_out <= '1';		--autoconfig on
+				turbo_chipram <= '0';	-- disable turbo_chipram until we know kickstart's running...
 			ELSIF enaWRreg='1' THEN
 				IF sel_autoconfig='1' AND state="11"AND uds_in='0' AND cpuaddr(6 downto 1)="100100" THEN
 					autoconfig_out <= '0';		--autoconfig off
+					turbo_chipram <= cpu(1);	-- enable turbo_chipram after autoconfig has been done...
+													-- FIXME - need a separate option for this.
 				END IF;	
 			END IF;	
 		END IF;	

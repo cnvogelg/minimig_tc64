@@ -50,12 +50,12 @@ module beamcounter
 	output	eol,					// end of video line
 	output	eof,					// end of video frame
 	output	reg vbl_int,			// vertical interrupt request (for Paula)
-	output	[8:1] htotal			// video line length
+	output	[8:1] htotal,			// video line length
+	output	reg lace
 );
 
 // local beam position counters
 reg		ersy;
-reg		lace;
 
 //local signals for beam counters and sync generator
 reg		long_frame;		// 1 : long frame (313 lines); 0 : normal frame (312 lines)
