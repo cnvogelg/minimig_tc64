@@ -398,7 +398,7 @@ module osd
 	output	reg [1:0] autofire_config = 0,
 	output	usrrst,
 	output	bootrst,
-	output	reconfigure
+	output	reg reconfigure
 );
 
 // local signals
@@ -420,8 +420,6 @@ reg 	[5:0] t_memory_config = 0;
 reg		[2:0] t_ide_config = 0;
 reg		[1:0] t_cpu_config = 0;
 reg 	[3:0] t_chipset_config = 0;
-
-reg		reconfig_reg;
 
 //--------------------------------------------------------------------------------------
 // memory configuration select signal
@@ -642,12 +640,11 @@ assign bootrst = rx && cmd && wrdat[7:0]==8'b1000_0001 ? 1'b1 : 1'b0;
 
 // reconfigure chameleon
 always @(posedge clk)
+begin
+	reconfigure<=1'b0;
 	if(rx && cmd && wrdat[7:0]==8'b1000_0010)
-	  reconfig_reg<=1;
-	else if(reset)
-	  reconfig_reg<=0;
-
-assign reconfigure = reconfig_reg;
+	  reconfigure<=1'b1;
+end
 	  
 endmodule
 

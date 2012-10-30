@@ -54,6 +54,8 @@ entity TG68K is
         ramready      : in std_logic:='0';
         cpu           : in std_logic_vector(1 downto 0);
         memcfg           : in std_logic_vector(5 downto 0);
+		  fastramcfg	: in std_logic_vector(1 downto 0);
+		  turbochipram : in std_logic;
         ramaddr    	  : out std_logic_vector(31 downto 0);
         cpustate      : out std_logic_vector(5 downto 0);
 		nResetOut	  : out std_logic;
@@ -138,7 +140,7 @@ COMPONENT TG68KdotC_Kernel
    SIGNAL autoconfig_data: std_logic_vector(3 downto 0);
    SIGNAL sel_fast: std_logic;
 	SIGNAL sel_chipram: std_logic;
-	SIGNAL turbo_chipram : std_logic := '0';
+	SIGNAL turbochip_ena : std_logic := '0';
    SIGNAL slower       : std_logic_vector(3 downto 0);
 
 
@@ -162,9 +164,10 @@ BEGIN
 
 	sel_chipram <= '1' when state/="01" AND (cpuaddr(23 downto 21)="000") ELSE '0'; --$000000 - $1FFFFF
 
+	-- FIXME - prevent TurboChip toggling while a transaction's in progress!
 	sel_fast <= '1' when state/="01" AND
 		(
-			(turbo_chipram='1' AND cpuaddr(23 downto 21)="000" )
+			(turbochip_ena='1' and turbochipram='1' AND cpuaddr(23 downto 21)="000" )
 			OR cpuaddr(23 downto 21)="001"
 			OR cpuaddr(23 downto 21)="010"
 			OR cpuaddr(23 downto 21)="011"
@@ -284,11 +287,11 @@ pf68K_Kernel_inst: TG68KdotC_Kernel
 		IF rising_edge(clk) THEN
 			IF reset='0' THEN
 				autoconfig_out <= '1';		--autoconfig on
-				turbo_chipram <= '0';	-- disable turbo_chipram until we know kickstart's running...
+				turbochip_ena <= '0';	-- disable turbo_chipram until we know kickstart's running...
 			ELSIF enaWRreg='1' THEN
 				IF sel_autoconfig='1' AND state="11"AND uds_in='0' AND cpuaddr(6 downto 1)="100100" THEN
 					autoconfig_out <= '0';		--autoconfig off
-					turbo_chipram <= cpu(1);	-- enable turbo_chipram after autoconfig has been done...
+					turbochip_ena <= '1';	-- enable turbo_chipram after autoconfig has been done...
 													-- FIXME - need a separate option for this.
 				END IF;	
 			END IF;	

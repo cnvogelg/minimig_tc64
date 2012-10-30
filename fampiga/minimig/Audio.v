@@ -281,7 +281,7 @@ begin
 		end
 		
 		if(dump)
-			sigma[6:0]<=7'b100_0000; // Clear the accumulator to avoid standing tones.
+			sigma[4:0]<=7'b1_0000; // Clear the accumulator to avoid standing tones.
 	end
 end
 

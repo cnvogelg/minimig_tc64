@@ -159,8 +159,8 @@ set_global_assignment -name MISC_FILE "D:/_chameleon/dockingstation/chameleon/fa
 set_global_assignment -name FMAX_REQUIREMENT "108 MHz"
 set_global_assignment -name ENABLE_CLOCK_LATENCY ON
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
-set_global_assignment -name EDA_SIMULATION_TOOL "ModelSim-Altera (VHDL)"
-set_global_assignment -name EDA_OUTPUT_DATA_FORMAT VHDL -section_id eda_simulation
+set_global_assignment -name EDA_SIMULATION_TOOL "<None>"
+set_global_assignment -name EDA_OUTPUT_DATA_FORMAT NONE -section_id eda_simulation
 set_global_assignment -name PHYSICAL_SYNTHESIS_EFFORT NORMAL
 set_global_assignment -name SYNTH_TIMING_DRIVEN_SYNTHESIS ON
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
@@ -171,11 +171,11 @@ set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_DUPLICATION ON
 
 set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "2.5 V"
 set_global_assignment -name OPTIMIZE_POWER_DURING_SYNTHESIS OFF
+set_global_assignment -name BDF_FILE ../board/fampiga_top.bdf
 set_global_assignment -name VHDL_FILE ../board/chameleon_reconfigure.vhd
 set_global_assignment -name VHDL_FILE ../board/chameleon_cdtv_remote.vhd
 set_global_assignment -name VHDL_FILE ../board/palclk.vhd
 set_global_assignment -name VHDL_FILE ../board/cfide.vhd
-set_global_assignment -name BDF_FILE ../board/fampiga_top.bdf
 set_global_assignment -name SOURCE_FILE ../board/JBboot.cmp
 set_global_assignment -name AHDL_FILE ../board/JBboot.tdf
 set_global_assignment -name VHDL_FILE ../board/sdram.vhd
