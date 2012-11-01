@@ -123,6 +123,8 @@ unsigned char FindDrive(void)
     if (!MMC_Read(0, sector_buffer)) // read MBR
         return(0);
 
+	BootPrint("Read first block\n");
+
 	boot_sector=0;
 	partitioncount=1;
 
@@ -134,6 +136,7 @@ unsigned char FindDrive(void)
 
 	if(partitioncount)
 	{
+		BootPrint("Found at least one partition\n");
 		// We have at least one partition, parse the MBR.
 		struct MasterBootRecord *mbr=(struct MasterBootRecord *)sector_buffer;
 		memcpy(&partitions[0],&mbr->Partition[0],sizeof(struct PartitionEntry));

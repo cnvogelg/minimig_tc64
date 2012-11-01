@@ -3,6 +3,8 @@
 
 #define MAXDIRENTRIES 8
 
+// FIXME - derive CHS address from FAT boot sector for card and partition mount modes.
+
 typedef struct
 {
     unsigned long sector;

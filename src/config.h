@@ -41,7 +41,7 @@ typedef struct
 	unsigned char pad1;
     hardfileTYPE  hardfile[2];
     unsigned char cpu;
-	unsigned char pad2;
+	unsigned char fastram;	// Contains fast mem (bit 0 & 1) and turbo chipram (bit 7) settings.
 } configTYPE;
 
 extern fileTYPE file;	// Temporary file available for use by other modules, to avoid repeated memory usage.

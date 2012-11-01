@@ -214,8 +214,8 @@ unsigned char MMC_Read(unsigned long lba, unsigned char *pReadBuffer)
 
     if (MMC_Command(CMD17, lba))
     {
-        printf("CMD17 (READ_BLOCK): invalid response 0x%02X (lba=%lu)\r", response, lba);
         DisableCard();
+        printf("CMD17 (READ_BLOCK): invalid response 0x%02X (lba=%lu)\r", response, lba);
         return(0);
     }
 
@@ -225,8 +225,8 @@ unsigned char MMC_Read(unsigned long lba, unsigned char *pReadBuffer)
     {
         if (timeout++ >= 1000000) // we can't wait forever
         {
-            printf("CMD17 (READ_BLOCK): no data token! (lba=%lu)\r", lba);
             DisableCard();
+            printf("CMD17 (READ_BLOCK): no data token! (lba=%lu)\r", lba);
             return(0);
         }
     }
@@ -298,28 +298,6 @@ unsigned long MMC_GetCapacity()
 {
 	unsigned long result=0;
 	MMC_GetCSD();
-//	switch(CardType)
-//	{
-//		case CARDTYPE_SDHC:
-//			result=(CSDData[7]&0x3f)<<26;
-//			result|=CSDData[8]<<18;
-//			result|=CSDData[9]<<10;
-//			result+=1024;
-//			return(result);
-//			break;
-//		default:
-//			int blocksize=CSDData[5]&15;	// READ_BL_LEN
-//			blocksize=1<<(blocksize-9);		// Now a scalar:  physical block size / 512.
-//			result=(CSDData[6]&3)<<10;
-//			result|=CSDData[7]<<2;
-// 			result|=(CSDData[8]>>6)&3;		// result now contains C_SIZE
-//			int cmult=(CSDData[9]&3)<<1;
-//			cmult|=(CSDData[10]>>7) & 1;
-//			++result;
-//			result<<=cmult+2;
-//			return(result);
-//			break;
-//	}
     if ((CSDData[0] & 0xC0)==0x40)   //CSD Version 2.0 - SDHC
     {
 			result=(CSDData[7]&0x3f)<<26;

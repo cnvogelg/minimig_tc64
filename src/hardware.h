@@ -38,6 +38,25 @@
 
 #define SPIN (*(volatile unsigned short *)0xDEE010)	// Waste a few cycles to let the FPGA catch up
 
+// A 16-bit register for platform-specific config.
+// On read:
+//   Bits 3:0 -> memory size.  (1<<memsize gives the size in megabytes.)
+//   Bit 4 -> Turbo chipram supported
+//   Bit 5 -> Reconfig supportred 
+
+// On write:
+//   Bits 1:0 -> Zorro II Fast ram memory config:  00-> off, 01->2mb, 10->4mb, 11->8mb
+//   Bit 15 -> Turbo chipram enable/disable
+
+#define PLATFORM (*(volatile unsigned short *)0xDEE014)
+#define PLATFORM_TURBOCHIP 4
+#define PLATFORM_RECONFIG 5
+#define PLATFORM_ACTIONREPLAY 6
+
+// Write to this register to reconfigure the FPGA on devices which support such operations.
+#define RECONFIGURE (*(volatile unsigned short *)0xDEE016)
+
+
 // static inline unsigned char SPI(unsigned char o)
 //{	
 //	volatile unsigned char *ptr = (volatile unsigned char *)0xda4000;
@@ -70,5 +89,7 @@ void Timer_Init(void);
 unsigned long GetTimer(unsigned long offset);
 unsigned long CheckTimer(unsigned long t);
 void WaitTimer(unsigned long time);
+void ConfigFastRAM(unsigned char memory);
+void Reconfigure();
 
 

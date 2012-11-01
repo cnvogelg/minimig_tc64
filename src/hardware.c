@@ -204,3 +204,14 @@ void WaitTimer(unsigned long time)
     while (!CheckTimer(time));
 }
 
+void ConfigFastRAM(unsigned char memory)
+{
+	PLATFORM=((memory&0x80)<<8)|(memory &0x03);
+}
+
+
+void Reconfigure()
+{
+	RECONFIGURE=0;	// A write to this register triggers a reconfig
+}
+

@@ -352,6 +352,7 @@ void ApplyConfiguration(char reloadkickstart)
     ConfigCPU(config.cpu);
     ConfigFilter(config.filter.lores, config.filter.hires);
     ConfigScanlines(config.scanlines);
+	ConfigFastRAM(config.fastram);
 
 	if(reloadkickstart)
 	{

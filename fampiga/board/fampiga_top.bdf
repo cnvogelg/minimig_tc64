@@ -3314,12 +3314,6 @@ applicable agreement for further details.
 	(bus)
 )
 (connector
-	(text "memcfg[5..0]" (rect -48 504 18 515)(font "Arial" ))
-	(pt 48 520)
-	(pt -56 520)
-	(bus)
-)
-(connector
 	(pt 48 312)
 	(pt 40 312)
 )

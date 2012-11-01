@@ -99,7 +99,7 @@ module userio
 	output	osd_enable,
 	output	[1:0] lr_filter,
 	output	[1:0] hr_filter,
-	output	[5:0] memory_config,
+	output	[3:0] memory_config,
 	output	[3:0] chipset_config,
 	output	[3:0] floppy_config,
 	output	[3:0] scanline,

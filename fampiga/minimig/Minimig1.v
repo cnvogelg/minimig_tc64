@@ -201,7 +201,7 @@ module Minimig1
 //	output	[14:0]rdata, 		// right DAC data
 	// user i/o
 	output	[1:0] cpu_config,
-	output	[5:0] memcfg,
+	output	[3:0] memcfg,
 	output	drv_snd,
 	output	floppyled,
 	// unused pins

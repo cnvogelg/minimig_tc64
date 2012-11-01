@@ -139,12 +139,14 @@ __geta4 void main(void)
 //       SetSPIMode(SPIMODE_NORMAL);
 
     if (!MMC_Init())
-        FatalError(1);
+       FatalError(1);
 
-    BootPrint("Init done again - hunting for drive...\n");
+//    BootPrint("Init done again - hunting for drive...\n");
 
 //    spiclk = 7;//MCLK / ((AT91C_SPI_CSR[0] & AT91C_SPI_SCBR) >> 8) / 1000000;
 //    printf("spiclk: %u MHz\r", spiclk);
+
+    BootPrint("hunting for drive...\n");
 
     if (!FindDrive())
         FatalError(2);

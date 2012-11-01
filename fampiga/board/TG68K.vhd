@@ -53,7 +53,6 @@ entity TG68K is
         fromram    	  : in std_logic_vector(15 downto 0);
         ramready      : in std_logic:='0';
         cpu           : in std_logic_vector(1 downto 0);
-        memcfg           : in std_logic_vector(5 downto 0);
 		  fastramcfg	: in std_logic_vector(1 downto 0);
 		  turbochipram : in std_logic;
         ramaddr    	  : out std_logic_vector(31 downto 0);
@@ -141,6 +140,7 @@ COMPONENT TG68KdotC_Kernel
    SIGNAL sel_fast: std_logic;
 	SIGNAL sel_chipram: std_logic;
 	SIGNAL turbochip_ena : std_logic := '0';
+	SIGNAL turbochip_d : std_logic := '0';
    SIGNAL slower       : std_logic_vector(3 downto 0);
 
 
@@ -167,7 +167,7 @@ BEGIN
 	-- FIXME - prevent TurboChip toggling while a transaction's in progress!
 	sel_fast <= '1' when state/="01" AND
 		(
-			(turbochip_ena='1' and turbochipram='1' AND cpuaddr(23 downto 21)="000" )
+			(turbochip_ena='1' and turbochip_d='1' AND cpuaddr(23 downto 21)="000" )
 			OR cpuaddr(23 downto 21)="001"
 			OR cpuaddr(23 downto 21)="010"
 			OR cpuaddr(23 downto 21)="011"
@@ -197,43 +197,15 @@ BEGIN
 		else "100" when cpuaddr(23 downto 21)="011" -- 6 -> 8
 		else "111" when cpuaddr(23 downto 21)="100" -- 8 -> E
 		else cpuaddr(23 downto 21);	-- pass through others
-	
-	-- map RAM appropriately:
--- we want 0x200000 to 0x9ffffe to map to 
--- 0x400000 to 0xbffffe.  Blocks can be bitswapped if need be.
--- Truth table of bits 23 downto 20
 
--- 0000 -> 0000 -- chip, 1st meg, 0 -> 0
--- 0001 -> 0001 -- chip, 2nd meg, 1 -> 1
--- 0010 -> 0100 -- fast, 1st meg, 2 -> 4
--- 0011 -> 0101 -- fast, 2nd meg, 3 -> 5
--- 0100 -> 0110 -- fast, 3rd meg, 4 -> 6
--- 0101 -> 0111 -- fast, 4th meg, 5 -> 7
--- 0110 -> 1000 -- fast, 5th meg, 6 -> 8
--- 0111 -> 1001 -- fast, 6th meg, 7 -> 9
--- 1000 -> 1010 -- fast, 7th meg, 8 -> A
--- 1001 -> 1011 -- fast, 8th meg, 9 -> B
--- 1010 -> (1110) -- A: PCMCIA space, doesn't matter.
--- 1011 -> (1111) -- B: Peripheral space, doesn't matter
--- 1100 -> 1100 -- C: slow ram - a good idea to leave this if possible
--- 1101 -> 1101 -- D: more slow ram, only up to 0xd7fffe
--- 1110 -> 1110 -- E: OSD processor's RAM
--- 1111 -> 1111 -- F: Kickstart ROM
-
--- Bit zero passes through unmodified
--- Bit 1 becomes (bit 2 and not bit 1) xor bit 3
--- Bit 2 becomes (bit 3 and bit 2) or (bit 1 xor bit 2)
--- Bit 3 becomes bit 3 or (bit 2 and bit 1)
-
---	ramaddr(20 downto 0) <= cpuaddr(20 downto 0);
---	ramaddr(31 downto 24) <= cpuaddr(31 downto 24);
---	ramaddr(23 downto 21) <= cpuaddr(23 downto 21) when cpuaddr(24)='1'
---			else
---		(cpuaddr(23) or (cpuaddr(22) and cpuaddr(21))) &
---		((cpuaddr(23) and cpuaddr(22)) or (cpuaddr(22) xor cpuaddr(21))) &
---		(cpuaddr(23) xor (cpuaddr(22) and not cpuaddr(21)));
---
-
+process(clk,turbochipram)
+begin
+	if rising_edge(clk) then
+		if state="01" then -- No mem access, so safe to switch chipram access mode
+			turbochip_d<=turbochipram;
+		end if;
+	end if;
+end process;
 
 pf68K_Kernel_inst: TG68KdotC_Kernel 
 	generic map(
@@ -267,11 +239,11 @@ pf68K_Kernel_inst: TG68KdotC_Kernel
 	PROCESS (clk)
 	BEGIN
 		autoconfig_data <= "1111";
-		IF memcfg(5 downto 4)/="00" THEN
+		IF fastramcfg/="00" THEN
 			CASE cpuaddr(6 downto 1) IS
 				WHEN "000000" => autoconfig_data <= "1110";		--normal card, add mem, no ROM
 				WHEN "000001" => 
-					CASE memcfg(5 downto 4) IS 
+					CASE fastramcfg IS 
 						WHEN "01" => autoconfig_data <= "0110";		--2MB
 						WHEN "10" => autoconfig_data <= "0111";		--4MB
 						WHEN OTHERS => autoconfig_data <= "0000";	--8MB
