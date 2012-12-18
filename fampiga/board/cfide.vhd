@@ -154,6 +154,8 @@ signal usart_rx : std_logic :='1';
 	signal mux_d_regd : std_logic_vector(3 downto 0) := (others => '1');
 
 signal reconfigure : std_logic :='0';
+
+signal slower : std_logic_vector(2 downto 0);
 	
 begin
 
@@ -170,9 +172,20 @@ srom: startram
     );
 
 
+-- Slow down accesses
+process(sysclk, cpuena)
+begin
+	if rising_edge(sysclk) then
+		slower<='0'&slower(2 downto 1);
+		if cpuena='1' then
+			slower<="111";
+		end if;	
+	end if;
+end process;
 
+memce <= slower(0) WHEN ROM_select='0' AND addr(23)='0' ELSE '1';
+--memce <= '0' WHEN ROM_select='0' AND addr(23)='0' ELSE '1';
 
-memce <= '0' WHEN ROM_select='0' AND addr(23)='0' ELSE '1';
 cpudata <=  rom_data WHEN ROM_select='1' ELSE 
 			IOdata WHEN IOcpuena='1' ELSE
 			part_in WHEN PART_select='1' ELSE 
