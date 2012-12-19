@@ -647,11 +647,12 @@ mytwc : component TwoWayCache
 							cas_dqm <= cpuU& cpuL;
 							sd_cs <= "1110"; --ACTIVE
 							sd_ras <= '0';
+							casaddr <= cpuAddr(24 downto 1)&'0';
 							if (cpuState(1) and cpuState(0))='1' then	-- Write cycle
-								casaddr <= cpuAddr(24 downto 1)&'0';
+--								casaddr <= cpuAddr(24 downto 1)&'0';
 								cas_sd_we <= '0';
 							else
-								casaddr <= cpuAddr(24 downto 3)&"000";
+--								casaddr <= cpuAddr(24 downto 3)&"000";
 								cas_sd_we <= '1';
 							end if;
 							datain <= cpuWR;

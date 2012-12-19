@@ -113,10 +113,13 @@ wire [10:0] cacheline2;
 
 reg readword_burst; // Set to 1 when the lsb of the cache address should
 							// track the SDRAM controller.
-reg [1:0] readword;
+reg [9:0] readword;
 
-assign cacheline1 = {1'b0,cpu_addr[10:3],(readword_burst ? readword : cpu_addr[2:1])};
-assign cacheline2 = {1'b1,cpu_addr[10:3],(readword_burst ? readword : cpu_addr[2:1])};
+//assign cacheline1 = {1'b0,cpu_addr[10:3],(readword_burst ? readword : cpu_addr[2:1])};
+//assign cacheline2 = {1'b1,cpu_addr[10:3],(readword_burst ? readword : cpu_addr[2:1])};
+
+assign cacheline1 = {1'b0,readword_burst ? readword : cpu_addr[10:1]};
+assign cacheline2 = {1'b1,readword_burst ? readword : cpu_addr[10:1]};
 
 // We share each tag between all four words of a cacheline.  We therefore only need
 // one M9K tag RAM for four M9Ks of data RAM.
@@ -164,7 +167,6 @@ begin
 	tag_wren2<=1'b0;
 	data_wren1<=1'b0;
 	data_wren2<=1'b0;
-	cpu_ack<=1'b0;
 	init<=1'b0;
 	readword_burst<=1'b0;
 
@@ -308,17 +310,26 @@ begin
 			state<=PAUSE1;
 			if(cpu_req==1'b0) 
 				state<=WAITING;
-			else
-				cpu_ack<=1'b1;
 		end
 		
 		WAITFILL:
 		begin
 			readword_burst<=1'b1;
-			readword<=2'b00;
+
+			// In the interests of performance, read the word we're waiting for first.
+			readword<=cpu_addr[10:1];
+
 			if (sdram_fill==1'b1)
 			begin
 				sdram_req<=1'b0;
+
+				// Forward data to CPU
+				// FIXME need to latch the address until the current cycle is complete.
+				// TAGRAM is already written, so just need to take care of
+				// Data RAM addresses.
+				data_to_cpu<=data_from_sdram;
+				cpu_ack<=1'b1;		
+				
 				// write first word to Cache...
 				data_ports_w<={2'b11,data_from_sdram};
 				data_wren1<=tag_mru1;
@@ -331,7 +342,7 @@ begin
 		begin
 			// write second word to Cache...
 			readword_burst<=1'b1;
-			readword<=2'b01;
+			readword[1:0]<=readword[1:0]+1;
 			data_ports_w<={2'b11,data_from_sdram};
 			data_wren1<=tag_mru1;
 			data_wren2<=!tag_mru1;
@@ -342,7 +353,7 @@ begin
 		begin
 			// write third word to Cache...
 			readword_burst<=1'b1;
-			readword<=2'b10;
+			readword[1:0]<=readword[1:0]+1;
 			data_ports_w<={2'b11,data_from_sdram};
 			data_wren1<=tag_mru1;
 			data_wren2<=!tag_mru1;
@@ -353,7 +364,7 @@ begin
 		begin
 			// write last word to Cache...
 			readword_burst<=1'b1;
-			readword<=2'b11;
+			readword[1:0]<=readword[1:0]+1;
 			data_ports_w<={2'b11,data_from_sdram};
 			data_wren1<=tag_mru1;
 			data_wren2<=!tag_mru1;
@@ -362,16 +373,31 @@ begin
 		
 		FILL5:
 		begin
-			readword=cpu_addr[2:1];
-			state<=WAITING;
+			state<=FILL5;
+			// Shouldn't need to worry about readword now - only used during burst
+//			readword=cpu_addr[2:1];
+
+			// Remain on state 5 until cpu_ack is low.
+			// We use this rather than cpu_req because in the time it's taken us to
+			// reach this point, it's possible the next request could have started.
+			if(cpu_ack==1'b0)
+				state<=WAITING;
 		end
 
 		default:
 			state<=WAITING;
 	endcase
+
+	// Cancel the ack flag as soon as req drops.
+	// The state machine will wait for this to happen before starting a new cycle.
+	if(cpu_req==1'b0)
+		cpu_ack<=1'b0;
 	
 	if(reset==1'b0)
+	begin
 		state<=INIT1;
+		cpu_ack<=1'b0;
+	end
 end
 
 endmodule
