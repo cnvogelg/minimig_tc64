@@ -27,6 +27,7 @@ module TwoWayCache
 	input [31:0] cpu_addr,
 	input cpu_req,	// 1 to request attention
 	output reg cpu_ack,	// 1 to signal that data is ready.
+	output reg cpu_wr_ack, // 1 to signal that write cycles have been actioned
 	input cpu_rw, // 1 for read cycles, 0 for write cycles
 	input cpu_rwl,
 	input cpu_rwu,
@@ -169,6 +170,7 @@ begin
 	data_wren2<=1'b0;
 	init<=1'b0;
 	readword_burst<=1'b0;
+	cpu_wr_ack<=1'b0;
 
 	case(state)
 
@@ -241,6 +243,7 @@ begin
 				// FIXME - ultimately we should clear a cacheline here and cache
 				// the data for future use.  Need to have a working valid flag first.
 				state<=WRITE2;
+				cpu_wr_ack<=1'b1;	// Indicate to the Write cache that it's safe to proceed.
 			end
 
 		WRITE2:
@@ -324,9 +327,9 @@ begin
 				sdram_req<=1'b0;
 
 				// Forward data to CPU
-				// FIXME need to latch the address until the current cycle is complete.
+				// (We now latch the address until the current cycle is complete.
 				// TAGRAM is already written, so just need to take care of
-				// Data RAM addresses.
+				// Data RAM addresses, which we do with the readword signal.
 				data_to_cpu<=data_from_sdram;
 				cpu_ack<=1'b1;		
 				

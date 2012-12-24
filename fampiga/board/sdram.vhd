@@ -151,6 +151,7 @@ COMPONENT TwoWayCache
 		cpu_addr		:	 IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 		cpu_req		:	 IN STD_LOGIC;
 		cpu_ack		:	 OUT STD_LOGIC;
+		cpu_wr_ack		:	 OUT STD_LOGIC;
 		cpu_rw		:	 IN STD_LOGIC;
 		cpu_rwl	: in std_logic;
 		cpu_rwu : in std_logic;
@@ -165,6 +166,18 @@ COMPONENT TwoWayCache
 	);
 END COMPONENT;
 
+-- Write buffer signals
+
+signal writebuffer_req : std_logic;
+signal writebuffer_ena : std_logic;
+signal writebufferCycle : std_logic;
+signal writebuffer_dqm : std_logic_vector(1 downto 0);
+signal writebufferAddr : std_logic_vector(24 downto 1);
+signal writebufferWR : std_logic_vector(15 downto 0);
+signal writebuffer_cache_ack : std_logic;
+
+type writebuffer_states is (waiting,write1,write2,write3);
+signal writebuffer_state : writebuffer_states;
 
 
 begin
@@ -291,6 +304,7 @@ mytwc : component TwoWayCache
 		cpu_addr => "0000000"&cpuAddr&'0',
 		cpu_req => not cpustate(2),
 		cpu_ack => ccachehit,
+		cpu_wr_ack => writebuffer_cache_ack,
 		cpu_rw => NOT cpuState(1) OR NOT cpuState(0),
 		cpu_rwl => cpuL,
 		cpu_rwu => cpuU,
@@ -305,7 +319,48 @@ mytwc : component TwoWayCache
 		sdram_rw => open
 	);
 
-	cpuena <= '1' when cena='1' or ccachehit='1' else '0'; 
+-- Write buffer, enables CPU to continue while a write is in progress.
+
+	process(sysclk, reset) begin
+		if reset='0' then
+			writebuffer_req<='0';
+			writebuffer_ena<='0';
+			writebuffer_state<=waiting;
+		elsif rising_edge(sysclk) then
+
+			case writebuffer_state is
+				when waiting =>
+					-- CPU write cycle, no cycle already pending.
+					if cpuState(2 downto 0)="011" then
+						writebufferAddr<=cpuAddr(24 downto 1);
+						writebufferWR<=cpuWR;
+						writebuffer_dqm<=cpuU & cpuL;
+						writebuffer_req<='1';
+						if writebuffer_cache_ack<='1' then
+							writebuffer_ena<='1';
+							writebuffer_state<=write2;
+						end if;
+					end if;
+				when write2 =>
+					if writebufferCycle='1' then	-- The SDRAM controller has picked up the request
+						writebuffer_req<='0';
+						writebuffer_state<=write3;
+					end if;
+				when write3 =>
+					if writebufferCycle='0' then	-- Wait for write cycle to finish, so it's safe to update the signals.
+						writebuffer_state<=waiting;
+					end if;
+				when others =>
+					writebuffer_state<=waiting;
+			end case;
+			
+			if cpuState(2)='1' then -- the CPU has unpaused, so clear the ack signal.
+				writebuffer_ena<='0';
+			end if;
+		end if;
+	end process;
+	
+	cpuena <= '1' when cena='1' or ccachehit='1' or writebuffer_ena='1' else '0'; 
 --	cpuena <= '1' when cena='1' or ccachehit='1' or dcachehit='1' else '0'; 
 --	
 --	process (sysclk, cpuAddr, ccache_addr, ccache, cequal, cvalid, cpuRDd) 
@@ -478,7 +533,9 @@ mytwc : component TwoWayCache
 					datawr <= chipWR;
 				ELSIF cpuCycle='1' THEN
 					datawr <= cpuWR;
-				ELSE	
+				ELSif writebufferCycle='1' then
+					datawr <= writebufferWR;
+				else
 					datawr <= hostWR;
 				END IF;
 			END IF;
@@ -598,6 +655,7 @@ mytwc : component TwoWayCache
 						cpuCycle <= '0';
 						chipCycle <= '0';
 						hostCycle <= '0';
+						writebufferCycle <= '0';
 						cas_sd_cs <= "1110"; 
 						cas_sd_ras <= '1';
 						cas_sd_cas <= '1';
@@ -637,8 +695,22 @@ mytwc : component TwoWayCache
 							
 		--					The Amiga CPU gets next bite of the cherry, unless the OSD CPU has been cycle-starved...
 		--					ELSIF cpuState(2)='0' AND cpuState(5)='0'
-						-- Request from read cache, or direct write request.
-						ELSIF (cache_req='1' or (cpuState(2)='0' and cpuState(1 downto 0)="11"))
+						-- Request from write buffer.
+						ELSIF (writebuffer_req='1')
+							and (hostslot_cnt/="00000000" or (hostState(2)='1' or hostena='1')) THEN	
+							-- We only yeild to the OSD CPU if it's both cycle-starved and ready to go.
+							writebufferCycle <= '1';
+							sdaddr <= writebufferAddr(24)&writebufferAddr(20 downto 9);
+							ba <= writebufferAddr(22 downto 21);
+							cas_dqm <= writebuffer_dqm;
+							sd_cs <= "1110"; --ACTIVE
+							sd_ras <= '0';
+							casaddr <= writebufferAddr(24 downto 1)&'0';
+							cas_sd_we <= '0';
+							datain <= writebufferWR;
+							cas_sd_cas <= '0';
+						-- Request from read cache
+						ELSIF (cache_req='1')
 							and (hostslot_cnt/="00000000" or (hostState(2)='1' or hostena='1')) THEN	
 							-- We only yeild to the OSD CPU if it's both cycle-starved and ready to go.
 							cpuCycle <= '1';
@@ -689,6 +761,7 @@ mytwc : component TwoWayCache
 						sd_ras <= cas_sd_ras;
 						sd_cas <= cas_sd_cas;
 						sd_we  <= cas_sd_we;
+						writebufferCycle<='0';	-- Indicate to WriteBuffer that it's safe to accept the next write.
 						
 					when ph8 =>
 						cache_fill<='1';
@@ -698,9 +771,6 @@ mytwc : component TwoWayCache
 						cache_fill<='1';
 					when ph11 =>
 						cache_fill<='1';
-						if cpuCycle='1' and cpuState="11" then
-							cena<='1';	-- Allow write cycles to complete.
-						end if;
 					when others =>
 						null;
 				end case;
