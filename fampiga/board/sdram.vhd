@@ -206,8 +206,8 @@ begin
 -------------------------------------------------------------------------
 	hostena <= '1' when zena='1' or hostState(1 downto 0)="01" OR zcachehit='1' else '0'; 
 
-	-- Map host processor's address space to 0xA00000
-	zmAddr <= '0'& NOT hostAddr(23) & hostAddr(22) & NOT hostAddr(21) & hostAddr(20 downto 0);
+	-- Map host processor's address space to 0x400000
+	zmAddr <= "00" & NOT hostAddr(22) & hostAddr(21 downto 0);
 	
 	process (sysclk, zmAddr, hostAddr, zcache_addr, zcache, zequal, zvalid, hostRDd) 
 	begin
@@ -239,7 +239,7 @@ begin
 	end process;		
 		
 	
---Daten�bernahme
+--Datenbernahme
 	process (sysclk, reset) begin
 		if reset = '0' THEN
 			zcache_fill <= '0';
@@ -418,7 +418,7 @@ mytwc : component TwoWayCache
 --	end process;		
 --		
 --	
-----Daten�bernahme
+----Datenbernahme
 --	process (sysclk, reset) begin
 --		if reset = '0' THEN
 --			ccache_fill <= '0';
@@ -606,7 +606,10 @@ mytwc : component TwoWayCache
 		END IF;	
 	end process;		
 
-
+-- Address bits will be allocated as follows:
+-- 24 downto 23: bank
+-- 22 downto 10: row
+-- 9 downto 1: column
 	
 	process (sysclk, initstate, pass, hostAddr, datain, init_done, casaddr, cpuU, cpuL, hostCycle) begin
 
@@ -676,8 +679,8 @@ mytwc : component TwoWayCache
 		-- 				We give the chipset first priority...
 						IF chip_dma='0' OR chipRW='0' THEN
 							chipCycle <= '1';
-							sdaddr <= '0'&chipAddr(20 downto 9);
-							ba <= chipAddr(22 downto 21);
+							sdaddr <= chipAddr(22 downto 10);
+							ba <= "00"; -- Always bank zero for chipset accesses, so we can interleave Fast RAM access
 							cas_dqm <= chipU& chipL;
 							sd_cs <= "1110"; 	--ACTIVE
 							sd_ras <= '0';
@@ -700,8 +703,8 @@ mytwc : component TwoWayCache
 							and (hostslot_cnt/="00000000" or (hostState(2)='1' or hostena='1')) THEN	
 							-- We only yeild to the OSD CPU if it's both cycle-starved and ready to go.
 							writebufferCycle <= '1';
-							sdaddr <= writebufferAddr(24)&writebufferAddr(20 downto 9);
-							ba <= writebufferAddr(22 downto 21);
+							sdaddr <= writebufferAddr(22 downto 10);
+							ba <= writebufferAddr(24 downto 23);
 							cas_dqm <= writebuffer_dqm;
 							sd_cs <= "1110"; --ACTIVE
 							sd_ras <= '0';
@@ -714,8 +717,8 @@ mytwc : component TwoWayCache
 							and (hostslot_cnt/="00000000" or (hostState(2)='1' or hostena='1')) THEN	
 							-- We only yeild to the OSD CPU if it's both cycle-starved and ready to go.
 							cpuCycle <= '1';
-							sdaddr <= cpuAddr(24)&cpuAddr(20 downto 9);
-							ba <= cpuAddr(22 downto 21);
+							sdaddr <= cpuAddr(22 downto 10);
+							ba <= cpuAddr(24 downto 23);
 							cas_dqm <= cpuU& cpuL;
 							sd_cs <= "1110"; --ACTIVE
 							sd_ras <= '0';
@@ -732,8 +735,8 @@ mytwc : component TwoWayCache
 						ELSIF hostState(2)='0' AND hostena='0' THEN
 							hostSlot_cnt <= "00001111";
 							hostCycle <= '1';
-							sdaddr <= '0'&zmAddr(20 downto 9);
-							ba <= zmAddr(22 downto 21);
+							sdaddr <= zmAddr(22 downto 10);
+							ba <= "00"; -- Always bank zero for SPI host CPU
 							cas_dqm <= hostU& hostL;
 							sd_cs <= "1110"; --ACTIVE
 							sd_ras <= '0';
@@ -752,8 +755,8 @@ mytwc : component TwoWayCache
 						END IF;
 
 					when ph4 =>
-						sdaddr <=  '0'&'0' & '1' & '0' & casaddr(23)&casaddr(8 downto 1);--auto precharge
-						ba <= casaddr(22 downto 21);
+						sdaddr <=  '0'&'0' & '1' & '0' & casaddr(9 downto 1);--auto precharge
+						ba <= casaddr(24 downto 23);
 						sd_cs <= cas_sd_cs; 
 						IF cas_sd_we='0' THEN
 							dqm <= cas_dqm;
@@ -778,3 +781,36 @@ mytwc : component TwoWayCache
 		END IF;	
 	END process;
 END;
+
+--                Slot 1                       Slot 2
+-- ph0 	(read)								(Read 0 in sdata)
+
+-- ph1	Slot alloc, RAS (read)			Read0		
+
+-- ph2	... (read)							Read1
+
+-- ph3	... (write)							Read2 (read3 in sdata)
+
+-- ph4	CAS, write0 (write) 				Read3
+
+-- ph5	write1 (write)
+
+-- ph6	write2 (write)
+
+-- ph7	write3 (read)
+
+-- ph8   (read0 in sdata) (rd)		
+
+-- ph9	read0 in sdata_reg (rd)			Slot alloc, RAS
+
+-- ph10	read1	(read)						...
+
+-- ph11	read2 (rd3 in sdata, wr)		...
+
+-- ph12	read3 (write)						CAS, write 0
+
+-- ph13	(write)								write1
+
+-- ph14	(write)								write2
+
+-- ph15	(read)								write3

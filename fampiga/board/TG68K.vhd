@@ -192,9 +192,9 @@ BEGIN
 
 	ramaddr(20 downto 0) <= cpuaddr(20 downto 0);
 	ramaddr(31 downto 24) <= cpuaddr(31 downto 24);
-	ramaddr(23 downto 21) <= "010" when cpuaddr(23 downto 21)="001" -- 2 -> 4
-		else "011" when cpuaddr(23 downto 21)="010" -- 4 -> 6
-		else "100" when cpuaddr(23 downto 21)="011" -- 6 -> 8
+	ramaddr(23 downto 21) <= "100" when cpuaddr(23 downto 21)="001" -- 2 -> 8
+		else "101" when cpuaddr(23 downto 21)="010" -- 4 -> A
+		else "110" when cpuaddr(23 downto 21)="011" -- 6 -> C
 		else "111" when cpuaddr(23 downto 21)="100" -- 8 -> E
 		else cpuaddr(23 downto 21);	-- pass through others
 
