@@ -139,10 +139,13 @@ signal pass		: pass_states;
 type slot_type is (refresh,chip,cpu_readcache,cpu_writecache,host,idle);
 signal slot1_type : slot_type := idle;
 signal slot2_type : slot_type := idle;
-
+signal slot1_bank : std_logic_vector(1 downto 0);
+signal slot2_bank : std_logic_vector(1 downto 0);
 
 signal cache_req : std_logic;
-signal cache_fill : std_logic;
+signal readcache_fill : std_logic;
+signal cache_fill_1 : std_logic;
+signal cache_fill_2 : std_logic;
 
 COMPONENT TwoWayCache
 	GENERIC ( WAITING : INTEGER := 0; WAITRD : INTEGER := 1; WAITFILL : INTEGER := 2; FILL2 : INTEGER := 3;
@@ -185,6 +188,14 @@ signal writebuffer_hold : std_logic; -- 1 during write access, cleared to indica
 type writebuffer_states is (waiting,write1,write2,write3);
 signal writebuffer_state : writebuffer_states;
 
+signal cpuAddr_mangled : std_logic_vector(24 downto 0);
+
+-- Let's try some bank-interleaving.
+-- For addresses in the upper 16 meg we shift bits around
+-- so that one bank bit comes from addr(3).  This should allow
+-- bank interleaving to make things more efficient.
+cpuAddr_mangled<=cpuAddr(24)&cpuAddr(3)&cpuAddr(22 downto 4)&cpuAddr(23)&cpuAddr(2 downto 0)
+	when cpuAddr(24)='1' else cpuAddr;
 
 begin
 
@@ -259,9 +270,9 @@ begin
 					hostRDd <= sdata_reg;
 				end if;
 				if sdram_state=ph11 AND slot1_type=host THEN 
-					if zmAddr=casaddr and cas_sd_cas='0' then
+--					if zmAddr=casaddr then and cas_sd_cas='0' then
 						zena <= '1';
-					end if;
+--					end if;
 				end if;
 				hostStated <= hostState(1 downto 0);
 				if zequal='1' and hostState(1 downto 0)="11" THEN
@@ -321,7 +332,7 @@ mytwc : component TwoWayCache
 		data_from_sdram => sdata_reg,
 		data_to_sdram => open,
 		sdram_req => cache_req,
-		sdram_fill => ccache_fill,
+		sdram_fill => readcache_fill,
 		sdram_rw => open
 	);
 
@@ -367,8 +378,10 @@ mytwc : component TwoWayCache
 	end process;
 	
 	cpuena <= '1' when cena='1' or ccachehit='1' or writebuffer_ena='1' else '0'; 
-	ccache_fill<='1' when cache_fill='1' and (slot1_type=cpu_readcache or slot2_type=cpu_readcache)
-		else '0';
+	readcache_fill<='1' when
+		(cache_fill_1='1' and slot1_type=cpu_readcache) or
+		(cache_fill_2='1' and slot2_type=cpu_readcache)
+			else '0';
 
 --	cpuena <= '1' when cena='1' or ccachehit='1' or dcachehit='1' else '0'; 
 --	
@@ -565,14 +578,16 @@ mytwc : component TwoWayCache
 				ena7RDreg <= '0';
 				ena7WRreg <= '0';
 				case sdram_state is	--LATENCY=3
-					when ph2 =>	sdwrite <= '1';
-								enaWRreg <= '1';
+					when ph2 =>	enaWRreg <= '1';
 					when ph3 =>	sdwrite <= '1';
 					when ph4 =>	sdwrite <= '1';
 					when ph5 => sdwrite <= '1';
 					when ph6 =>	enaWRreg <= '1';
 								ena7RDreg <= '1';
 					when ph10 => enaWRreg <= '1';
+					when ph11 => sdwrite<= '1';	-- Access slot 2
+					when ph12 => sdwrite<= '1';
+					when ph13 => sdwrite<= '1';
 					when ph14 => enaWRreg <= '1';
 								ena7WRreg <= '1';
 					when others => null;
@@ -626,6 +641,8 @@ mytwc : component TwoWayCache
 		if (sysclk'event and sysclk='1') THEN
 			if reset='0' then
 				refresh_pending<='0';
+				slot1_type<=idle;
+				slot2_type<=idle;
 			end if;
 			sd_cs <="1111";
 			sd_ras <= '1';
@@ -634,7 +651,8 @@ mytwc : component TwoWayCache
 			sdaddr <= "XXXXXXXXXXXXX";
 			ba <= "00";
 			dqm <= "00";
-			cache_fill<='0';
+			cache_fill_1<='0';
+			cache_fill_2<='0';
 
 			if cpuState(5)='1' then
 				cena<='0';
@@ -667,7 +685,12 @@ mytwc : component TwoWayCache
 	
 -- Time slot control	
 				case sdram_state is
+					when ph0 =>
+						cache_fill_2 <='1'; -- slot 2
+						
 					when ph1 =>
+						cache_fill_2 <='1'; -- slot 2
+
 --						cpuCycle <= '0';
 --						chipCycle <= '0';
 --						hostCycle <= '0';
@@ -685,8 +708,6 @@ mytwc : component TwoWayCache
 						else
 							refreshcnt <= refreshcnt-1;
 						end if;
-
-						slot2_type<=idle;
 						
 -- 					We give the chipset first priority...
 --						(This includes anything on the "motherboard" - chip RAM, slow RAM and Kickstart, turbo modes notwithstanding
@@ -695,6 +716,7 @@ mytwc : component TwoWayCache
 							slot1_type<=chip; -- chipCycle <= '1';
 							sdaddr <= chipAddr(22 downto 10);
 							ba <= "00"; -- Always bank zero for chipset accesses, so we can interleave Fast RAM access
+							slot1_bank<="00";
 							cas_dqm <= chipU& chipL;
 							sd_cs <= "1110"; 	--ACTIVE
 							sd_ras <= '0';
@@ -713,15 +735,18 @@ mytwc : component TwoWayCache
 							slot1_type<=refresh;
 							refresh_pending<='0';
 
-		--					The Amiga CPU gets next bite of the cherry, unless the OSD CPU has been cycle-starved...
-		--					ELSIF cpuState(2)='0' AND cpuState(5)='0'
-						-- Request from write buffer.
+--		--					The Amiga CPU gets next bite of the cherry, unless the OSD CPU has been cycle-starved...
+--		--					ELSIF cpuState(2)='0' AND cpuState(5)='0'
+--						-- Request from write buffer.
 						ELSIF (writebuffer_req='1')
-							and (hostslot_cnt/="00000000" or (hostState(2)='1' or hostena='1')) THEN	
+							and (hostslot_cnt/="00000000" or (hostState(2)='1' or hostena='1'))
+							and (slot2_type=idle or slot2_bank/=writebufferAddr(24 downto 23))
+								then
 							-- We only yeild to the OSD CPU if it's both cycle-starved and ready to go.
 							slot1_type<=cpu_writecache;
 							sdaddr <= writebufferAddr(22 downto 10);
 							ba <= writebufferAddr(24 downto 23);
+							slot1_bank<=writebufferAddr(24 downto 23);
 							cas_dqm <= writebuffer_dqm;
 							sd_cs <= "1110"; --ACTIVE
 							sd_ras <= '0';
@@ -730,24 +755,28 @@ mytwc : component TwoWayCache
 							datain <= writebufferWR;
 							cas_sd_cas <= '0';
 							writebuffer_hold<='1';	-- Let the write buffer know we're about to write.
+
 						-- Request from read cache
 						ELSIF (cache_req='1')
-							and (hostslot_cnt/="00000000" or (hostState(2)='1' or hostena='1')) THEN	
+							and (hostslot_cnt/="00000000" or (hostState(2)='1' or hostena='1'))
+							and (slot2_type=idle or slot2_bank/=cpuAddr(24 downto 23))
+								then
 							-- We only yeild to the OSD CPU if it's both cycle-starved and ready to go.
 							slot1_type<=cpu_readcache;
 							sdaddr <= cpuAddr(22 downto 10);
 							ba <= cpuAddr(24 downto 23);
+							slot1_bank<=cpuAddr(24 downto 23);
 							cas_dqm <= cpuU& cpuL;
 							sd_cs <= "1110"; --ACTIVE
 							sd_ras <= '0';
 							casaddr <= cpuAddr(24 downto 1)&'0';
-							if (cpuState(1) and cpuState(0))='1' then	-- Write cycle
+--							if (cpuState(1) and cpuState(0))='1' then	-- Write cycle
 --								casaddr <= cpuAddr(24 downto 1)&'0';
-								cas_sd_we <= '0';
-							else
---								casaddr <= cpuAddr(24 downto 3)&"000";
-								cas_sd_we <= '1';
-							end if;
+--							cas_sd_we <= '0';
+--							else
+----								casaddr <= cpuAddr(24 downto 3)&"000";
+							cas_sd_we <= '1';
+--							end if;
 --							datain <= cpuWR;
 							cas_sd_cas <= '0';
 						ELSIF hostState(2)='0' AND hostena='0' THEN
@@ -755,6 +784,7 @@ mytwc : component TwoWayCache
 							slot1_type<=host;
 							sdaddr <= zmAddr(22 downto 10);
 							ba <= "00"; -- Always bank zero for SPI host CPU
+							slot1_bank<="00";
 							cas_dqm <= hostU& hostL;
 							sd_cs <= "1110"; --ACTIVE
 							sd_ras <= '0';
@@ -764,16 +794,22 @@ mytwc : component TwoWayCache
 							IF hostState="011" THEN
 								cas_sd_we <= '0';
 							END IF;
-						elsif slot2_type=idle then
---							If no-one else wants this cycle we refresh the RAM.
-							sd_cs <="0000"; --AUTOREFRESH
-							sd_ras <= '0';
-							sd_cas <= '0';
-							refreshcnt <= "111111111";
-							slot1_type<=refresh;
+--						elsif slot2_type=idle then
+----							If no-one else wants this cycle we refresh the RAM.
+--							sd_cs <="0000"; --AUTOREFRESH
+--							sd_ras <= '0';
+--							sd_cas <= '0';
+--							refreshcnt <= "111111111";
+--							slot1_type<=refresh;
 						else
 							slot1_type<=idle;
 						END IF;
+
+					when ph2 =>
+						cache_fill_2 <='1'; -- slot 2
+
+					when ph3 =>
+						cache_fill_2 <='1'; -- slot 2
 
 					when ph4 =>
 						sdaddr <=  '0'&'0' & '1' & '0' & casaddr(9 downto 1);--auto precharge
@@ -788,13 +824,69 @@ mytwc : component TwoWayCache
 						writebuffer_hold<='0'; -- Indicate to WriteBuffer that it's safe to accept the next write.
 						
 					when ph8 =>
-						cache_fill<='1';
+						cache_fill_1<='1';
 					when ph9 =>
-						cache_fill<='1';
+						cache_fill_1<='1';
+
+--						Access slot 2, RAS
+						cas_sd_cs <= "1110"; 
+						cas_sd_ras <= '1';
+						cas_sd_cas <= '1';
+						cas_sd_we <= '1';
+
+						slot2_type<=idle;
+						if refresh_pending='0' and slot1_type/=refresh then
+							IF writebuffer_req='1'
+								and (slot1_type=idle or slot1_bank/=writebufferAddr(24 downto 23))
+									then
+								-- We only yeild to the OSD CPU if it's both cycle-starved and ready to go.
+								slot2_type<=cpu_writecache;
+								sdaddr <= writebufferAddr(22 downto 10);
+								ba <= writebufferAddr(24 downto 23);
+								slot2_bank <= writebufferAddr(24 downto 23);
+								cas_dqm <= writebuffer_dqm;
+								sd_cs <= "1110"; --ACTIVE
+								sd_ras <= '0';
+								casaddr <= writebufferAddr(24 downto 1)&'0';
+								cas_sd_we <= '0';
+								datain <= writebufferWR;
+								cas_sd_cas <= '0';
+								writebuffer_hold<='1';	-- Let the write buffer know we're about to write.
+							-- Request from read cache
+							ELSIF cache_req='1'
+								and (slot1_type=idle or slot1_bank/=cpuAddr(24 downto 23))
+								then
+								slot2_type<=cpu_readcache;
+								sdaddr <= cpuAddr(22 downto 10);
+								ba <= cpuAddr(24 downto 23);
+								slot2_bank <= cpuAddr(24 downto 23);
+								cas_dqm <= cpuU& cpuL;
+								sd_cs <= "1110"; --ACTIVE
+								sd_ras <= '0';
+								casaddr <= cpuAddr(24 downto 1)&'0';
+								cas_sd_we <= '1';
+								cas_sd_cas <= '0';
+							end if;
+						end if;
+
 					when ph10 =>
-						cache_fill<='1';
+						cache_fill_1<='1';
 					when ph11 =>
-						cache_fill<='1';
+						cache_fill_1<='1';
+						
+					-- Slot 2 CAS
+					when ph12 =>
+						sdaddr <=  '0'&'0' & '1' & '0' & casaddr(9 downto 1);--auto precharge
+						ba <= casaddr(24 downto 23);
+						sd_cs <= cas_sd_cs; 
+						IF cas_sd_we='0' THEN
+							dqm <= cas_dqm;
+						END IF;
+						sd_ras <= cas_sd_ras;
+						sd_cas <= cas_sd_cas;
+						sd_we  <= cas_sd_we;
+						writebuffer_hold<='0'; -- Indicate to WriteBuffer that it's safe to accept the next write.
+						
 					when others =>
 						null;
 				end case;
