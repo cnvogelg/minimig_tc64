@@ -325,7 +325,8 @@ pf68K_Kernel_inst: TG68KdotC_Kernel
 	PROCESS (clk)
 	BEGIN
 		state_ena <= '0';
-		IF clkena_in='1' AND enaWRreg='1' AND (state="01" OR (ena7RDreg='1' AND clkena_e='1') OR ramready='1') THEN
+--		IF clkena_in='1' AND enaWRreg='1' AND (state="01" OR (ena7RDreg='1' AND clkena_e='1') OR ramready='1') THEN
+		IF clkena_in='1' and slower(0)='0' AND (state="01" OR (ena7RDreg='1' AND clkena_e='1') OR ramready='1') THEN
 			clkena <= '1';
 		ELSE 
 			clkena <= '0';

@@ -188,16 +188,17 @@ signal writebuffer_hold : std_logic; -- 1 during write access, cleared to indica
 type writebuffer_states is (waiting,write1,write2,write3);
 signal writebuffer_state : writebuffer_states;
 
-signal cpuAddr_mangled : std_logic_vector(24 downto 0);
+signal cpuAddr_mangled : std_logic_vector(24 downto 1);
 
 -- Let's try some bank-interleaving.
 -- For addresses in the upper 16 meg we shift bits around
 -- so that one bank bit comes from addr(3).  This should allow
 -- bank interleaving to make things more efficient.
-cpuAddr_mangled<=cpuAddr(24)&cpuAddr(3)&cpuAddr(22 downto 4)&cpuAddr(23)&cpuAddr(2 downto 0)
-	when cpuAddr(24)='1' else cpuAddr;
 
 begin
+
+cpuAddr_mangled<=cpuAddr(24)&cpuAddr(3)&cpuAddr(22 downto 4)&cpuAddr(23)&cpuAddr(2 downto 1)
+	when cpuAddr(24)='1' else cpuAddr;
 
 	process (sysclk, reset_in) begin
 		if reset_in = '0' THEN
@@ -318,7 +319,7 @@ mytwc : component TwoWayCache
 		clk => sysclk,
 		reset => reset,
 		ready => open,
-		cpu_addr => "0000000"&cpuAddr&'0',
+		cpu_addr => "0000000"&cpuAddr_mangled&'0',
 		cpu_req => not cpustate(2),
 		cpu_ack => ccachehit,
 		cpu_wr_ack => writebuffer_cache_ack,
@@ -349,11 +350,11 @@ mytwc : component TwoWayCache
 				when waiting =>
 					-- CPU write cycle, no cycle already pending.
 					if cpuState(2 downto 0)="011" then
-						writebufferAddr<=cpuAddr(24 downto 1);
+						writebufferAddr<=cpuAddr_mangled(24 downto 1);
 						writebufferWR<=cpuWR;
 						writebuffer_dqm<=cpuU & cpuL;
 						writebuffer_req<='1';
-						if writebuffer_cache_ack<='1' then
+						if writebuffer_cache_ack='1' then
 							writebuffer_ena<='1';
 							writebuffer_state<=write2;
 						end if;
@@ -759,17 +760,17 @@ mytwc : component TwoWayCache
 						-- Request from read cache
 						ELSIF (cache_req='1')
 							and (hostslot_cnt/="00000000" or (hostState(2)='1' or hostena='1'))
-							and (slot2_type=idle or slot2_bank/=cpuAddr(24 downto 23))
+							and (slot2_type=idle or slot2_bank/=cpuAddr_mangled(24 downto 23))
 								then
 							-- We only yeild to the OSD CPU if it's both cycle-starved and ready to go.
 							slot1_type<=cpu_readcache;
-							sdaddr <= cpuAddr(22 downto 10);
-							ba <= cpuAddr(24 downto 23);
-							slot1_bank<=cpuAddr(24 downto 23);
+							sdaddr <= cpuAddr_mangled(22 downto 10);
+							ba <= cpuAddr_mangled(24 downto 23);
+							slot1_bank<=cpuAddr_mangled(24 downto 23);
 							cas_dqm <= cpuU& cpuL;
 							sd_cs <= "1110"; --ACTIVE
 							sd_ras <= '0';
-							casaddr <= cpuAddr(24 downto 1)&'0';
+							casaddr <= cpuAddr_mangled(24 downto 1)&'0';
 --							if (cpuState(1) and cpuState(0))='1' then	-- Write cycle
 --								casaddr <= cpuAddr(24 downto 1)&'0';
 --							cas_sd_we <= '0';
@@ -854,16 +855,16 @@ mytwc : component TwoWayCache
 								writebuffer_hold<='1';	-- Let the write buffer know we're about to write.
 							-- Request from read cache
 							ELSIF cache_req='1'
-								and (slot1_type=idle or slot1_bank/=cpuAddr(24 downto 23))
+								and (slot1_type=idle or slot1_bank/=cpuAddr_mangled(24 downto 23))
 								then
 								slot2_type<=cpu_readcache;
-								sdaddr <= cpuAddr(22 downto 10);
-								ba <= cpuAddr(24 downto 23);
-								slot2_bank <= cpuAddr(24 downto 23);
+								sdaddr <= cpuAddr_mangled(22 downto 10);
+								ba <= cpuAddr_mangled(24 downto 23);
+								slot2_bank <= cpuAddr_mangled(24 downto 23);
 								cas_dqm <= cpuU& cpuL;
 								sd_cs <= "1110"; --ACTIVE
 								sd_ras <= '0';
-								casaddr <= cpuAddr(24 downto 1)&'0';
+								casaddr <= cpuAddr_mangled(24 downto 1)&'0';
 								cas_sd_we <= '1';
 								cas_sd_cas <= '0';
 							end if;

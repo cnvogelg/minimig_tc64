@@ -212,8 +212,6 @@ begin
 			begin
 				// If the current address is in cache,
 				// we must update the appropriate cacheline
-
-				// FIXME - this won't work for byte accesses!
 				
 				// We mark the two halves of the word separately.
 				// If this is a byte write, the byte not being written
@@ -243,11 +241,11 @@ begin
 				// FIXME - ultimately we should clear a cacheline here and cache
 				// the data for future use.  Need to have a working valid flag first.
 				state<=WRITE2;
-				cpu_wr_ack<=1'b1;	// Indicate to the Write cache that it's safe to proceed.
 			end
 
 		WRITE2:
 			begin
+				cpu_wr_ack<=1'b1;	// Indicate to the Write cache that it's safe to proceed.
 				if(cpu_req==1'b0)	// Wait for the write cycle to finish
 					state<=WAITING;
 			end
