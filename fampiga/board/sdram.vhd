@@ -197,8 +197,11 @@ signal cpuAddr_mangled : std_logic_vector(24 downto 1);
 
 begin
 
-cpuAddr_mangled<=cpuAddr(24)&cpuAddr(3)&cpuAddr(22 downto 4)&cpuAddr(23)&cpuAddr(2 downto 1)
-	when cpuAddr(24)='1' else cpuAddr;
+-- Turns out this is counter-productive
+--cpuAddr_mangled<=cpuAddr(24)&cpuAddr(3)&cpuAddr(22 downto 4)&cpuAddr(23)&cpuAddr(2 downto 1)
+--	when cpuAddr(24)='1' else cpuAddr;
+
+cpuAddr_mangled<=cpuAddr;
 
 	process (sysclk, reset_in) begin
 		if reset_in = '0' THEN
