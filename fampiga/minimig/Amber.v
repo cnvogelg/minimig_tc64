@@ -53,6 +53,7 @@ module Amber
 	input	dblscan,				//enable VGA output (enable scandoubler)
 	input	osd_blank,				//OSD overlay enable (blank normal video)
 	input	osd_pixel,				//OSD pixel(video) data
+	input [5:0] osd_color,				//OSD background colour (RGBI)
 	input 	[3:0] red_in, 			//red componenent video in
 	input 	[3:0] green_in,  		//green component video in
 	input 	[3:0] blue_in,			//blue component video in
@@ -67,6 +68,14 @@ module Amber
 );
 
 //local signals
+wire [1:0] osd_red;
+wire [1:0] osd_green;
+wire [1:0] osd_blue;
+
+assign osd_red=osd_color[5:4];
+assign osd_green=osd_color[3:2];
+assign osd_blue=osd_color[1:0];
+
 reg 	[3:0] t_red;
 reg 	[3:0] t_green;
 reg 	[3:0] t_blue;
@@ -193,9 +202,9 @@ begin
 				end
 				else //osd background
 				begin
-					t_red    <= red_in / 2;
-					t_green  <= green_in / 2;
-					t_blue   <= 4'b0100 + blue_in / 2;
+					t_red    <= {1'b0,osd_red,1'b0} + red_in / 2;
+					t_green  <= {1'b0,osd_green,1'b0} + green_in / 2;
+					t_blue   <= {1'b0,osd_blue,1'b0} + blue_in / 2;
 				end
 			end
 			else //no osd
@@ -218,15 +227,15 @@ begin
 				else	//osd background
 					if (vfilter)
 					begin //dimmed transparent background with vertical interpolation
-						t_red    <= ( lbfo2[14:10] + lbfdo[14:10] ) / 8;
-						t_green  <= ( lbfo2[9:5] + lbfdo[9:5] ) / 8;
-						t_blue   <= 4'b0100 + ( lbfo2[4:0] + lbfdo[4:0] ) / 8;
+						t_red    <= {1'b0,osd_red,1'b0} + ( lbfo2[14:10] + lbfdo[14:10] ) / 8;
+						t_green  <= {1'b0,osd_green,1'b0} + ( lbfo2[9:5] + lbfdo[9:5] ) / 8;
+						t_blue   <= {1'b0,osd_blue,1'b0} + ( lbfo2[4:0] + lbfdo[4:0] ) / 8;
 					end
 					else
 					begin //dimmed transparent background without vertical interpolation
-						t_red    <= lbfo2[14:11] / 2;
-						t_green  <= lbfo2[9:6] / 2;
-						t_blue   <= 4'b0100 + lbfo2[4:1] / 2;
+						t_red    <= {1'b0,osd_red,1'b0} + lbfo2[14:11] / 2;
+						t_green  <= {1'b0,osd_green,1'b0} + lbfo2[9:6] / 2;
+						t_blue   <= {1'b0,osd_blue,1'b0} + lbfo2[4:1] / 2;
 					end
 			end
 			else	//no osd

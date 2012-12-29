@@ -96,6 +96,7 @@ module userio
 	input	sck,	  				// SPI clock
 	output	osd_blank,				// osd overlay, normal video blank output
 	output	osd_pixel,				// osd video pixel
+	output	[5:0] osd_color,
 	output	osd_enable,
 	output	[1:0] lr_filter,
 	output	[1:0] hr_filter,
@@ -342,6 +343,7 @@ osd	osd1
 	.sck(sck),
 	.osd_blank(osd_blank),
 	.osd_pixel(osd_pixel),
+	.osd_color(osd_color),
 	.osd_enable(osd_enable),
 	.key_disable(key_disable),
 	.lr_filter(lr_filter),
@@ -385,6 +387,7 @@ module osd
 	input	sck,	  						// SPI clock
 	output	osd_blank,						// osd overlay, normal video blank output
 	output	osd_pixel,						// osd video pixel
+	output	reg [5:0] osd_color,	// RrGgBb color for OSD window.
 	output	reg osd_enable = 0,				// osd enable
 	output	reg key_disable = 0,			// keyboard disable
 	output	reg [1:0] lr_filter = 0,
@@ -545,6 +548,7 @@ spi8 spi0
 // 8'b00000000 	NOP
 // 8'b001H0NNN 	write data to osd buffer line <NNN> (H - highlight)
 // 8'b0100--KE	enable OSD display (E) and disable Amiga keyboard (K)
+// 8'b011RrGgB AMR extension, RrGgB OSD background colour.
 // 8'b1000000B	reset Minimig (B - reset to bootloader)
 // 8'b10000010 reconfigure FPGA (reset to chameleon core)
 // 8'b100001AA	set autofire rate
@@ -625,10 +629,14 @@ always @(posedge clk)
 		highlight <= wrdat[3:0];
 		
 // disable/enable osd display
-// memory configuration
 always @(posedge clk)
-	if (rx && cmd && wrdat[7:4]==4'b0100)
-		{key_disable, osd_enable} <= wrdat[1:0];
+begin
+//	if (rx && cmd && wrdat[7:4]==4'b0100)
+	if (rx && cmd && wrdat[7:5]==3'b010)
+		{key_disable, osd_enable} <= wrdat[1:0];	
+	if (rx && cmd && wrdat[7:5]==3'b011)	// AMR
+		osd_color <= {wrdat[4:0],1'b0};	// OSD colour in RrGgBb format.  (b is always 0)
+end
 
 assign wren = rx && ~cmd && wrcmd ? 1'b1 : 1'b0;
 

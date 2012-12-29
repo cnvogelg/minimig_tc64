@@ -314,6 +314,7 @@ wire		[3:0]green_i;			// denise green (internal)
 wire		[3:0]blue_i;			// denise blue (internal)
 wire		osd_blank;				// osd blanking 
 wire		osd_pixel;				// osd pixel(video) data
+wire		[5:0] osd_color;		// osd background colour
 wire		osd_enable;
 wire		_hsync_i;				// horizontal sync (internal)
 wire		_vsync_i;				// vertical sync (internal)
@@ -587,6 +588,7 @@ userio USERIO1
 	.sck(sck),
 	.osd_blank(osd_blank),
 	.osd_pixel(osd_pixel),
+	.osd_color(osd_color),
 	.osd_enable(osd_enable),
 	.lr_filter(lr_filter),
 	.hr_filter(hr_filter),
@@ -638,6 +640,7 @@ Amber AMBER1
 	.hires(hires),
 	.osd_blank(osd_blank),
 	.osd_pixel(osd_pixel),
+	.osd_color(osd_color),
 	.red_in(red_i),
 	.blue_in(blue_i),
 	.green_in(green_i),

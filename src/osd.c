@@ -647,7 +647,15 @@ void OsdWaitVBL(void)
 void OsdEnable(unsigned char mode)
 {
     EnableOsd();
-    SPI(OSDCMDENABLE | (mode & DISABLE_KEYBOARD));
+    SPI(OSDCMDENABLE | (mode & OSDENABLEPARAMBITS));
+    DisableOsd();
+}
+
+// Set OSD background color.
+void OsdColor(unsigned char color)
+{
+    EnableOsd();
+    SPI(OSDCMDCOLOR | (color & OSDCOLORBITS));
     DisableOsd();
 }
 

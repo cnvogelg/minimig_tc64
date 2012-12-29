@@ -15,6 +15,7 @@
 #define OSDCMDREAD       0x00        // OSD read controller/key status
 #define OSDCMDWRITE      0x20        // OSD write video data command
 #define OSDCMDENABLE     0x41        // OSD enable command
+#define OSDCMDCOLOR      0x60        // OSD enable command
 #define OSDCMDDISABLE    0x40        // OSD disable command
 #define OSDCMDRST        0x80        // OSD reset command
 #define OSDCMDRECONFIG   0x82        // OSD reset command
@@ -27,7 +28,10 @@
 #define OSDCMDCFGMEM     0xF0        // OSD settings: memory config
 #define OSDCMDCFGCPU     0xFC        // OSD settings: CPU config
 
+#define OSDCOLORBITS 0x1F
+#define OSDENABLEPARAMBITS 0x1E
 #define DISABLE_KEYBOARD 0x02        // disable keyboard while OSD is active
+#define OSDINTENSITY 0x04
 
 #define REPEATDELAY      500         // repeat delay in 1ms units
 #define REPEATRATE       50          // repeat rate in 1ms units
@@ -82,6 +86,7 @@ void OsdWrite(unsigned char n, char *s, unsigned char inver, unsigned char stipp
 void OsdWriteOffset(unsigned char n, char *s, unsigned char inver, unsigned char stipple, char offset); // Used for scrolling "Exit" text downwards...
 void OsdClear(void);
 void OsdEnable(unsigned char mode);
+void OsdColor(unsigned char color);
 void OsdDisable(void);
 void OsdWaitVBL(void);
 void OsdReset(unsigned char boot);

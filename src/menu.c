@@ -38,6 +38,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "config.h"
 #include "menu.h"
 
+#define OSDCOLOR_TOPLEVEL 0x01
+#define OSDCOLOR_SUBMENU 0x03
+#define OSDCOLOR_WARNING 0x10
 
 // other constants
 #define DIRSIZE 8 // number of items in directory display window
@@ -139,6 +142,7 @@ void SelectFile(char* pFileExt, unsigned char Options, unsigned char MenuSelect,
 }
 
 #define STD_EXIT "            exit"
+#define STD_BACK "            back"
 #define HELPTEXT_DELAY 10000
 #define FRAME_DELAY 150
 
@@ -155,6 +159,7 @@ void ShowSplash()
     OsdWrite(6, "", 0,0);
     OsdWrite(7, "", 0,0);
 	OsdEnable(0);
+	OsdColor(OSDCOLOR_TOPLEVEL);
 }
 
 
@@ -360,6 +365,7 @@ void HandleUI(void)
         /* main menu                                                      */
         /******************************************************************/
     case MENU_MAIN1 :
+        OsdColor(OSDCOLOR_TOPLEVEL);
 		menumask=0x70;	// b01110000 Floppy turbo, Harddisk options & Exit.
 		OsdSetTitle("Minimig",OSD_ARROW_RIGHT);
 		helptext=helptexts[HELPTEXT_MAIN];
@@ -486,6 +492,7 @@ void HandleUI(void)
         /* second part of the main menu                                   */
         /******************************************************************/
     case MENU_MAIN2_1 :
+        OsdColor(OSDCOLOR_TOPLEVEL);
 		helptext=helptexts[HELPTEXT_MAIN];
 		menumask=0x3f;
  		OsdSetTitle("Settings",OSD_ARROW_LEFT|OSD_ARROW_RIGHT);
@@ -549,6 +556,7 @@ void HandleUI(void)
         break;
 
     case MENU_MISC1 :
+        OsdColor(OSDCOLOR_TOPLEVEL);
 		helptext=helptexts[HELPTEXT_MAIN];
 		menumask=0x0f;	// Reset, about and exit.
  		OsdSetTitle("Misc",OSD_ARROW_LEFT);
@@ -597,6 +605,7 @@ void HandleUI(void)
 		break;
 
 	case MENU_ABOUT1 :
+        OsdColor(OSDCOLOR_SUBMENU);
 		helptext=helptexts[HELPTEXT_NONE];
 		menumask=0x01;	// Just Exit
  		OsdSetTitle("About",0);
@@ -612,7 +621,7 @@ void HandleUI(void)
 //        OsdWrite(4, "", 0,0);
         OsdWrite(5, "", 0,0);
         OsdWrite(6, "", 0,0);
-        OsdWrite(7, STD_EXIT, menusub == 0,0);
+        OsdWrite(7, STD_BACK, menusub == 0,0);
 
 		StarsInit();
 		ScrollReset();
@@ -638,6 +647,7 @@ void HandleUI(void)
 		break;
 
     case MENU_LOADCONFIG_1 :
+        OsdColor(OSDCOLOR_SUBMENU);
 		helptext=helptexts[HELPTEXT_NONE];
 		if(parentstate!=menustate)	// First run?
 		{
@@ -857,6 +867,7 @@ void HandleUI(void)
         /* reset menu                                                     */
         /******************************************************************/
     case MENU_RESET1 :
+        OsdColor(OSDCOLOR_WARNING);
 		helptext=helptexts[HELPTEXT_NONE];
 		OsdSetTitle("Reset",0);
 		menumask=0x03;	// Yes / No
@@ -893,6 +904,7 @@ void HandleUI(void)
         /* reconfigure confirmation                                       */
         /******************************************************************/
     case MENU_RECONF1 :
+        OsdColor(OSDCOLOR_WARNING);
 		helptext=helptexts[HELPTEXT_NONE];
 		OsdSetTitle("Exit",0);
 		menumask=0x03;	// Yes / No
@@ -929,6 +941,7 @@ void HandleUI(void)
         /******************************************************************/
 
     case MENU_SAVECONFIG_1 :
+        OsdColor(OSDCOLOR_SUBMENU);
 		helptext=helptexts[HELPTEXT_NONE];
 		menumask=0x3f;
 		parentstate=menustate;
@@ -995,6 +1008,7 @@ void HandleUI(void)
         /* chipset settings menu                                          */
         /******************************************************************/
     case MENU_SETTINGS_CHIPSET1 :
+        OsdColor(OSDCOLOR_SUBMENU);
 		helptext=helptexts[HELPTEXT_CHIPSET];
 		menumask=0;
  		OsdSetTitle("Chipset",OSD_ARROW_LEFT|OSD_ARROW_RIGHT);
@@ -1013,7 +1027,7 @@ void HandleUI(void)
         OsdWrite(4, "", 0,0);
         OsdWrite(5, "", 0,0);
         OsdWrite(6, "", 0,0);
-        OsdWrite(7, STD_EXIT, menusub == 3,0);
+        OsdWrite(7, STD_BACK, menusub == 3,0);
 
         menustate = MENU_SETTINGS_CHIPSET2;
         break;
@@ -1089,6 +1103,7 @@ void HandleUI(void)
         /* memory settings menu                                           */
         /******************************************************************/
     case MENU_SETTINGS_MEMORY1 :
+        OsdColor(OSDCOLOR_SUBMENU);
 		helptext=helptexts[HELPTEXT_MEMORY];
 		menumask=0x7f;
 		parentstate=menustate;
@@ -1138,7 +1153,7 @@ void HandleUI(void)
 			menumask&=0xdf;	// Remove bit 5
 		}
 
-        OsdWrite(7, STD_EXIT, menusub == 6,0);
+        OsdWrite(7, STD_BACK, menusub == 6,0);
 
         menustate = MENU_SETTINGS_MEMORY2;
         break;
@@ -1315,6 +1330,7 @@ void HandleUI(void)
 		// Make the menu work on the copy, not the original, and copy on acceptance,
 		// not on rejection.
     case MENU_SETTINGS_HARDFILE1 :
+        OsdColor(OSDCOLOR_SUBMENU);
 		helptext=helptexts[HELPTEXT_HARDFILE];
 		OsdSetTitle("Harddisks",0);
 
@@ -1373,7 +1389,7 @@ void HandleUI(void)
         OsdWrite(5, s, enable ? (menusub == 4) : 0 ,enable==0);
 
         OsdWrite(6, "", 0,0);
-        OsdWrite(7, STD_EXIT, menusub == 5,0);
+        OsdWrite(7, STD_BACK, menusub == 5,0);
 
         menustate = MENU_SETTINGS_HARDFILE2;
 
@@ -1532,6 +1548,7 @@ void HandleUI(void)
 
     // hardfile configuration has changed, ask user if he wants to use the new settings
     case MENU_HARDFILE_CHANGED1 :
+        OsdColor(OSDCOLOR_WARNING);
 		menumask=0x03;
 		parentstate=menustate;
  		OsdSetTitle("Confirm",0);
@@ -1643,6 +1660,7 @@ void HandleUI(void)
         /* video settings menu                                            */
         /******************************************************************/
     case MENU_SETTINGS_VIDEO1 :
+        OsdColor(OSDCOLOR_SUBMENU);
 		menumask=0x1f;
 		parentstate=menustate;
 		helptext=helptexts[HELPTEXT_VIDEO];
@@ -1663,7 +1681,7 @@ void HandleUI(void)
         strcat(s, config_scanlines_msg[(config.scanlines & 0xc)>>2]);
         OsdWrite(5, s, menusub == 3,0);
         OsdWrite(6, "", 0,0);
-        OsdWrite(7, STD_EXIT, menusub == 4,0);
+        OsdWrite(7, STD_BACK, menusub == 4,0);
 
         menustate = MENU_SETTINGS_VIDEO2;
         break;
@@ -1738,6 +1756,7 @@ void HandleUI(void)
          // no break intended
 
     case MENU_ROMFILE_SELECTED1 :
+        OsdColor(OSDCOLOR_WARNING);
 		menumask=0x03;
 		parentstate=menustate;
  		OsdSetTitle("Confirm",0);
@@ -2393,7 +2412,8 @@ void ErrorMessage(char *message, unsigned char code)
 	    OsdWrite(6, "", 0,0);
 	    OsdWrite(7, "", 0,0);
 
-        OsdEnable(0); // do not disable KEYBOARD
+		OsdEnable(0);
+        OsdColor(OSDCOLOR_WARNING); // do not disable KEYBOARD
     }
 }
 
@@ -2405,6 +2425,7 @@ void InfoMessage(char *message)
 //        OsdClear();
  		OsdSetTitle("Message",0);
         OsdEnable(0); // do not disable keyboard
+		OsdEnable(OSDCOLOR_TOPLEVEL);
     }
     OsdWrite(0, "", 0,0);
     OsdWrite(1, message, 0,0);
