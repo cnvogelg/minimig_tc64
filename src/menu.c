@@ -709,6 +709,7 @@ void HandleUI(void)
         /* file selection menu                                            */
         /******************************************************************/
     case MENU_FILE_SELECT1 :
+        OsdColor(OSDCOLOR_SUBMENU);
 		helptext=helptexts[HELPTEXT_NONE];
  		OsdSetTitle("Select",0);
         PrintDirectory();
