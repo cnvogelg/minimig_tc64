@@ -20,7 +20,7 @@ applicable agreement for further details.
 */
 (header "symbol" (version "1.2"))
 (symbol
-	(rect 64 72 280 488)
+	(rect 64 64 280 480)
 	(text "cfide" (rect 5 0 28 11)(font "Arial" ))
 	(text "inst" (rect 8 400 25 411)(font "Arial" ))
 	(port
@@ -215,8 +215,8 @@ applicable agreement for further details.
 	(port
 		(pt 216 112)
 		(output)
-		(text "cpuena" (rect -80 0 -44 11)(font "Arial" ))
-		(text "cpuena" (rect 165 107 201 118)(font "Arial" ))
+		(text "cpuena" (rect -80 0 -45 11)(font "Arial" ))
+		(text "cpuena" (rect 165 107 200 118)(font "Arial" ))
 		(line (pt 216 112)(pt 200 112))
 	)
 	(port
@@ -257,8 +257,8 @@ applicable agreement for further details.
 	(port
 		(pt 216 208)
 		(output)
-		(text "kb_data" (rect -80 0 -40 11)(font "Arial" ))
-		(text "kb_data" (rect 162 203 202 214)(font "Arial" ))
+		(text "kb_data" (rect -80 0 -42 11)(font "Arial" ))
+		(text "kb_data" (rect 162 203 200 214)(font "Arial" ))
 		(line (pt 216 208)(pt 200 208))
 	)
 	(port
@@ -271,8 +271,8 @@ applicable agreement for further details.
 	(port
 		(pt 216 240)
 		(output)
-		(text "ms_data" (rect -80 0 -37 11)(font "Arial" ))
-		(text "ms_data" (rect 159 235 202 246)(font "Arial" ))
+		(text "ms_data" (rect -80 0 -38 11)(font "Arial" ))
+		(text "ms_data" (rect 159 235 201 246)(font "Arial" ))
 		(line (pt 216 240)(pt 200 240))
 	)
 	(port
@@ -285,8 +285,8 @@ applicable agreement for further details.
 	(port
 		(pt 216 272)
 		(output)
-		(text "ir" (rect -80 0 -75 11)(font "Arial" ))
-		(text "ir" (rect 191 267 196 278)(font "Arial" ))
+		(text "ir" (rect -80 0 -73 11)(font "Arial" ))
+		(text "ir" (rect 191 267 198 278)(font "Arial" ))
 		(line (pt 216 272)(pt 200 272))
 	)
 	(port
@@ -304,18 +304,18 @@ applicable agreement for further details.
 		(line (pt 216 320)(pt 200 320))
 	)
 	(port
-		(pt 216 336)
-		(output)
-		(text "fastramsize[1..0]" (rect -80 0 3 11)(font "Arial" ))
-		(text "fastramsize[1..0]" (rect 125 331 208 342)(font "Arial" ))
-		(line (pt 216 336)(pt 200 336)(line_width 3))
-	)
-	(port
 		(pt 216 352)
 		(output)
 		(text "turbochipram" (rect -80 0 -17 11)(font "Arial" ))
 		(text "turbochipram" (rect 142 347 205 358)(font "Arial" ))
 		(line (pt 216 352)(pt 200 352))
+	)
+	(port
+		(pt 216 336)
+		(output)
+		(text "fastramsize[2..0]" (rect -80 0 3 11)(font "Arial" ))
+		(text "fastramsize[2..0]" (rect 125 331 208 342)(font "Arial" ))
+		(line (pt 216 336)(pt 200 336)(line_width 3))
 	)
 	(drawing
 		(rectangle (rect 16 16 200 368))

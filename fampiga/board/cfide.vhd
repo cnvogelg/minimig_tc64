@@ -73,7 +73,7 @@ entity cfide is
 -- USART
 	usart_clk : in std_logic;
 	usart_rts : in std_logic;
-	fastramsize : out std_logic_vector(1 downto 0);
+	fastramsize : out std_logic_vector(2 downto 0);
 	turbochipram : out std_logic
 --	reconfigure: in std_logic	-- reset Chameleon to core 0	
    );
@@ -224,14 +224,14 @@ process(sysclk,n_reset)
 begin
 	if rising_edge(sysclk) then
 		if n_reset='0' then
-			fastramsize<="00";
+			fastramsize<="000";
 			turbochipram<='0';
 		end if;
 		reconfigure<='0';
 		if PART_select='1' and state="11" then	-- Write to platform registers
 			case addr(4 downto 1) is
 				when "1010" => -- DEE014
-					fastramsize<=cpudata_in(1 downto 0);
+					fastramsize<=cpudata_in(2 downto 0);
 					turbochipram<=cpudata_in(15);
 				when "1011" => -- DEE016
 					reconfigure<='1';
