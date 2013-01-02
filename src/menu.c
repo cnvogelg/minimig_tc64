@@ -562,7 +562,13 @@ void HandleUI(void)
  		OsdSetTitle("Misc",OSD_ARROW_LEFT);
         OsdWrite(0, "    Reset", menusub == 0,0);
         OsdWrite(1, "", 0,0);
-        OsdWrite(2, "    Return to Chameleon", menusub == 1,0);
+		if(PLATFORM&(1<<PLATFORM_RECONFIG))
+	        OsdWrite(2, "    Return to Chameleon", menusub == 1,0);
+		else
+		{
+	        OsdWrite(2, "", 0,0);
+			menumask&=~0x02;	// Remove the Reconfigure option from the menu
+		}
 //        OsdWrite(3, "    (Not yet implemented)", 0,1);
         OsdWrite(3, "", 0,0);
         OsdWrite(4, "    About", menusub == 2,0);
