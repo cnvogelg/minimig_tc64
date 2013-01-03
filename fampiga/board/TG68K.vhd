@@ -205,10 +205,10 @@ BEGIN
 	ramaddr(20 downto 0) <= cpuaddr(20 downto 0);
 	ramaddr(31 downto 25) <= "0000000";
 	ramaddr(24) <= sel_ziiiram;	-- Remap the Zorro III RAM to 0x1000000
-	ramaddr(23 downto 21) <= "100" when cpuaddr(23 downto 21)="001" -- 2 -> 8
-		else "101" when cpuaddr(23 downto 21)="010" -- 4 -> A
-		else "110" when cpuaddr(23 downto 21)="011" -- 6 -> C
-		else "111" when cpuaddr(23 downto 21)="100" -- 8 -> E
+	ramaddr(23 downto 21) <= "100" when sel_ziiiram&cpuaddr(23 downto 21)="0001" -- 2 -> 8
+		else "101" when sel_ziiiram&cpuaddr(23 downto 21)="0010" -- 4 -> A
+		else "110" when sel_ziiiram&cpuaddr(23 downto 21)="0011" -- 6 -> C
+		else "111" when sel_ziiiram&cpuaddr(23 downto 21)="0100" -- 8 -> E
 		else cpuaddr(23 downto 21);	-- pass through others
 
 process(clk,turbochipram)
