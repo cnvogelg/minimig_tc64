@@ -840,7 +840,7 @@ mytwc : component TwoWayCache
 
 						slot2_type<=idle;
 						if refresh_pending='0' and slot1_type/=refresh then
-							IF writebuffer_req='1'
+							IF writebuffer_req='1'  and writebufferAddr(24 downto 23)/="00" -- Reserve bank 0 for slot 1
 								and (slot1_type=idle or slot1_bank/=writebufferAddr(24 downto 23))
 									then
 								-- We only yeild to the OSD CPU if it's both cycle-starved and ready to go.
@@ -857,7 +857,7 @@ mytwc : component TwoWayCache
 								cas_sd_cas <= '0';
 								writebuffer_hold<='1';	-- Let the write buffer know we're about to write.
 							-- Request from read cache
-							ELSIF cache_req='1'
+							ELSIF cache_req='1' and cpuAddr(24 downto 23)/="00" -- Reserve bank 0 for slot 1
 								and (slot1_type=idle or slot1_bank/=cpuAddr_mangled(24 downto 23))
 								then
 								slot2_type<=cpu_readcache;

@@ -13,11 +13,20 @@
 //   Bits 10:3 specify the six bit address of the cachelines;
 //     this will map to {1'b0,addr[8:3]} and {1;b1,addr[8:3]} respectively.
 //   Bits 25:11 have to be stored in the tag, which, it turns out is no problem,
-//     since we can use have 18-bit wide words.  The highest bit will be used as
+//     since we can use 18-bit wide words.  The highest bit will be used as
 //     a "most recently used" flag, leaving one bit spare, so we can support 64 meg
 //     without changing bit widths.
 // (Storing the MRU flag in both tags in a 2-way cache is redundant, so we'll only 
 // store it in the first tag.)
+
+// FIXME - add bus snooping.
+// Bus snooping works simply by invalidating cachelines that match
+// addresses appearing on the snoop_addr lines.  This is triggered by
+// the snoop_req line, which should be taken high when a chipset write to ChipRAM
+// takes place.
+// Since we can't afford to delay the chipset write accessed, we need to latch
+// the snoop address.
+
 
 module TwoWayCache
 (
@@ -38,7 +47,9 @@ module TwoWayCache
 	output reg [15:0] data_to_sdram,
 	output reg sdram_req,
 	input sdram_fill,
-	output reg sdram_rw	// 1 for read cycles, 0 for write cycles
+	output reg sdram_rw,	// 1 for read cycles, 0 for write cycles
+	input [20:0] snoop_addr, // Address of chipram writes
+	input snoop_req // 1 when snoop_addr contains an address that requires invalidation.
 );
 
 // States for state machine
