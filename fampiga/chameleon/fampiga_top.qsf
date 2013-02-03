@@ -341,6 +341,11 @@ set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=00
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=243" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=29318" -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=13807" -section_id auto_signaltap_0
+set_global_assignment -name VHDL_FILE ../chameleon_io/chameleon_phi_clock_e.vhd
+set_global_assignment -name VHDL_FILE ../chameleon_io/chameleon_phi_clock_a.vhd
+set_global_assignment -name VHDL_FILE ../chameleon_io/chameleon_docking_station.vhd
+set_global_assignment -name VHDL_FILE ../chameleon_io/chameleon_c64_joykeyb.vhd
+set_global_assignment -name VHDL_FILE ../chameleon_io/chameleon_io.vhd
 set_global_assignment -name SDC_FILE fampiga.sdc
 set_global_assignment -name QIP_FILE ../board/CacheBlockRAM.qip
 set_global_assignment -name QIP_FILE ../board/Cache_DataRAM.qip
@@ -378,7 +383,6 @@ set_global_assignment -name VERILOG_FILE ../minimig/Minimig1.v
 set_global_assignment -name VERILOG_FILE ../minimig/Paula.v
 set_global_assignment -name VERILOG_FILE ../minimig/PS2Keyboard.v
 set_global_assignment -name VERILOG_FILE ../minimig/Sprites.v
-set_global_assignment -name VHDL_FILE ../board/chameleon_docking_station.vhd
 set_global_assignment -name CDF_FILE Chain1.cdf
 set_global_assignment -name QIP_FILE ../board/palclk.qip
 set_global_assignment -name SIGNALTAP_FILE stp1.stp

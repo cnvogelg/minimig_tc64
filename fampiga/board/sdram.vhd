@@ -182,6 +182,7 @@ signal writebuffer_ena : std_logic;
 signal writebuffer_dqm : std_logic_vector(1 downto 0);
 signal writebufferAddr : std_logic_vector(24 downto 1);
 signal writebufferWR : std_logic_vector(15 downto 0);
+signal writebufferWR_reg : std_logic_vector(15 downto 0);
 signal writebuffer_cache_ack : std_logic;
 signal writebuffer_hold : std_logic; -- 1 during write access, cleared to indicate that the buffer can accept the next word.
 
@@ -545,8 +546,8 @@ mytwc : component TwoWayCache
 
 	process (sysclk, reset, sdwrite, datain) begin
 		IF sdwrite='1' THEN
---			sdata <= datawr;
-			sdata <= datain;
+			sdata <= datawr;
+--			sdata <= datain;
 		ELSE
 			sdata <= "ZZZZZZZZZZZZZZZZ";
 		END IF;
@@ -555,17 +556,29 @@ mytwc : component TwoWayCache
 		END IF;
 
 		if (sysclk'event and sysclk='1') THEN
---			if sdram_state=ph2 THEN
---				IF chipCycle='1' THEN
---					datawr <= chipWR;
---				ELSIF cpuCycle='1' THEN
---					datawr <= cpuWR;
---				ELSif writebufferCycle='1' then
---					datawr <= writebufferWR;
---				else
---					datawr <= hostWR;
---				END IF;
---			END IF;
+
+			if sdram_state=ph2 THEN
+				case slot1_type is
+					when chip =>
+						datawr <= chipWR;
+					when cpu_writecache =>
+						datawr <= writebufferWR_reg;
+					when others =>
+						datawr <= hostWR;			
+				END case;
+			END IF;
+
+			if sdram_state=ph10 THEN
+				case slot2_type is
+					when chip =>
+						datawr <= chipWR;
+					when cpu_writecache =>
+						datawr <= writebufferWR_reg;
+					when others =>
+						datawr <= hostWR;			
+				END case;
+			END IF;
+
 			sdata_reg <= sdata;
 			c_7mdd <= c_7md;
 			c_7mdr <= c_7md AND NOT c_7mdd;
@@ -725,7 +738,7 @@ mytwc : component TwoWayCache
 							sd_cs <= "1110"; 	--ACTIVE
 							sd_ras <= '0';
 							casaddr <= '0'&chipAddr&'0';	
-							datain <= chipWR;
+--							datain <= chipWR;
 							cas_sd_cas <= '0';
 							cas_sd_we <= chipRW;
 
@@ -756,7 +769,8 @@ mytwc : component TwoWayCache
 							sd_ras <= '0';
 							casaddr <= writebufferAddr(24 downto 1)&'0';
 							cas_sd_we <= '0';
-							datain <= writebufferWR;
+--							datain <= writebufferWR;
+							writebufferWR_reg <= writebufferWR;
 							cas_sd_cas <= '0';
 							writebuffer_hold<='1';	-- Let the write buffer know we're about to write.
 
@@ -793,7 +807,7 @@ mytwc : component TwoWayCache
 							sd_cs <= "1110"; --ACTIVE
 							sd_ras <= '0';
 							casaddr <= zmAddr;
-							datain <= hostWR;
+--							datain <= hostWR;
 							cas_sd_cas <= '0';
 							IF hostState="011" THEN
 								cas_sd_we <= '0';
@@ -853,7 +867,8 @@ mytwc : component TwoWayCache
 								sd_ras <= '0';
 								casaddr <= writebufferAddr(24 downto 1)&'0';
 								cas_sd_we <= '0';
-								datain <= writebufferWR;
+--								datain <= writebufferWR;
+								writebufferWR_reg <= writebufferWR;
 								cas_sd_cas <= '0';
 								writebuffer_hold<='1';	-- Let the write buffer know we're about to write.
 							-- Request from read cache

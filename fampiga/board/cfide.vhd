@@ -22,7 +22,7 @@
  
 library IEEE;
 use IEEE.std_logic_1164.all;
-use IEEE.STD_LOGIC_UNSIGNED.all;
+use IEEE.numeric_std.all;
 
  
 entity cfide is
@@ -64,7 +64,7 @@ entity cfide is
 	nreset: out std_logic;
 	ir: buffer std_logic;
 	ena1MHz: out std_logic;
-	irq_d: in std_logic;
+	irq_d: in std_logic :='1';
 	led: in std_logic_vector(1 downto 0);
 
 	amiser_txd: in std_logic;	-- CV: amiga serial txd		
@@ -74,8 +74,17 @@ entity cfide is
 	usart_clk : in std_logic;
 	usart_rts : in std_logic;
 	fastramsize : out std_logic_vector(2 downto 0);
-	turbochipram : out std_logic
+	turbochipram : out std_logic;
 --	reconfigure: in std_logic	-- reset Chameleon to core 0	
+
+	phi2_n : in std_logic;
+	dotclock_n : in std_logic;
+	io_ef_n : in std_logic;
+	rom_lh_n : in std_logic;
+	joystick1 : out unsigned(5 downto 0);
+	joystick2 : out unsigned(5 downto 0);
+	joystick3 : out unsigned(5 downto 0);
+	joystick4 : out unsigned(5 downto 0)
    );
 
 end cfide;
@@ -99,7 +108,7 @@ architecture wire of cfide is
 
 
 signal shift: std_logic_vector(9 downto 0);
-signal clkgen: std_logic_vector(9 downto 0);
+signal clkgen: unsigned(9 downto 0);
 signal shiftout: std_logic;
 signal txbusy: std_logic;
 signal ld: std_logic;
@@ -127,22 +136,22 @@ signal sd_in	: std_logic_vector(15 downto 0);
 signal sd_in_shift	: std_logic_vector(15 downto 0);
 signal sd_di_in	: std_logic;
 --signal spi_word	: std_logic;
-signal shiftcnt	: std_logic_vector(13 downto 0);
+signal shiftcnt	: unsigned(13 downto 0);
 signal sck		: std_logic;
 signal scs		: std_logic_vector(7 downto 0);
 signal dscs		: std_logic;
 signal SD_busy		: std_logic;
-signal spi_div: std_logic_vector(7 downto 0);
-signal spi_speed: std_logic_vector(7 downto 0);
+signal spi_div: unsigned(7 downto 0);
+signal spi_speed: unsigned(7 downto 0);
 signal rom_data: std_logic_vector(15 downto 0);
 
-signal timecnt: std_logic_vector(15 downto 0);
-signal timeprecnt: std_logic_vector(15 downto 0);
+signal timecnt: unsigned(15 downto 0);
+signal timeprecnt: unsigned(15 downto 0);
 
 --signal led_green	 : std_logic;
 --signal led_red	 : std_logic;
 --signal ir	 : std_logic;
-signal enacnt: std_logic_vector(6 downto 0);
+signal enacnt: unsigned(6 downto 0);
 
 signal usart_rx : std_logic :='1';
 
@@ -158,6 +167,79 @@ signal reconfigure : std_logic :='0';
 signal slower : std_logic_vector(2 downto 0);
 	
 begin
+
+
+joystick1<="111111";
+joystick2<="111111";
+joystick3<="111111";
+joystick4<="111111";
+
+
+-- C64 IO
+
+--	myIO : entity work.chameleon_io
+--		generic map (
+--			enable_docking_station => true,
+--			enable_c64_joykeyb => true,
+--			enable_c64_4player => true
+--		)
+--		port map (
+--		-- Clocks
+--			clk => sysclk,	-- present
+--			clk_mux => sysclk, -- present
+--			ena_1mhz => ena_1mhz, -- present
+--			reset => reset, -- present, but inverted
+--			
+--			no_clock => no_clock,  -- output
+--			docking_station => docking_station, -- output
+--			
+--		-- Chameleon FPGA pins
+--			-- C64 Clocks
+--			phi2_n => phi2_n,	-- missing?
+--			dotclock_n => dotclock_n, -- missing?
+--			-- C64 cartridge control lines
+--			io_ef_n => io_ef_n, -- missing?
+--			rom_lh_n => rom_lh_n, -- missing?
+--			-- SPI bus
+--			spi_miso => spi_miso,  -- present
+--			-- CPLD multiplexer
+--			mux_clk => mux_clk,  -- present
+--			mux => mux,  -- present
+--			mux_d => mux_d,  -- present
+--			mux_q => mux_q,  -- present
+--
+--		-- LEDs
+--			led_green => led_green,  -- present
+--			led_red => led_red,  -- present
+--			ir => ir,  -- missing
+--		
+--		-- PS/2 Keyboard
+--			ps2_keyboard_clk_out => ps2_keyboard_clk_out, -- present
+--			ps2_keyboard_dat_out => ps2_keyboard_dat_out, -- present
+--			ps2_keyboard_clk_in => ps2_keyboard_clk_in, -- present
+--			ps2_keyboard_dat_in => ps2_keyboard_dat_in, -- present
+--	
+--		-- PS/2 Mouse
+--			ps2_mouse_clk_out => ps2_mouse_clk_out, -- present
+--			ps2_mouse_dat_out => ps2_mouse_dat_out, -- present
+--			ps2_mouse_clk_in => ps2_mouse_clk_in, -- present
+--			ps2_mouse_dat_in => ps2_mouse_dat_in, -- present
+--
+--		-- Buttons
+--			button_reset_n => button_reset_n, -- present (nreset)
+--
+--		-- Joysticks
+--			joystick1 => joystick1,  -- missing
+--			joystick2 => joystick2,  -- missing
+--			joystick3 => joystick3,  -- missing
+--			joystick4 => joystick4,  -- missing
+--
+--		-- Keyboards
+--			keys => keys,	-- missing - how to map?  Array, readable in software?
+--			restore_key_n => restore_key_n, -- missing
+--			c64_nmi_n => c64_nmi_n -- missing			
+--		);
+
 
 srom: startram
 	PORT MAP 
@@ -191,7 +273,7 @@ cpudata <=  rom_data WHEN ROM_select='1' ELSE
 			part_in WHEN PART_select='1' ELSE 
 			memdata_in;
 part_in <= 
-			timecnt WHEN addr(4 downto 1)="1000" ELSE	--DEE010
+			std_logic_vector(timecnt) WHEN addr(4 downto 1)="1000" ELSE	--DEE010
 			"XXXXXXXX"&"1"&"0000001" WHEN addr(4 downto 1)="1001" ELSE	--DEE012
 			"XXXX"&"00000011"&"0101"; -- Reconfig supported, Turbo Chipram supported, 32 meg of RAM
 				--  WHEN addr(4 downto 1)="1010" ELSE	--DEE014
@@ -412,7 +494,7 @@ end process;
 		IF enaWRreg='1' THEN
 			IF SPI_select='1' AND state="11" AND SD_busy='0' THEN	 --SD write
 				IF addr(3)='1' THEN				--DA4008
-					spi_speed <= cpudata_in(7 downto 0);
+					spi_speed <= unsigned(cpudata_in(7 downto 0));
 				ELSIF addr(2)='1' THEN				--DA4004
 					scs(0) <= not cpudata_in(0);
 					IF cpudata_in(7)='1' THEN
