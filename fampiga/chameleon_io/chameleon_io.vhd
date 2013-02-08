@@ -643,9 +643,9 @@ begin
 	process(clk_mux)
 	begin
 		if rising_edge(clk_mux) then
+			spi_raw_ack <= '0';
 			if mux_clk_reg = '1' then
 				spi_sample <= '0';
-				spi_raw_ack <= '0';
 				case mux_state is
 --
 -- RESET
