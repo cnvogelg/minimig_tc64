@@ -145,6 +145,7 @@ signal spi_div: unsigned(7 downto 0);
 signal spi_speed: unsigned(7 downto 0);
 signal rom_data: std_logic_vector(15 downto 0);
 signal spi_raw_ack : std_logic;
+signal spi_wait : std_logic;
 
 signal timecnt: unsigned(15 downto 0);
 signal timeprecnt: unsigned(15 downto 0);
@@ -516,10 +517,15 @@ end process;
 			spi_speed <= "00000000";
 			dscs <= '0';
 		ELSIF (sysclk'event AND sysclk='1') THEN
+
+		if spi_raw_ack='1' then -- Unpause SPI as soon as the IO controller has written to the MUX
+			spi_wait<='0';
+		end if;
+
 		IF enaWRreg='1' THEN
 			IF SPI_select='1' AND state="11" AND SD_busy='0' THEN	 --SD write
 				IF addr(3)='1' THEN				--DA4008
-					spi_speed <= unsigned(cpudata_in(7 downto 0))+8;
+					spi_speed <= unsigned(cpudata_in(7 downto 0));
 				ELSIF addr(2)='1' THEN				--DA4004
 					scs(0) <= not cpudata_in(0);
 					IF cpudata_in(7)='1' THEN
@@ -544,7 +550,13 @@ end process;
 						scs(1) <= not cpudata_in(0);
 					END IF;
 				ELSE							--DA4000
-					spi_div <= spi_speed;
+
+					if scs(1)='0' then
+						spi_div <= spi_speed;
+					else
+						spi_div <= spi_speed+2;
+					end if;
+
 					sd_out <= cpudata_in(15 downto 0);
 					IF scs(6)='1' THEN		-- SPI direkt Mode
 						shiftcnt <= "10111111111111";
@@ -577,24 +589,31 @@ end process;
 --					sck <= '1';
 				END IF;
 			ELSE
-				IF spi_div="00000000" THEN
-					spi_div <= spi_speed;
-					IF SD_busy='1' THEN
-						IF sck='0' THEN
-							IF shiftcnt(12 downto 0)/="0000000000000" THEN
-								sck <='1';
+				IF spi_div="00000000" then
+					if spi_wait='0' or scs(1)='0' THEN -- Wait for io component to propagate signals.
+						spi_wait<='1'; -- Only wait if SPI needs to go through the MUX
+						if scs(1)='0' then
+							spi_div <= spi_speed;
+						else
+							spi_div <= spi_speed+2;
+						end if;
+						IF SD_busy='1' THEN
+							IF sck='0' THEN
+								IF shiftcnt(12 downto 0)/="0000000000000" THEN
+									sck <='1';
+								END IF;
+								shiftcnt <= shiftcnt-1;
+								sd_out <= sd_out(14 downto 0)&'1';
+							ELSE	
+								sck <='0';
+								sd_in_shift <= sd_in_shift(14 downto 0)&sd_di_in;
+	--							IF spi_word='0' THEN
+	--								sd_in_shift(8) <= sd_di_in;
+	--							END IF;
 							END IF;
-							shiftcnt <= shiftcnt-1;
-							sd_out <= sd_out(14 downto 0)&'1';
-						ELSE	
-							sck <='0';
-							sd_in_shift <= sd_in_shift(14 downto 0)&sd_di_in;
---							IF spi_word='0' THEN
---								sd_in_shift(8) <= sd_di_in;
---							END IF;
-						END IF;
+						end if;
 					END IF;
-				ELSe -- if spi_raw_ack='1' then -- Wait for io component to propagate signals.
+				ELSE
 					spi_div <= spi_div-1;
 				END IF;
 			END IF;		
