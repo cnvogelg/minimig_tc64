@@ -170,6 +170,8 @@ signal slower : std_logic_vector(2 downto 0);
 	
 -- C64 IO signals
 
+signal button_reset_n : std_logic;
+
 signal no_clock : std_logic;
 signal docking_station : std_logic;
 signal c64_keys : unsigned(63 downto 0);
@@ -180,6 +182,21 @@ signal c64_joy2 : unsigned(5 downto 0);
 
 
 begin
+
+
+-- Reset circuit
+
+	myReset : entity work.gen_reset
+		generic map (
+			resetCycles => 131071
+		)
+		port map (
+			clk => sysclk,
+			enable => '1',
+			button => not button_reset_n,
+			nreset => nreset
+		);
+
 
 -- Reverse order of direction signals.
 joystick1<=c64_joy1(5 downto 4)&c64_joy1(0)&c64_joy1(1)&c64_joy1(2)&c64_joy1(3);
@@ -250,7 +267,7 @@ joystick2<=c64_joy2(5 downto 4)&c64_joy2(0)&c64_joy2(1)&c64_joy2(2)&c64_joy2(3);
 			ps2_mouse_dat_in => ms_data, -- present
 
 		-- Buttons
-			button_reset_n => nreset, -- present (nreset)
+			button_reset_n => button_reset_n, -- present (nreset)
 
 		-- Joysticks
 			joystick1 => c64_joy1,  -- missing
