@@ -193,7 +193,7 @@ entity chameleon_io is
 -- SPI raw signals (enable_raw_spi must be set to true)
 		spi_raw_clk : in std_logic := '1';
 		spi_raw_mosi : in std_logic := '1';
-		spi_raw_ack : out std_logic;
+		spi_raw_ack : out std_logic;  -- Added by AMR
 		
 -- LEDs
 		led_green : in std_logic := '0';
