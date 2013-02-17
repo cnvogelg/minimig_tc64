@@ -242,6 +242,8 @@ joystick2<=c64_joy2(5 downto 4)&c64_joy2(0)&c64_joy2(1)&c64_joy2(2)&c64_joy2(3);
 			mux => mux,  -- present
 			mux_d => mux_d,  -- present
 			mux_q => mux_q,  -- present
+			
+			to_usb_rx => usart_rx,
 
 		-- SPI raw signals (enable_raw_spi must be set to true)
 			mmc_cs_n => NOT scs(1),
@@ -571,7 +573,7 @@ end process;
 					if scs(1)='0' then
 						spi_div <= spi_speed;
 					else
-						spi_div <= spi_speed+2;
+						spi_div <= spi_speed+2; -- FIXME: ugly - find a better way to do this.
 					end if;
 
 					sd_out <= cpudata_in(15 downto 0);
@@ -612,7 +614,7 @@ end process;
 						if scs(1)='0' then
 							spi_div <= spi_speed;
 						else
-							spi_div <= spi_speed+2;
+							spi_div <= spi_speed+2; -- FIXME: ugly - find a better way to do this.
 						end if;
 						IF SD_busy='1' THEN
 							IF sck='0' THEN
