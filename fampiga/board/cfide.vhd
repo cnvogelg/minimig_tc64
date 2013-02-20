@@ -84,7 +84,8 @@ entity cfide is
 	joystick1 : out unsigned(5 downto 0);
 	joystick2 : out unsigned(5 downto 0);
 	joystick3 : out unsigned(5 downto 0);
-	joystick4 : out unsigned(5 downto 0)
+	joystick4 : out unsigned(5 downto 0);
+	scandoubler : out std_logic
    );
 
 end cfide;
@@ -202,12 +203,6 @@ begin
 joystick1<=c64_joy1(5 downto 4)&c64_joy1(0)&c64_joy1(1)&c64_joy1(2)&c64_joy1(3);
 joystick2<=c64_joy2(5 downto 4)&c64_joy2(0)&c64_joy2(1)&c64_joy2(2)&c64_joy2(3);
 
---joystick1<="111111";
---joystick2<="111111";
---joystick3<="111111";
---joystick4<="111111";
-
-
 -- C64 IO
 -- FIXME - re-enable RS232-over-IEC
 
@@ -318,8 +313,12 @@ cpudata <=  rom_data WHEN ROM_select='1' ELSE
 part_in <= 
 			std_logic_vector(timecnt) WHEN addr(4 downto 1)="1000" ELSE	--DEE010
 			"XXXXXXXX"&"1"&"0000001" WHEN addr(4 downto 1)="1001" ELSE	--DEE012
-			"XXXX"&"00000011"&"0101"; -- Reconfig supported, Turbo Chipram supported, 32 meg of RAM
-				--  WHEN addr(4 downto 1)="1010" ELSE	--DEE014
+			"0100"&"00000011"&"0101";	-- Bits 3:0 -> memory size.  (1<<memsize gives the size in megabytes.)
+												-- Bit  4 -> Turbo chipram supported
+												-- Bit  5 -> Reconfig supportred 
+												-- Bit  6 -> Action replay supported
+												-- Bit 14 -> Scandoubler software-controllable.
+			--  WHEN addr(4 downto 1)="1010" ELSE	--DEE014
 
 IOdata <= sd_in;			
 --IOdata <=   --rs232data WHEN rs232_select='1' ELSE 
@@ -351,6 +350,7 @@ begin
 		if n_reset='0' then
 			fastramsize<="000";
 			turbochipram<='0';
+			scandoubler<='1';
 		end if;
 		reconfigure<='0';
 		if PART_select='1' and state="11" then	-- Write to platform registers
@@ -358,6 +358,7 @@ begin
 				when "1010" => -- DEE014
 					fastramsize<=cpudata_in(2 downto 0);
 					turbochipram<=cpudata_in(15);
+					scandoubler<=cpudata_in(14);
 				when "1011" => -- DEE016
 					reconfigure<='1';
 				when others =>

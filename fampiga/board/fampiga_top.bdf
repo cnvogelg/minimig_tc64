@@ -2275,6 +2275,21 @@ applicable agreement for further details.
 	)
 )
 (symbol
+	(rect 256 680 288 696)
+	(text "VCC" (rect 7 0 27 10)(font "Arial" (font_size 6)))
+	(text "inst12" (rect 3 5 32 16)(font "Arial" )(invisible))
+	(port
+		(pt 16 16)
+		(output)
+		(text "1" (rect 19 7 26 18)(font "Courier New" (bold))(invisible))
+		(text "1" (rect 19 7 26 18)(font "Courier New" (bold))(invisible))
+		(line (pt 16 16)(pt 16 8))
+	)
+	(drawing
+		(line (pt 8 8)(pt 24 8))
+	)
+)
+(symbol
 	(rect 1288 -336 1504 144)
 	(text "cfide" (rect 5 0 28 11)(font "Arial" ))
 	(text "inst3" (rect 8 464 31 475)(font "Arial" ))
@@ -2415,7 +2430,7 @@ applicable agreement for further details.
 		(pt 216 304)
 		(input)
 		(text "amiser_txd" (rect -80 0 -26 11)(font "Arial" ))
-		(text "amiser_txd" (rect 137 296 191 307)(font "Arial" ))
+		(text "amiser_txd" (rect 144 296 198 307)(font "Arial" ))
 		(line (pt 200 304)(pt 216 304))
 	)
 	(port
@@ -2628,23 +2643,15 @@ applicable agreement for further details.
 		(text "joystick4[5..0]" (rect 137 411 206 422)(font "Arial" ))
 		(line (pt 216 416)(pt 200 416)(line_width 3))
 	)
-	(drawing
-		(rectangle (rect 16 16 200 464))
-	)
-)
-(symbol
-	(rect 256 680 288 696)
-	(text "VCC" (rect 7 0 27 10)(font "Arial" (font_size 6)))
-	(text "inst12" (rect 3 5 32 16)(font "Arial" )(invisible))
 	(port
-		(pt 16 16)
+		(pt 216 432)
 		(output)
-		(text "1" (rect 19 7 26 18)(font "Courier New" (bold))(invisible))
-		(text "1" (rect 19 7 26 18)(font "Courier New" (bold))(invisible))
-		(line (pt 16 16)(pt 16 8))
+		(text "scandoubler" (rect -80 0 -20 11)(font "Arial" ))
+		(text "scandoubler" (rect 144 424 204 435)(font "Arial" ))
+		(line (pt 216 432)(pt 200 432))
 	)
 	(drawing
-		(line (pt 8 8)(pt 24 8))
+		(rectangle (rect 8 16 200 464))
 	)
 )
 (connector
@@ -2916,11 +2923,6 @@ applicable agreement for further details.
 	(text "c_28m" (rect 400 392 433 403)(font "Arial" ))
 	(pt 464 408)
 	(pt 392 408)
-)
-(connector
-	(text "v" (rect 432 472 437 483)(font "Arial" ))
-	(pt 464 488)
-	(pt 424 488)
 )
 (connector
 	(text "sd_do" (rect 409 584 438 595)(font "Arial" ))
@@ -3962,6 +3964,16 @@ applicable agreement for further details.
 (connector
 	(pt 1312 48)
 	(pt 1288 48)
+)
+(connector
+	(text "scandoubler" (rect 1514 80 1574 91)(font "Arial" ))
+	(pt 1504 96)
+	(pt 1608 96)
+)
+(connector
+	(text "scandoubler" (rect 408 472 468 483)(font "Arial" ))
+	(pt 400 488)
+	(pt 464 488)
 )
 (junction (pt 976 24))
 (junction (pt 680 8))

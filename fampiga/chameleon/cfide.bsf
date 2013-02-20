@@ -160,7 +160,7 @@ applicable agreement for further details.
 		(pt 216 304)
 		(input)
 		(text "amiser_txd" (rect -80 0 -26 11)(font "Arial" ))
-		(text "amiser_txd" (rect 137 296 191 307)(font "Arial" ))
+		(text "amiser_txd" (rect 144 296 198 307)(font "Arial" ))
 		(line (pt 200 304)(pt 216 304))
 	)
 	(port
@@ -373,7 +373,14 @@ applicable agreement for further details.
 		(text "joystick4[5..0]" (rect 137 411 195 422)(font "Arial" ))
 		(line (pt 216 416)(pt 200 416)(line_width 3))
 	)
+	(port
+		(pt 216 432)
+		(output)
+		(text "scandoubler" (rect -80 0 -20 11)(font "Arial" ))
+		(text "scandoubler" (rect 144 424 194 435)(font "Arial" ))
+		(line (pt 216 432)(pt 200 432))
+	)
 	(drawing
-		(rectangle (rect 16 16 200 464))
+		(rectangle (rect 8 16 200 464))
 	)
 )
