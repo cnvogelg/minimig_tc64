@@ -332,7 +332,7 @@ cpudata <=  rom_data WHEN ROM_select='1' ELSE
 part_in <= 
 			std_logic_vector(timecnt) WHEN addr(4 downto 1)="1000" ELSE	--DEE010
 			"XXXXXXXX"&"1"&"0000001" WHEN addr(4 downto 1)="1001" ELSE	--DEE012
-			"01" & (c64_keys(15) and menu_n_r) & '0'&"00000011"&"0101";	-- Bits 3:0 -> memory size.  (1<<memsize gives the size in megabytes.)
+			"01" & not (c64_keys(15) and menu_n_r) & '0'&"00000011"&"0101";	-- Bits 3:0 -> memory size.  (1<<memsize gives the size in megabytes.)
 												-- Bit  4 -> Turbo chipram supported
 												-- Bit  5 -> Reconfig supportred 
 												-- Bit  6 -> Action replay supported
