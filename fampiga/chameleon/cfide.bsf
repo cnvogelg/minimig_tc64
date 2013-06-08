@@ -20,9 +20,9 @@ applicable agreement for further details.
 */
 (header "symbol" (version "1.2"))
 (symbol
-	(rect 64 64 280 544)
+	(rect 64 64 280 576)
 	(text "cfide" (rect 5 0 28 11)(font "Arial" ))
-	(text "inst" (rect 8 464 25 475)(font "Arial" ))
+	(text "inst" (rect 8 496 25 507)(font "Arial" ))
 	(port
 		(pt 0 32)
 		(input)
@@ -159,8 +159,8 @@ applicable agreement for further details.
 	(port
 		(pt 216 304)
 		(input)
-		(text "amiser_txd" (rect -80 0 -26 11)(font "Arial" ))
-		(text "amiser_txd" (rect 144 296 198 307)(font "Arial" ))
+		(text "amiser_txd" (rect -8 0 46 11)(font "Arial" ))
+		(text "amiser_txd" (rect 137 296 191 307)(font "Arial" ))
 		(line (pt 200 304)(pt 216 304))
 	)
 	(port
@@ -204,6 +204,20 @@ applicable agreement for further details.
 		(text "rom_lh_n" (rect 0 0 44 11)(font "Arial" ))
 		(text "rom_lh_n" (rect 21 411 65 422)(font "Arial" ))
 		(line (pt 0 416)(pt 16 416))
+	)
+	(port
+		(pt 0 432)
+		(input)
+		(text "freeze_n" (rect 0 0 42 11)(font "Arial" ))
+		(text "freeze_n" (rect 21 427 63 438)(font "Arial" ))
+		(line (pt 0 432)(pt 16 432))
+	)
+	(port
+		(pt 0 448)
+		(input)
+		(text "menu_n" (rect 0 0 38 11)(font "Arial" ))
+		(text "menu_n" (rect 21 443 59 454)(font "Arial" ))
+		(line (pt 0 448)(pt 16 448))
 	)
 	(port
 		(pt 216 32)
@@ -377,10 +391,10 @@ applicable agreement for further details.
 		(pt 216 432)
 		(output)
 		(text "scandoubler" (rect -80 0 -20 11)(font "Arial" ))
-		(text "scandoubler" (rect 144 424 194 435)(font "Arial" ))
+		(text "scandoubler" (rect 145 427 195 438)(font "Arial" ))
 		(line (pt 216 432)(pt 200 432))
 	)
 	(drawing
-		(rectangle (rect 8 16 200 464))
+		(rectangle (rect 8 16 200 496))
 	)
 )

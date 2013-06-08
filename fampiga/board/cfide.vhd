@@ -85,7 +85,9 @@ entity cfide is
 	joystick2 : out unsigned(5 downto 0);
 	joystick3 : out unsigned(5 downto 0);
 	joystick4 : out unsigned(5 downto 0);
-	scandoubler : out std_logic
+	scandoubler : out std_logic;
+	freeze_n : in std_logic;
+	menu_n : in std_logic
    );
 
 end cfide;
@@ -147,6 +149,7 @@ signal spi_speed: unsigned(7 downto 0);
 signal rom_data: std_logic_vector(15 downto 0);
 signal spi_raw_ack : std_logic;
 signal spi_wait : std_logic;
+signal spi_wait_d : std_logic;
 
 signal timecnt: unsigned(15 downto 0);
 signal timeprecnt: unsigned(15 downto 0);
@@ -157,6 +160,11 @@ signal timeprecnt: unsigned(15 downto 0);
 signal enacnt: unsigned(6 downto 0);
 
 signal usart_rx : std_logic :='1';
+
+signal freeze_n_r : std_logic;
+signal menu_n_r : std_logic;
+signal freeze_n_r2 : std_logic;
+signal menu_n_r2 : std_logic;
 
 -- MUX
 	signal mux_clk_reg : std_logic := '0';
@@ -183,6 +191,17 @@ signal c64_joy2 : unsigned(5 downto 0);
 
 
 begin
+
+-- Synchronise buttons.
+process(sysclk)
+begin
+	if rising_edge(sysclk) then
+		freeze_n_r2 <= freeze_n;
+		freeze_n_r <= freeze_n_r2;
+		menu_n_r2 <= menu_n;
+		menu_n_r <= menu_n_r2;
+	end if;
+end process;
 
 
 -- Reset circuit
@@ -313,10 +332,11 @@ cpudata <=  rom_data WHEN ROM_select='1' ELSE
 part_in <= 
 			std_logic_vector(timecnt) WHEN addr(4 downto 1)="1000" ELSE	--DEE010
 			"XXXXXXXX"&"1"&"0000001" WHEN addr(4 downto 1)="1001" ELSE	--DEE012
-			"0100"&"00000011"&"0101";	-- Bits 3:0 -> memory size.  (1<<memsize gives the size in megabytes.)
+			"01" & (c64_keys(15) and menu_n_r) & '0'&"00000011"&"0101";	-- Bits 3:0 -> memory size.  (1<<memsize gives the size in megabytes.)
 												-- Bit  4 -> Turbo chipram supported
 												-- Bit  5 -> Reconfig supportred 
 												-- Bit  6 -> Action replay supported
+												-- Bit 13 -> OSD button (active low)
 												-- Bit 14 -> Scandoubler software-controllable.
 			--  WHEN addr(4 downto 1)="1010" ELSE	--DEE014
 
@@ -539,7 +559,12 @@ end process;
 		ELSIF (sysclk'event AND sysclk='1') THEN
 
 		if spi_raw_ack='1' then -- Unpause SPI as soon as the IO controller has written to the MUX
-			spi_wait<='0';
+			if spi_wait_d='1' then
+				spi_wait_d<='0';
+			else
+				spi_wait<='0';
+				spi_wait_d<='1';
+			end if;
 		end if;
 
 		IF enaWRreg='1' THEN

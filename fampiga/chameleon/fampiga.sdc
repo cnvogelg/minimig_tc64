@@ -42,7 +42,7 @@ derive_clock_uncertainty;
 
 # Very narrow window here.
 set_input_delay -clock sdram_clk_pin -max [expr 5.4 + 1.0] [get_ports sd_data*]
-set_input_delay -clock sdram_clk_pin -min [expr 3 + 0.1 ] [get_ports sd_data*]
+set_input_delay -clock sdram_clk_pin -min [expr 0 + 1.0 ] [get_ports sd_data*]
 
 #**************************************************************
 # Set Output Delay
@@ -62,4 +62,5 @@ set_output_delay -clock sdram_clk_pin -min [expr -1.0 - 0.1] [get_ports {sd_ba_0
 # Multicycles
 
 # Without this, Quartus shoots for the wrong clock edge on inputs, due to the phase-shifted clock.
-set_multicycle_path -from {sd_data*} -to {sdram:inst5|sdata_reg*} -setup -end 2
+set_multicycle_path -from [get_clocks {sdram_clk_pin}] -to [get_clocks {inst|altpll_component|auto_generated|pll1|clk[1]}] -setup -end 2
+
