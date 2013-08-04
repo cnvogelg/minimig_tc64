@@ -244,11 +244,11 @@ joystick2<=c64_joy2(5 downto 4)&c64_joy2(0)&c64_joy2(1)&c64_joy2(2)&c64_joy2(3);
 			
 		-- Chameleon FPGA pins
 			-- C64 Clocks
-			phi2_n => phi2_n,	-- missing?
-			dotclock_n => dotclock_n, -- missing?
+			phi2_n => phi2_n,
+			dotclock_n => dotclock_n, 
 			-- C64 cartridge control lines
-			io_ef_n => io_ef_n, -- missing?
-			rom_lh_n => rom_lh_n, -- missing?
+			io_ef_n => io_ef_n,
+			rom_lh_n => rom_lh_n,
 			-- SPI bus
 			spi_miso => sd_dimm,  -- present
 			-- CPLD multiplexer
@@ -286,10 +286,10 @@ joystick2<=c64_joy2(5 downto 4)&c64_joy2(0)&c64_joy2(1)&c64_joy2(2)&c64_joy2(3);
 			button_reset_n => button_reset_n, -- present (nreset)
 
 		-- Joysticks
-			joystick1 => c64_joy1,  -- missing
-			joystick2 => c64_joy2,  -- missing
-			joystick3 => joystick3,  -- missing
-			joystick4 => joystick4,  -- missing
+			joystick1 => c64_joy1,
+			joystick2 => c64_joy2,
+			joystick3 => joystick3, 
+			joystick4 => joystick4,
 
 		-- Keyboards
 			keys => c64_keys,	-- missing - how to map?  Array, readable in software?
@@ -332,7 +332,8 @@ cpudata <=  rom_data WHEN ROM_select='1' ELSE
 part_in <= 
 			std_logic_vector(timecnt) WHEN addr(4 downto 1)="1000" ELSE	--DEE010
 			"XXXXXXXX"&"1"&"0000001" WHEN addr(4 downto 1)="1001" ELSE	--DEE012
-			"01" & not (c64_keys(15) and menu_n_r) & '0'&"00000011"&"0101";	-- Bits 3:0 -> memory size.  (1<<memsize gives the size in megabytes.)
+			"01" & not (c64_keys(63) and menu_n_r) & '0'&"00000011"&"0101";	-- Bits 3:0 -> memory size.  (1<<memsize gives the size in megabytes.)
+			-- Yuck - but C64 joystick in port 1 interferes with keyboard scanning.
 												-- Bit  4 -> Turbo chipram supported
 												-- Bit  5 -> Reconfig supportred 
 												-- Bit  6 -> Action replay supported
