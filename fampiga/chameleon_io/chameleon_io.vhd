@@ -117,9 +117,6 @@ use IEEE.numeric_std.all;
 
 entity chameleon_io is
 	generic (
-		enable_docking_station : boolean := true;
-		enable_c64_joykeyb : boolean := false;
-		enable_c64_4player : boolean := false;
 		enable_raw_spi : boolean := false;
 		enable_iec_access : boolean := false
 	);
@@ -387,96 +384,16 @@ begin
 -- Docking-station
 -- To enable set enable_docking_station to true.
 -- -----------------------------------------------------------------------
-	genDockingStation : if enable_docking_station generate
-		myDockingStation : entity work.chameleon_docking_station
-			port map (
-				clk => clk,
-				
-				docking_station => docking_station_loc,
-				
-				dotclock_n => dotclock_n,
-				io_ef_n => io_ef_n,
-				rom_lh_n => rom_lh_n,
-				irq_q => docking_irq,
-				
-				joystick1 => docking_joystick1,
-				joystick2 => docking_joystick2,
-				joystick3 => docking_joystick3,
-				joystick4 => docking_joystick4,
-				keys => docking_keys,
-				restore_key_n => restore_key_n,
-				
-				amiga_power_led => led_green,
-				amiga_drive_led => led_red,
-				amiga_reset_n => amiga_reset_n,
-				amiga_trigger => amiga_trigger,
-				amiga_scancode => amiga_scancode
-			);
-	end generate;
-
-	noDockingStation : if not enable_docking_station generate
 		docking_joystick1 <= (others => '1');
 		docking_joystick2 <= (others => '1');
 		docking_joystick3 <= (others => '1');
 		docking_joystick4 <= (others => '1');
 		docking_keys <= (others => '1');
-	end generate;
 
 -- -----------------------------------------------------------------------
 -- C64 keyboard and joystick support
 -- To enable set enable_c64_joykeyb to true.
 -- -----------------------------------------------------------------------
-	genC64JoyKeyb : if enable_c64_joykeyb generate
-		myC64JoyKeyb : entity work.chameleon_c64_joykeyb
-			generic map (
-				enable_4player => enable_c64_4player
-			)
-			port map (
-				clk => clk,
-				ena_1mhz => ena_1mhz,
-				no_clock => no_clock_loc,
-				reset => reset,
-				
-				ba => c64_ba_reg,
-				req => c64_kb_req,
-				ack => c64_kb_ack,
-				we => c64_kb_we,
-				a => c64_kb_a,
-				d => c64_data_reg,
-				q => c64_kb_q,
-				
-				joystick1 => c64_joystick1,
-				joystick2 => c64_joystick2,
-				joystick3 => c64_joystick3,
-				joystick4 => c64_joystick4,
-				keys => c64_keys
-			);
-
-		c64_addr <= c64_kb_a;
-		c64_to_io <= c64_kb_q;
-		c64_vic_loc <= '0';
-		c64_roms_loc <= '0';
-		c64_clockport_loc <= '0';
-		c64_we_loc <= c64_kb_we;
-
-		process(clk)
-		begin
-			if rising_edge(clk) then
-				if end_of_phi_1 = '1' then
-					c64_cs_loc <= '0';
-					if c64_kb_req /= c64_kb_ack then
-						if c64_cs_loc = '1' then
-							c64_kb_ack <= c64_kb_req;
-						else
-							c64_cs_loc <= '1';
-						end if;
-					end if;
-				end if;
-			end if;
-		end process;
-	end generate;
-	
-	noC64JoyKeyb : if not enable_c64_joykeyb generate
 		c64_joystick1 <= (others => '1');
 		c64_joystick2 <= (others => '1');
 		c64_joystick3 <= (others => '1');
@@ -491,7 +408,6 @@ begin
 		c64_roms_loc <= c64_cs_roms;
 		c64_clockport_loc <= c64_clockport;
 		c64_we_loc <= c64_we;
-	end generate;
 
 -- -----------------------------------------------------------------------
 -- MUX CPLD

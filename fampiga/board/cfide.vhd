@@ -227,9 +227,6 @@ joystick2<=c64_joy2(5 downto 4)&c64_joy2(0)&c64_joy2(1)&c64_joy2(2)&c64_joy2(3);
 
 	myIO : entity work.chameleon_io
 		generic map (
-			enable_docking_station => true,
-			enable_c64_joykeyb => true,
-			enable_c64_4player => true,
 			enable_raw_spi => true
 		)
 		port map (

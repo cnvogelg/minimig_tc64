@@ -1,447 +1,150 @@
-<session jtag_chain="USB-Blaster [1-1]" jtag_device="@2: EP3C25/EP4CE22 (0x020F30DD)" sof_file="fampiga_top.sof">
+<session jtag_chain="USB-Blaster [2-2.1]" jtag_device="@2: EP3C25/EP4CE22 (0x020F30DD)" sof_file="fampiga_top.sof">
   <display_tree gui_logging_enabled="0">
     <display_branch instance="auto_signaltap_0" log="USE_GLOBAL_TEMP" signal_set="USE_GLOBAL_TEMP" trigger="USE_GLOBAL_TEMP"/>
   </display_tree>
   <instance entity_name="sld_signaltap" is_auto_node="yes" is_expanded="true" name="auto_signaltap_0" source_file="sld_signaltap.vhd">
     <node_ip_info instance_id="0" mfg_id="110" node_id="0" version="6"/>
-    <signal_set global_temp="1" is_expanded="true" name="signal_set: 2013/06/05 23:10:39  #0">
+    <position_info>
+      <single attribute="active tab" value="0"/>
+      <single attribute="data horizontal scroll position" value="895"/>
+      <single attribute="data vertical scroll position" value="0"/>
+      <single attribute="setup horizontal scroll position" value="0"/>
+      <single attribute="setup vertical scroll position" value="7"/>
+      <single attribute="zoom level denominator" value="1"/>
+      <single attribute="zoom level numerator" value="256"/>
+      <single attribute="zoom offset denominator" value="1"/>
+      <single attribute="zoom offset numerator" value="508"/>
+    </position_info>
+    <signal_set global_temp="1" name="signal_set: 2013/08/05 20:37:04  #0">
       <clock name="sysclk" polarity="posedge" tap_mode="classic"/>
-      <config ram_type="M4K" reserved_data_nodes="0" reserved_storage_qualifier_nodes="0" reserved_trigger_nodes="0" sample_depth="512" trigger_in_enable="no" trigger_out_enable="no"/>
+      <config ram_type="M4K" reserved_data_nodes="0" reserved_storage_qualifier_nodes="0" reserved_trigger_nodes="0" sample_depth="1024" trigger_in_enable="no" trigger_out_enable="no"/>
       <top_entity/>
       <signal_vec>
         <trigger_input_vec>
-          <wire name="Minimig1:inst1|Amber:AMBER1|dblscan" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joya[0]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joya[1]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joya[2]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joya[3]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joya[4]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joya[5]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joyb[0]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joyb[1]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joyb[2]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joyb[3]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joyb[4]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joyb[5]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|SPI_select" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|chameleon_io:myIO|spi_ack" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|chameleon_io:myIO|spi_raw_ack" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|chameleon_io:myIO|spi_raw_clk" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|chameleon_io:myIO|spi_raw_mosi" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|joystick1[0]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|joystick1[1]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|joystick1[2]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|joystick1[3]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|joystick1[4]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|joystick1[5]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux[0]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux[1]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux[2]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux[3]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux_clk" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux_d[0]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux_d[1]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux_d[2]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux_d[3]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux_q[0]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux_q[1]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux_q[2]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux_q[3]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|n_reset" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|sck" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|scs[0]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|scs[1]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|scs[2]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|scs[3]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|scs[4]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|scs[5]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|scs[6]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|scs[7]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|sd_dimm" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|sd_do" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|spi_div[0]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_div[1]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_div[2]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_div[3]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_div[4]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_div[5]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_div[6]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_div[7]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_speed[0]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_speed[1]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_speed[2]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_speed[3]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_speed[4]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_speed[5]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_speed[6]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_speed[7]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_wait" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|state[0]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|state[1]" tap_mode="classic" type="combinatorial"/>
-          <wire name="nHSync" tap_mode="classic" type="output pin"/>
-          <wire name="nVSync" tap_mode="classic" type="output pin"/>
-          <wire name="scandoubler" tap_mode="classic" type="combinatorial"/>
-          <wire name="spi_miso" tap_mode="classic" type="input pin"/>
-          <wire name="cfide:inst3|chameleon_io:myIO|c64_nmi_n" tap_mode="probeonly" type="register"/>
-          <wire name="cfide:inst3|chameleon_io:myIO|chameleon_docking_station:\genDockingStation:myDockingStation|restore_n_reg" tap_mode="probeonly" type="register"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux[0]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux[1]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux[2]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux[3]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux_clk" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux_d[0]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux_d[1]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux_d[2]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux_d[3]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux_q[0]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux_q[1]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux_q[2]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux_q[3]" tap_mode="classic"/>
         </trigger_input_vec>
         <data_input_vec>
-          <wire name="Minimig1:inst1|Amber:AMBER1|dblscan" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joya[0]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joya[1]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joya[2]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joya[3]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joya[4]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joya[5]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joyb[0]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joyb[1]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joyb[2]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joyb[3]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joyb[4]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joyb[5]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|SPI_select" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|chameleon_io:myIO|spi_ack" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|chameleon_io:myIO|spi_raw_ack" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|chameleon_io:myIO|spi_raw_clk" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|chameleon_io:myIO|spi_raw_mosi" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|joystick1[0]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|joystick1[1]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|joystick1[2]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|joystick1[3]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|joystick1[4]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|joystick1[5]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux[0]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux[1]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux[2]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux[3]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux_clk" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux_d[0]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux_d[1]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux_d[2]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux_d[3]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux_q[0]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux_q[1]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux_q[2]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux_q[3]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|n_reset" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|sck" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|scs[0]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|scs[1]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|scs[2]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|scs[3]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|scs[4]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|scs[5]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|scs[6]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|scs[7]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|sd_dimm" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|sd_do" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|spi_div[0]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_div[1]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_div[2]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_div[3]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_div[4]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_div[5]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_div[6]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_div[7]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_speed[0]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_speed[1]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_speed[2]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_speed[3]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_speed[4]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_speed[5]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_speed[6]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_speed[7]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_wait" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|state[0]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|state[1]" tap_mode="classic" type="combinatorial"/>
-          <wire name="nHSync" tap_mode="classic" type="output pin"/>
-          <wire name="nVSync" tap_mode="classic" type="output pin"/>
-          <wire name="scandoubler" tap_mode="classic" type="combinatorial"/>
-          <wire name="spi_miso" tap_mode="classic" type="input pin"/>
-          <wire name="cfide:inst3|chameleon_io:myIO|c64_nmi_n" tap_mode="probeonly" type="register"/>
-          <wire name="cfide:inst3|chameleon_io:myIO|chameleon_docking_station:\genDockingStation:myDockingStation|restore_n_reg" tap_mode="probeonly" type="register"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux[0]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux[1]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux[2]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux[3]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux_clk" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux_d[0]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux_d[1]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux_d[2]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux_d[3]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux_q[0]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux_q[1]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux_q[2]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux_q[3]" tap_mode="classic"/>
         </data_input_vec>
         <storage_qualifier_input_vec>
-          <wire name="Minimig1:inst1|Amber:AMBER1|dblscan" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joya[0]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joya[1]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joya[2]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joya[3]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joya[4]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joya[5]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joyb[0]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joyb[1]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joyb[2]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joyb[3]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joyb[4]" tap_mode="classic" type="combinatorial"/>
-          <wire name="c64joyb[5]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|SPI_select" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|chameleon_io:myIO|spi_ack" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|chameleon_io:myIO|spi_raw_ack" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|chameleon_io:myIO|spi_raw_clk" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|chameleon_io:myIO|spi_raw_mosi" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|joystick1[0]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|joystick1[1]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|joystick1[2]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|joystick1[3]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|joystick1[4]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|joystick1[5]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux[0]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux[1]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux[2]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux[3]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux_clk" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux_d[0]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux_d[1]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux_d[2]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux_d[3]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux_q[0]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux_q[1]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux_q[2]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|mux_q[3]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|n_reset" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|sck" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|scs[0]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|scs[1]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|scs[2]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|scs[3]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|scs[4]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|scs[5]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|scs[6]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|scs[7]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|sd_dimm" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|sd_do" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|spi_div[0]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_div[1]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_div[2]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_div[3]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_div[4]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_div[5]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_div[6]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_div[7]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_speed[0]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_speed[1]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_speed[2]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_speed[3]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_speed[4]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_speed[5]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_speed[6]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_speed[7]" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|spi_wait" tap_mode="classic" type="register"/>
-          <wire name="cfide:inst3|state[0]" tap_mode="classic" type="combinatorial"/>
-          <wire name="cfide:inst3|state[1]" tap_mode="classic" type="combinatorial"/>
-          <wire name="nHSync" tap_mode="classic" type="output pin"/>
-          <wire name="nVSync" tap_mode="classic" type="output pin"/>
-          <wire name="scandoubler" tap_mode="classic" type="combinatorial"/>
-          <wire name="spi_miso" tap_mode="classic" type="input pin"/>
-          <wire name="cfide:inst3|chameleon_io:myIO|c64_nmi_n" tap_mode="probeonly" type="register"/>
-          <wire name="cfide:inst3|chameleon_io:myIO|chameleon_docking_station:\genDockingStation:myDockingStation|restore_n_reg" tap_mode="probeonly" type="register"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux[0]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux[1]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux[2]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux[3]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux_clk" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux_d[0]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux_d[1]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux_d[2]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux_d[3]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux_q[0]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux_q[1]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux_q[2]" tap_mode="classic"/>
+          <wire name="cfide:inst3|chameleon_io:myIO|mux_q[3]" tap_mode="classic"/>
         </storage_qualifier_input_vec>
       </signal_vec>
       <presentation>
+        <unified_setup_data_view>
+          <node name="cfide:inst3|chameleon_io:myIO|mux" order="msb_to_lsb" type="combinatorial">
+            <node data_index="3" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux[3]" storage_index="3" tap_mode="classic" trigger_index="3" type="combinatorial"/>
+            <node data_index="2" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux[2]" storage_index="2" tap_mode="classic" trigger_index="2" type="combinatorial"/>
+            <node data_index="1" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux[1]" storage_index="1" tap_mode="classic" trigger_index="1" type="combinatorial"/>
+            <node data_index="0" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux[0]" storage_index="0" tap_mode="classic" trigger_index="0" type="combinatorial"/>
+          </node>
+          <node data_index="4" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_clk" storage_index="4" tap_mode="classic" trigger_index="4" type="combinatorial"/>
+          <node name="cfide:inst3|chameleon_io:myIO|mux_d" order="msb_to_lsb" type="combinatorial">
+            <node data_index="8" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_d[3]" storage_index="8" tap_mode="classic" trigger_index="8" type="combinatorial"/>
+            <node data_index="7" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_d[2]" storage_index="7" tap_mode="classic" trigger_index="7" type="combinatorial"/>
+            <node data_index="6" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_d[1]" storage_index="6" tap_mode="classic" trigger_index="6" type="combinatorial"/>
+            <node data_index="5" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_d[0]" storage_index="5" tap_mode="classic" trigger_index="5" type="combinatorial"/>
+          </node>
+          <node name="cfide:inst3|chameleon_io:myIO|mux_q" order="msb_to_lsb" type="combinatorial">
+            <node data_index="12" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_q[3]" storage_index="12" tap_mode="classic" trigger_index="12" type="combinatorial"/>
+            <node data_index="11" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_q[2]" storage_index="11" tap_mode="classic" trigger_index="11" type="combinatorial"/>
+            <node data_index="10" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_q[1]" storage_index="10" tap_mode="classic" trigger_index="10" type="combinatorial"/>
+            <node data_index="9" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_q[0]" storage_index="9" tap_mode="classic" trigger_index="9" type="combinatorial"/>
+          </node>
+        </unified_setup_data_view>
         <data_view>
-          <net is_signal_inverted="no" name="cfide:inst3|chameleon_io:myIO|spi_ack"/>
-          <net is_signal_inverted="no" name="cfide:inst3|chameleon_io:myIO|spi_raw_ack"/>
-          <net is_signal_inverted="no" name="cfide:inst3|chameleon_io:myIO|spi_raw_clk"/>
-          <net is_signal_inverted="no" name="cfide:inst3|chameleon_io:myIO|spi_raw_mosi"/>
-          <net is_signal_inverted="no" name="spi_miso"/>
-          <bus is_signal_inverted="no" link="all" name="cfide:inst3|spi_div" order="msb_to_lsb" radix="hex" state="collapse" type="register">
-            <net is_signal_inverted="no" name="cfide:inst3|spi_div[7]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|spi_div[6]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|spi_div[5]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|spi_div[4]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|spi_div[3]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|spi_div[2]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|spi_div[1]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|spi_div[0]"/>
+          <bus name="cfide:inst3|chameleon_io:myIO|mux" order="msb_to_lsb" type="combinatorial">
+            <net data_index="3" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux[3]" storage_index="3" tap_mode="classic" trigger_index="3" type="combinatorial"/>
+            <net data_index="2" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux[2]" storage_index="2" tap_mode="classic" trigger_index="2" type="combinatorial"/>
+            <net data_index="1" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux[1]" storage_index="1" tap_mode="classic" trigger_index="1" type="combinatorial"/>
+            <net data_index="0" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux[0]" storage_index="0" tap_mode="classic" trigger_index="0" type="combinatorial"/>
           </bus>
-          <bus is_signal_inverted="no" link="all" name="cfide:inst3|spi_speed" order="msb_to_lsb" radix="hex" state="collapse" type="register">
-            <net is_signal_inverted="no" name="cfide:inst3|spi_speed[7]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|spi_speed[6]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|spi_speed[5]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|spi_speed[4]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|spi_speed[3]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|spi_speed[2]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|spi_speed[1]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|spi_speed[0]"/>
+          <net data_index="4" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_clk" storage_index="4" tap_mode="classic" trigger_index="4" type="combinatorial"/>
+          <bus name="cfide:inst3|chameleon_io:myIO|mux_d" order="msb_to_lsb" type="combinatorial">
+            <net data_index="8" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_d[3]" storage_index="8" tap_mode="classic" trigger_index="8" type="combinatorial"/>
+            <net data_index="7" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_d[2]" storage_index="7" tap_mode="classic" trigger_index="7" type="combinatorial"/>
+            <net data_index="6" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_d[1]" storage_index="6" tap_mode="classic" trigger_index="6" type="combinatorial"/>
+            <net data_index="5" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_d[0]" storage_index="5" tap_mode="classic" trigger_index="5" type="combinatorial"/>
           </bus>
-          <net is_signal_inverted="no" name="cfide:inst3|SPI_select"/>
-          <bus is_signal_inverted="no" link="all" name="cfide:inst3|mux" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
-            <net is_signal_inverted="no" name="cfide:inst3|mux[3]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|mux[2]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|mux[1]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|mux[0]"/>
+          <bus name="cfide:inst3|chameleon_io:myIO|mux_q" order="msb_to_lsb" type="combinatorial">
+            <net data_index="12" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_q[3]" storage_index="12" tap_mode="classic" trigger_index="12" type="combinatorial"/>
+            <net data_index="11" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_q[2]" storage_index="11" tap_mode="classic" trigger_index="11" type="combinatorial"/>
+            <net data_index="10" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_q[1]" storage_index="10" tap_mode="classic" trigger_index="10" type="combinatorial"/>
+            <net data_index="9" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_q[0]" storage_index="9" tap_mode="classic" trigger_index="9" type="combinatorial"/>
           </bus>
-          <net is_signal_inverted="no" name="cfide:inst3|mux_clk"/>
-          <bus is_signal_inverted="no" link="all" name="cfide:inst3|mux_d" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
-            <net is_signal_inverted="no" name="cfide:inst3|mux_d[3]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|mux_d[2]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|mux_d[1]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|mux_d[0]"/>
-          </bus>
-          <bus is_signal_inverted="no" link="all" name="cfide:inst3|mux_q" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
-            <net is_signal_inverted="no" name="cfide:inst3|mux_q[3]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|mux_q[2]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|mux_q[1]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|mux_q[0]"/>
-          </bus>
-          <net is_signal_inverted="no" name="cfide:inst3|n_reset"/>
-          <net is_signal_inverted="no" name="cfide:inst3|sck"/>
-          <bus is_signal_inverted="no" link="all" name="cfide:inst3|scs" order="msb_to_lsb" radix="hex" state="collapse" type="register">
-            <net is_signal_inverted="no" name="cfide:inst3|scs[7]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|scs[6]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|scs[5]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|scs[4]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|scs[3]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|scs[2]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|scs[1]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|scs[0]"/>
-          </bus>
-          <net is_signal_inverted="no" name="cfide:inst3|sd_dimm"/>
-          <net is_signal_inverted="no" name="cfide:inst3|sd_do"/>
-          <bus is_signal_inverted="no" link="all" name="cfide:inst3|state" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
-            <net is_signal_inverted="no" name="cfide:inst3|state[1]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|state[0]"/>
-          </bus>
-          <bus is_signal_inverted="no" link="all" name="c64joya" order="msb_to_lsb" radix="hex" state="expand" type="combinatorial">
-            <net is_signal_inverted="no" name="c64joya[5]"/>
-            <net is_signal_inverted="no" name="c64joya[4]"/>
-            <net is_signal_inverted="no" name="c64joya[3]"/>
-            <net is_signal_inverted="no" name="c64joya[2]"/>
-            <net is_signal_inverted="no" name="c64joya[1]"/>
-            <net is_signal_inverted="no" name="c64joya[0]"/>
-          </bus>
-          <bus is_signal_inverted="no" link="all" name="c64joyb" order="msb_to_lsb" radix="hex" state="expand" type="combinatorial">
-            <net is_signal_inverted="no" name="c64joyb[5]"/>
-            <net is_signal_inverted="no" name="c64joyb[4]"/>
-            <net is_signal_inverted="no" name="c64joyb[3]"/>
-            <net is_signal_inverted="no" name="c64joyb[2]"/>
-            <net is_signal_inverted="no" name="c64joyb[1]"/>
-            <net is_signal_inverted="no" name="c64joyb[0]"/>
-          </bus>
-          <bus is_signal_inverted="no" link="all" name="cfide:inst3|joystick1" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
-            <net is_signal_inverted="no" name="cfide:inst3|joystick1[5]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|joystick1[4]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|joystick1[3]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|joystick1[2]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|joystick1[1]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|joystick1[0]"/>
-          </bus>
-          <net is_signal_inverted="no" name="cfide:inst3|spi_wait"/>
-          <net is_signal_inverted="no" name="nVSync"/>
-          <net is_signal_inverted="no" name="nHSync"/>
-          <net is_signal_inverted="no" name="Minimig1:inst1|Amber:AMBER1|dblscan"/>
-          <net is_signal_inverted="no" name="scandoubler"/>
-          <net is_signal_inverted="no" name="cfide:inst3|chameleon_io:myIO|c64_nmi_n"/>
-          <net is_signal_inverted="no" name="cfide:inst3|chameleon_io:myIO|chameleon_docking_station:\genDockingStation:myDockingStation|restore_n_reg"/>
         </data_view>
         <setup_view>
-          <net is_signal_inverted="no" name="cfide:inst3|chameleon_io:myIO|spi_ack"/>
-          <net is_signal_inverted="no" name="cfide:inst3|chameleon_io:myIO|spi_raw_ack"/>
-          <net is_signal_inverted="no" name="cfide:inst3|chameleon_io:myIO|spi_raw_clk"/>
-          <net is_signal_inverted="no" name="cfide:inst3|chameleon_io:myIO|spi_raw_mosi"/>
-          <net is_signal_inverted="no" name="spi_miso"/>
-          <bus is_signal_inverted="no" link="all" name="cfide:inst3|spi_div" order="msb_to_lsb" radix="hex" state="collapse" type="register">
-            <net is_signal_inverted="no" name="cfide:inst3|spi_div[7]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|spi_div[6]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|spi_div[5]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|spi_div[4]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|spi_div[3]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|spi_div[2]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|spi_div[1]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|spi_div[0]"/>
+          <bus name="cfide:inst3|chameleon_io:myIO|mux" order="msb_to_lsb" type="combinatorial">
+            <net data_index="3" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux[3]" storage_index="3" tap_mode="classic" trigger_index="3" type="combinatorial"/>
+            <net data_index="2" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux[2]" storage_index="2" tap_mode="classic" trigger_index="2" type="combinatorial"/>
+            <net data_index="1" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux[1]" storage_index="1" tap_mode="classic" trigger_index="1" type="combinatorial"/>
+            <net data_index="0" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux[0]" storage_index="0" tap_mode="classic" trigger_index="0" type="combinatorial"/>
           </bus>
-          <bus is_signal_inverted="no" link="all" name="cfide:inst3|spi_speed" order="msb_to_lsb" radix="hex" state="collapse" type="register">
-            <net is_signal_inverted="no" name="cfide:inst3|spi_speed[7]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|spi_speed[6]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|spi_speed[5]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|spi_speed[4]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|spi_speed[3]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|spi_speed[2]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|spi_speed[1]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|spi_speed[0]"/>
+          <net data_index="4" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_clk" storage_index="4" tap_mode="classic" trigger_index="4" type="combinatorial"/>
+          <bus name="cfide:inst3|chameleon_io:myIO|mux_d" order="msb_to_lsb" type="combinatorial">
+            <net data_index="8" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_d[3]" storage_index="8" tap_mode="classic" trigger_index="8" type="combinatorial"/>
+            <net data_index="7" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_d[2]" storage_index="7" tap_mode="classic" trigger_index="7" type="combinatorial"/>
+            <net data_index="6" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_d[1]" storage_index="6" tap_mode="classic" trigger_index="6" type="combinatorial"/>
+            <net data_index="5" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_d[0]" storage_index="5" tap_mode="classic" trigger_index="5" type="combinatorial"/>
           </bus>
-          <net is_signal_inverted="no" name="cfide:inst3|SPI_select"/>
-          <bus is_signal_inverted="no" link="all" name="cfide:inst3|mux" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
-            <net is_signal_inverted="no" name="cfide:inst3|mux[3]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|mux[2]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|mux[1]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|mux[0]"/>
+          <bus name="cfide:inst3|chameleon_io:myIO|mux_q" order="msb_to_lsb" type="combinatorial">
+            <net data_index="12" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_q[3]" storage_index="12" tap_mode="classic" trigger_index="12" type="combinatorial"/>
+            <net data_index="11" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_q[2]" storage_index="11" tap_mode="classic" trigger_index="11" type="combinatorial"/>
+            <net data_index="10" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_q[1]" storage_index="10" tap_mode="classic" trigger_index="10" type="combinatorial"/>
+            <net data_index="9" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_q[0]" storage_index="9" tap_mode="classic" trigger_index="9" type="combinatorial"/>
           </bus>
-          <net is_signal_inverted="no" name="cfide:inst3|mux_clk"/>
-          <bus is_signal_inverted="no" link="all" name="cfide:inst3|mux_d" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
-            <net is_signal_inverted="no" name="cfide:inst3|mux_d[3]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|mux_d[2]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|mux_d[1]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|mux_d[0]"/>
-          </bus>
-          <bus is_signal_inverted="no" link="all" name="cfide:inst3|mux_q" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
-            <net is_signal_inverted="no" name="cfide:inst3|mux_q[3]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|mux_q[2]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|mux_q[1]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|mux_q[0]"/>
-          </bus>
-          <net is_signal_inverted="no" name="cfide:inst3|n_reset"/>
-          <net is_signal_inverted="no" name="cfide:inst3|sck"/>
-          <bus is_signal_inverted="no" link="all" name="cfide:inst3|scs" order="msb_to_lsb" radix="hex" state="collapse" type="register">
-            <net is_signal_inverted="no" name="cfide:inst3|scs[7]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|scs[6]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|scs[5]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|scs[4]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|scs[3]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|scs[2]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|scs[1]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|scs[0]"/>
-          </bus>
-          <net is_signal_inverted="no" name="cfide:inst3|sd_dimm"/>
-          <net is_signal_inverted="no" name="cfide:inst3|sd_do"/>
-          <bus is_signal_inverted="no" link="all" name="cfide:inst3|state" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
-            <net is_signal_inverted="no" name="cfide:inst3|state[1]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|state[0]"/>
-          </bus>
-          <bus is_signal_inverted="no" link="all" name="c64joya" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
-            <net is_signal_inverted="no" name="c64joya[5]"/>
-            <net is_signal_inverted="no" name="c64joya[4]"/>
-            <net is_signal_inverted="no" name="c64joya[3]"/>
-            <net is_signal_inverted="no" name="c64joya[2]"/>
-            <net is_signal_inverted="no" name="c64joya[1]"/>
-            <net is_signal_inverted="no" name="c64joya[0]"/>
-          </bus>
-          <bus is_signal_inverted="no" link="all" name="c64joyb" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
-            <net is_signal_inverted="no" name="c64joyb[5]"/>
-            <net is_signal_inverted="no" name="c64joyb[4]"/>
-            <net is_signal_inverted="no" name="c64joyb[3]"/>
-            <net is_signal_inverted="no" name="c64joyb[2]"/>
-            <net is_signal_inverted="no" name="c64joyb[1]"/>
-            <net is_signal_inverted="no" name="c64joyb[0]"/>
-          </bus>
-          <bus is_signal_inverted="no" link="all" name="cfide:inst3|joystick1" order="msb_to_lsb" radix="hex" state="collapse" type="combinatorial">
-            <net is_signal_inverted="no" name="cfide:inst3|joystick1[5]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|joystick1[4]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|joystick1[3]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|joystick1[2]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|joystick1[1]"/>
-            <net is_signal_inverted="no" name="cfide:inst3|joystick1[0]"/>
-          </bus>
-          <net is_signal_inverted="no" name="cfide:inst3|spi_wait"/>
-          <net is_signal_inverted="no" name="nVSync"/>
-          <net is_signal_inverted="no" name="nHSync"/>
-          <net is_signal_inverted="no" name="Minimig1:inst1|Amber:AMBER1|dblscan"/>
-          <net is_signal_inverted="no" name="scandoubler"/>
-          <net is_signal_inverted="no" name="cfide:inst3|chameleon_io:myIO|c64_nmi_n"/>
-          <net is_signal_inverted="no" name="cfide:inst3|chameleon_io:myIO|chameleon_docking_station:\genDockingStation:myDockingStation|restore_n_reg"/>
         </setup_view>
+        <trigger_in_editor/>
+        <trigger_out_editor/>
       </presentation>
-      <trigger CRC="52090A67" attribute_mem_mode="false" gap_record="true" global_temp="1" is_expanded="true" name="trigger: 2013/06/05 23:10:39  #1" position="post" power_up_trigger_mode="false" record_data_gap="true" segment_size="512" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="true" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_in="dont_care" trigger_out="active high" trigger_type="circular">
-        <power_up_trigger position="pre" storage_qualifier_disabled="no" trigger_in="dont_care" trigger_out="active high"/>
+      <trigger CRC="B7F80B8B" attribute_mem_mode="false" gap_record="true" global_temp="1" name="trigger: 2013/08/05 20:37:04  #1" position="post" power_up_trigger_mode="false" record_data_gap="true" segment_size="256" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="false" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_type="circular">
+        <power_up_trigger position="pre" storage_qualifier_disabled="no"/>
         <events use_custom_flow_control="no">
-          <level enabled="yes" name="condition1" type="basic"><power_up enabled="yes">
-            </power_up><op_node/>
+          <level enabled="yes" name="condition1" type="basic">
+            <power_up enabled="yes">
+            </power_up>
+            <op_node/>
           </level>
         </events>
         <storage_qualifier_events>
-          <transitional>00000000000000000000000000000000000000000000000000000000000000000000000000
-            <pwr_up_transitional>00000000000000000000000000000000000000000000000000000000000000000000000000</pwr_up_transitional>
+          <transitional>1111111111111
+            <pwr_up_transitional>1111111111111</pwr_up_transitional>
           </transitional>
           <storage_qualifier_level type="basic">
             <power_up>
@@ -460,22 +163,11 @@
           </storage_qualifier_level>
         </storage_qualifier_events>
         <log>
-          <data global_temp="1" name="log: 2013/06/08 19:56:32  #0" power_up_mode="false" sample_depth="512" trigger_position="448">0100111111111001101001110011010111111100000000010000000001000000010000010001001111111110001010011100111101111111000000000100000000010000000100000100010011111111100010100111000000111111110000000001000000000100000001000001000100111111111000101001110000101110111100000000010100000001000000010000010001001111111110001010011110000111101111000000000101000000010000000100000100010011111111100010100111100011111111110000000001010000000100000001000001000100111111111001101001110011010111111100000000010100000001000000010000010001001111111110001010011100111101111111000000000100000000010000000000000100010011111111100110100111001101011111110000000001000000000100000000000001000100111111111000101001110011110111111100000000010000000001000000000000010001001111111110011010011100110101111111000000000100000000010000000000000100010011111111100010100111001111011111110000000001010000000100000001100001000100111111111001101001110011010111111100000000010100000001000000011000010001001111111110001010011100111101111111000000000101000000010000000110000100010011111111100110100111001101011111110000000001010000000100000001100001000100111111111000101001110011110111111100000000010000000001000000001100010001001111111110011010011100110101111111000000000100000000010000000011000100010011111111100010100111001111011111110000000001000000000100000000110001000100111111111001101001110011010111111100000000010000000001000000001100010001001111111110001010011100111101111111000000000101000000010000000111000100010011111111100010100111101000011111110000000001010000000100000001110001000100111111111000101001111010100110011100000000010100000001000000011100010001001111111110001010011100010110100111000000000101000000010000000111000100010011111111100010100111000111101111110000000001000000000100000001110001000100111111111001101001110011010111111100000000010000000001000000011100010001001111111110001010011100111101111111000000000100000000010000000111000100010011111111100010100111111001010111110000000001000000000100000001110001000100111111111000101001111110110101111100000000010100000001000000011100010001001111111110001010011110110111111111000000000101000000010000000111000100010011111111100010100111101111111111110000000001010000000100000001110001000100111111111001101001110011010111111100000000010100000001000000011100010001001111111110001010011100111101111111000000000100000000010000000011000100010011111111100010100111011101101111110000000001000000000100000000110001000100111111111000101001110111111011101100000000010000000001000000001100010001001111111110001010011100100001111011000000000100000000010000000011000100010011111111100010100111001010011111110000000001010000000100000001110001000100111111111001101001110011010111111100000000010100000001000000011100010001001111111110001010011100111101111111000000000101000000010000000111000100010011111111100010100111011001011111110000000001010000000100000001110001000100111111111000101001110110110111111100000000010000000001000000011100010001001111111110001010011111010000111111000000000100000000010000000111000100010011111111100010100111110110001011110000000001000000000100000001110001000100111111111001101001110011010110111100000000010000000001000000011100010001001111111110001010011100111101111111000000000101000000010000000111000100010011111111100010100111010001000111110000000001010000000100000001110001000100111111111000101001110100110001111100000000010100000001000000011100010001001111111110001010011110110111111111000000000101000000010000000111000100010011111111100010100111101111111111110000000001000000000100000001110001000100111111111001101001110011010111111100000000010000000001000000011100010001001111111110001010011100111101111111000000000100000000010000000111000100010011111111100010100111110000000111110000000001000000000100000001110001000100111111111000101001111100100001111100000000010100000001000000011100010001001111111110001010011100000000011111000000000101000000010000000111000100010011111111100010100111000010000011110000000001010000000100000001110001000100111111111000101001111000000000000100000000010100000001000000011100010001001111111110001010011110001000011111000000000100000000010000000111000100010011111111100110100111001101011000010000000001000000000100000001110001000100111111111000101001110011110111111100000000010000000001000000001100010001001111111110001010011110110111111111000000000100000000010000000011000100010011111111100010100111101111111111110000000001010000000100000001110001000100111111111001101001110011010111111100000000010100000001000000011100010001001111111110001010011100111101111111000000000101000000010000000111000100010011111111100010100111111001110111110000000001010000000100000001110001000100111111111000101001111110111101111100000000010000000001000000011100010001001111111110001010011111100101011111000000000100000000010000000111000100010011111111100010100111111011010111110000000001000000000100000001110001000100111111111001101001110011010111111100000000010000000001000000011100010001001111111110001010011100111101111111000000000101000000010000000111000100010011111111100010100111111001010111110000000001010000000100000001110001000100111111111000101001111110110101111100000000010100000001000000011100010001001111111110011010011100110101111111000000000101000000010000000111000100010011111111100010100111001111011111110000000001000000000100000001110001000100111111111000101001111110010101111100000000010000000001000000011100010001001111111110001010011111101101011111000000000100000000010000000111000100010011111111100110100111001101011111110000000001000000000100000001110001000100111111111000101001110011110111111100000000010100000001000000011100010001001111111110011010011100110101111111000000000101000000010000000111000100010011111111100010100111001111011111110000000001010000000100000001110001000100111111111000101001110011010111111100000000010100000001000000011100010001001111111110001010011100111101111111000000000100000000010000000111000100010011111111100010100111000000000111110000000001000000000100000001110001000100111111111000101001110000100000000100000000010000000001000000011100010001001111111110001010011110000000000001000000000100000000010000000111000100010011111111100010100111100010000000010000000001010000000100000001110001000100111111111001101001110011010110000100000000010100000001000000011100010001001111111110001010011100111101111111000000000101000000010000000011000100010011111111100010100111001101011111110000000001010000000100000000110001000100111111111000101001110011110111111100000000010000000001000000001100010001001111111110001010011100010110111111000000000100000000010000000011000100010011111111100010100111000111101111110000000001000000000100000000110001000100111111111001101001110011010111111100000000010000000001000000001100010001001111111110001010011100111101111111000000000101000000010000000111000100010011111111100010100111011001011111110000000001010000000100000001110001000100111111111000101001110110110111111100000000010100000001000000011100010001001111111110011010011100110101111111000000000101000000010000000111000100010011111111100010100111001111011111110000000001000000000100000000110001000100111111111000101001110000000001111100000000010000000001000000001100010001001111111110001010011100001000000001000000000100000000010000000011000100010011111111100010100111100000000000010000000001000000000100000000110001000100111111111000101001111000100000000100000000010100000001000000011100010001001111111110011010011100110101100001000000000101000000010000000111000100010011111111100010100111001111011111110000000001010000000100000001110001000100111111111000101001111011011111111100000000010100000001000000011100010001001111111110001010011110111111111111000000000100000000010000000110000100010011111111100110100111001101011111110000000001000000000100000001100001000100111111111000101001110011110111111100000000010000000001000000001000010001001111111110001010011100000000011111000000000100000000010000000010000100010011111111100010100111000010000000010000000001010000000100000001000001000100111111111000101001111000000000000100000000010100000001000000010000010001001111111110001010011110001000000001000000000101000000010000000100000100010011111111100110100111001101011000010000000001010000000100000001000001000100111111111000101001110011110111111100000000010000000001000000010000010001001111111110001010011100000000011111000000000100000000010000000100000100010011111111100010100111000010000000010000000001000000000100000001000001000100111111111000101001111000000000000100000000010000000001000000010000010001001111111110001010011110001000000001000000000101000000010000000100000100010011111111100110100111001101011000010000000001010000000100000001000001000100111111111000101001110011110111111100000000010100000001000000000000010001001111111110001010011100000000011111000000000101000000010000000000000100010011111111100010100111000010000000010000000001000000000100000000000001000100111111111000101001111000000000000100000000010000000001000000000000010001001111111110001010011110001000000001000000000100000000010000000000000100010011111111100110100111001101011000010000000001000000000100000000000001000100111111111000101001110011110111111100000000010100000001000000010000010001001111111110011010011100110101111111000000000101000000010000000100000100010011111111100010100111001111011111110000000001010000000100000000000001000100111111111001101001110011010111111100000000010100000001000000000000010001001111111110001010011100111101111111000000000100000000010000000000000100010011111111100110100111001101011111110000000001000000000100000000000001000100111111111000101001110011110111111100000000010000000001000000000000010001001111111110011010011100110101111111000000000100000000010000000000000100010011111111100010100111001111011111110000000001010000000100000001000001000100111111111001101001110011010111111100000000010100000001000000010000010001001111111110001010011100111101111111000000000101000000010000000000000100010011111111100110100111001101011111110000000001010000000100000000000001000100111111111000101001110011110111111100000000010000000001000000000000010001001111111110001010011110100001111111000000000100000000010000000000000100010011111111100010100111101010011001110000000001000000000100000000000001000100111111111000101001110001011010011100000000010000000001000000000000010001001111111110001010011100011110111111000000000101000000010000000100000100010011111111100110100111001101011111110000000001010000000100000001000001000100111111111000101001110011110111111100000000010100000001000000000000010001001111111110001010011111100101011111000000000101000000010000000000000100010011111111100010100111111011010111110000000001000000000100000000000001000100111111111000101001111011011111111100000000010000000001000000000000010001001111111110001010011110111111111111000000000100000000010000000000000100010011111111100110100111001101011111110000000001000000000100000000000001000100111111111000101001110011110111111100000000010100000001000000010000010001001111111110001010011101110110111111000000000101000000010000000100000100010011111111100010100111011111101110110000000001010000000100000001000001000100111111111000101001110010000111101100000000010100000001000000010000010001001111111110001010011100101001111111000000000100000000010000000110000100010011111111100110100111001101011111110000000001000000000100000001100001000100111111111000101001110011110111111100000000010000000001000000001000010001001111111110001010011101100101111111000000000100000000010000000010000100010011111111100010100111011011011111110000000001010000000100000001110001000100111111111000101001111101000011111100000000010100000001000000011100010001001111111110001010011111011000101111000000000101000000010000000111000100010011111111100110100111001101011011110000000001010000000100000001110001000100111111111000101001110011110111111100000000010000000001000000011100010001001111111110001010011101000100011111000000000100000000010000000111000100010011111111100010100111010011000111110000000001000000000100000001110001000100111111111000101001111011011111111100000000010000000001000000011100010001001111111110001010011110111111111111000000000101000000010000000100000100010011111111100110100111001101011111110000000001010000000100000001000001000100111111111000101001110011110111111100000000010100000001000000000000010001001111111110001010011111000000011111000000000101000000010000000000000100010011111111100010100111110010000111110000000001000000000100000000000001000100111111111000101001110000000001111100000000010000000001000000000000010001001111111110001010011100001000000001000000000100000000010000000000000100010011111111100010100111100000000000010000000001000000000100000000000001000100111111111000101001111000100000000100000000010100000001000000010000010001001111111110011010011100110101100001000000000101000000010000000100000100010011111111100010100111001111011111110000000001010000000100000001000001000100111111111000101001111011011111111100000000010100000001000000010000010001001111111110001010011110111111111111000000000100000000010000000100000100010011111111100110100111001101011111110000000001000000000100000001000001000100111111111000101001110011110111111100000000010000000001000000000000010001001111111110001010011111100111011111000000000100000000010000000000000100010011111111100010100111111011110111110000000001010000000100000001000001000100111111111000101001111110010101111100000000010100000001000000010000010001001111111110001010011111101101011111000000000101000000010000000100000100010011111111100110100111001101011111110000000001010000000100000001000001000100111111111000101001110011110111111100000000010000000001000000010000010001001111111110001010011111100101011111000000000100000000010000000100000100010011111111100010100111111011010111110000000001000000000100000001000001000100111111111001101001110011010111111100000000010000000001000000010000010001001111111110001010011100111101111111000000000101000000010000000111000100010011111111100010100111111001010111110000000001010000000100000001110001000100111111111000101001111110110101111100000000010100000001000000011100010001001111111110011010011100110101111111000000000101000000010000000111000100010011111111100010100111001111011111110000000001000000000100000001110001000100111111111001101001110011010111111100000000010000000001000000011100010001001111111110001010011100111101111111000000000100000000010000000011000100010011111111100010100111111001100111110000000001000000000100000000110001000100111111111000101001111110111001111100000000010100000001000000010000010001001111111110001010011100000000011111000000000101000000010000000100000100010011111111100010100111000010000000010000000001010000000100000001000001000100111111111000101001111000000000000100000000010100000001000000010000010001001111111110001010011110001000000001000000000100000000010000000100000100010011111111100110100111001101011000010000000001000000000100000001000001000100111111111000101001110011110111111100000000010000000001000000010000010001001111111110001010011110100101111111000000000100000000010000000100000100010011111111100010100111101011011001110000000001010000000100000001000001000100111111111000101001110001011011011100000000010100000001000000010000010001001111111110001010011100011110111111000000000101000000010000000100000100010011111111100110100111001101011111110000000001010000000100000001000001000100111111111000101001110011110111111100000000010000000001000000000000010001001111111110001010011101100101111111000000000100000000010000000000000100010011111111100010100111011011011111110000000001000000000100000000000001000100111111111001101001110011010111111100000000010000000001000000000000010001001111111110001010011100111101111111000000000101000000010000000100000100010011111111100010100111000000000111110000000001010000000100000001000001000100111111111000101001110000100001011100000000010100000001000000010000010001001111111110001010011110000000010011000000000101000000010000000100000100010011111111100010100111100010000111110000000001000000000100000001110001000100111111111001101001110011010111111100000000010000000001000000011100010001001111111110001010011100111101111111000000000100000000010000000011000100010011111111100010100111101101111111110000000001000000000100000000110001000100111111111000101001111011111111111100000000010100000001000000011100010001001111111110011010011100110101111111000000000101000000010000000111000100010011111111100010100111001111011111110000000001010000000100000001110001000100111111111000101001110000000001111100000000010100000001000000011100010001001111111110001010011100001000010011000000000100000000010000000100000100010011111111100010100111100000000100110000000001000000000100000001000001000100111111111000101001111000100001111100000000010000000001000000010000010001001111111110011010011100110101111111000000000100000000010000000100000100010011111111100010100111001111011111110000000001010000000100000001000001000100111111111000101001110000000001111100000000010100000001000000010000010001001111111110001010011100001000010011000000000101000000010000000100000100010011111111100010100111100000000100110000000001010000000100000001000001000100111111111000101001111000100001111100000000010000000001000000010000010001001111111110011010011100110101111111000000000100000000010000000100000100010011111111100010100111001111011111110000000001000000000100000001000001000100111111111000101001110000000001111100000000010000000001000000010000010001001111111110001010011100001000010011000000000101000000010000000100000100010011111111100010100111100000000100110000000001010000000100000001000001000100111111111000101001111000100001111100000000010100000001000000010000010001001111111110011010011100110101111111000000000101000000010000000100000100010011111111100010100111001111011111110000000001000000000100000000000001000100111111111001101001110011010111111100000000010000000001000000000000010001001111111110001010011100111101111111000000000100000000010000000000000100010011111111100110100111001101011111110000000001000000000100000000000001000100111111111000101001110011110111111100000000010100000001000000010000010001001111111110011010011100110101111111000000000101000000010000000100000100010011111111100010100111001111011111110000000001010000000100000001000001000100111111111001101001110011010111111100000000010100000001000000010000010001001111111110001010011100111101111111000000000100000000010000000000000100010011111111100110100111001101011111110000000001000000000100000000000001000100111111111000101001110011110111111100000000010000000001000000000000010001001111111110001010011110100001111111000000000100000000010000000000000100010011111111100010100111101010011101110000000001010000000100000001000001000100111111111000101001110001011010011100000000010100000001000000010000010001001111111110001010011100011110111111000000000101000000010000000100000100010011111111100110100111001101011111110000000001010000000100000001000001000100111111111000101001110011110111111100000000010000000001000000000000010001001111111110001010011111100101011111000000000100000000010000000000000100010011111111100010100111111011010111110000000001000000000100000000000001000100111111111000101001111011011111111100000000010000000001000000000000010001001111111110001010011110111111111111000000000101000000010000000100000100010011111111100110100111001101011111110000000001010000000100000001000001000100111111111000101001110011110111111100000000010100000001000000010000010001001111111110001010011101110110111111000000000101000000010000000100000100010011111111100010100111011111101110110000000001000000000100000001000001000100111111111000101001110010000111101100000000010000000001000000010000010001001111111110001010011100101001111111000000000100000000010000000100000100010011111111100110100111001101011111110000000001000000000100000001000001000100111111111000101001110011110111111100000000010100000001000000010000010001001111111110001010011101100101111111000000000101000000010000000100000100010011111111100010100111011011011111110000000001010000000100000001000001000100111111111000101001111101000011111100000000010100000001000000010000010001001111111110001010011111011000101111000000000100000000010000000100000100010011111111100110100111001101011011110000000001000000000100000001000001000100111111111000101001110011110111111100000000010000000001000000010000010001001111111110001010011101000000011111000000000100000000010000000100000100010011111111100010100111010010000111110000000001010000000100000001000001000100111111111000101001111011011111111100000000010100000001000000010000010001001111111110001010011110111111111111000000000101000000010000000100000100010011111111100110100111001101011111110000000001010000000100000001000001000100111111111100101001110011110111111100000000010000000001000000001100010001001111111111001010011111000000011111000000000100000000010000000011000100010011111111110010100111110010000111110000000001000000000100000000110001000100111111111100101001110000010111111100000000010000000001000000001100010001001111111111001010011100001101100001010000100100000000010000000011000100010011111111110010100111100001111101110100001001000000000100000000110001000100111111111100101001111000111110000101000010010000000001000000001100010001001111111111011010011100110101111111010000100100000000010000000011000100010011111111100010100111001111011111110100001001000000000100000000000001000100111111111000101001111011011111111101000010010000000001000000000000010001001111111110001010011110111111111111010000100100000000010000000000000100010011111111100110100111001101011111110100001001000000000100000000000001000100111111111000101001110011110111111101000010010100000001000000010000010001001111111110001010011111100111011111010000100101000000010000000100000100010011111111100010100111111011110111110100001001010000000100000001000001000100111111111001101001110011010111111101000010010100000001000000010000010001001111111110001010011100111101111111010000100100000000010000000100000100010011111111100010100111111001010111110100001001000000000100000001000001000100111111111000101001111110110101111101000010010000000001000000010000010001001111111110011010011100110101111111010000100100000000010000000100000100010011111111100010100111001111011111110100001001010000000100000001000001000100111111111000101001111110010101111101000010010100000001000000010000010001001111111110001010011111101101011111010000100101000000010000000100000100010011111111100110100111001101011111110100001001010000000100000001000001000100111111111000101001110011110111111101000010010000000001000000010000010001001111111110001010011111100101011111010000100100000000010000000100000100010011111111100010100111111011010111110100001001000000000100000001000001000100111111111001101001110011010111111101000010010000000001000000010000010001001111111110001010011100111101111111010000100101000000010000000100000100010011111111100010100111001101011111110100001001010000000100000001000001000100111111111000101001110011110111111101000010010100000001000000010000010001001111111110001010011100000101111111010000100101000000010000000100000100010011111111100010100111000011011101110100001001000000000100000001000001000100111111111000101001111000011111011101000010010000000001000000010000010001001111111110001010011110001111111111010000100100000000010000000100000100010011111111100110100111001101011111110100001001000000000100000001000001000100111111111000101001110011110111111101000010010100000001000000010000010001001111111110001010011100110101111111010000100101000000010000000100000100010011111111100010100111001111011111110100001001010000000100000001000001000100111111111000101001110001011011111101000010010100000001000000010000010001001111111110001010011100011110111111010000100100000000010000000100000100010011111111100110100111001101011111110100001001000000000100000001000001000100111111111000101001110011110111111101000010010000000001000000000000010001001111111110001010011101100101111111010000100100000000010000000000000100010011111111100010100111011011011111110100001001010000000100000001000001000100111111111001101001110011010111111101000010010100000001000000010000010001001111111110001010011100111101111111010000100101000000010000000100000100010011111111100010100111000001011111110100001001010000000100000001000001000100111111111000101001110000110111011101000010010000000001000000010000010001001111111110001010011110000111110111010000100100000000010000000100000100010011111111100010100111100011111111110100001001000000000100000001000001000100111111111001101001110011010111111101000010010000000001000000010000010001001111111110001010011100111101111111010000100101000000010000000100000100010011111111100010100111101101111111110100001001010000000100000001000001000100111111111000101001111011111111111101000010010100000001000000010000010001001111111110011010011100110101111111010000100101000000010000000100000100010011111111100010100111001111011111110100001001000000000100000001000001000100111111111000101001110000010111111101000010010000000001000000010000010001001111111110001010011100001101110111010000100100000000010000000100000100010011111111100010100111100001111101110100001001000000000100000001000001000100111111111000101001111000111111111101000010010100000001000000010000010001001111111110011010011100110101111111010000100101000000010000000100000100010011111111100010100111001111011111110100001001010000000100000000000001000100111111111000101001110000010111111101000010010100000001000000000000010001001111111111001010011100001101110111010000100100000000010000000011000100010011111111110010100111100001111101110100001001000000000100000000110001000100111111111100101001111000111111111101000010010000000001000000001100010001001111111111011010011100110101111111010000100100000000010000000011000100010011111111110000100111001111011111111100001001010000000100000000110001000100111111111100001001110000010111111111000010010100000001000000001100010001001111111111000010011100001101110111110000100101000000010000000011000100010011111111110000100111100001111101111100001001010000000100000000110001000100111111111000001001111000111111111111000010010000000001000000000000010001001111111110010010011100110001111111110000100100000000010000000000000100010011111111100000100111001110011111111100001001000000000100000000000001000100111111111001001001110011000111111111000010010000000001000000000000010001001111111110001010011100111001111111010000100101000000010000000100000100010011111111100110100111001101011111110100001001010000000100000001000001000100111111111000101001110011110111111101000010010100000001000000000000010001001111111110011010011100110101111111010000100101000000010000000000000100010011111111100010100111001111011111110100001001000000000100000000000001000100111111111001101001110011010111111101000010010000000001000000000000010001001111111110001010011100111101111111010000100100000000010000000000000100010011111111100110100111001101011111110100001001000000000100000000000001000100111111111100001001110011110111111111000010010100000001000000010100010001001111111111010010011100110001111111110000100101000000010000000101000100010011111111110000100111001110011111111100001001010000000100000000010001000100111111111100001001111010000111111111000010010100000001000000000100010001001111111111000010011110101001100111110000100100000000010000000001000100010011111111110000100111000101101001111100001001000000000100000000010001000100111111111100001001110001111011111111000010010000000001000000000100010001001111111111010010011100110001111111110000100100000000010000000001000100010011111111110010100111001110011111110100001001010000000100000001010001000100111111111100101001111110010101111101000010010100000001000000010100010001001111111111001010011111101101011111010000100101000000010000000101000100010011111111110010100111101101111111110100001001010000000100000001010001000100111111111100101001111011111111111101000010010000000001000000010100010001001111111111011010011100110101111111010000100100000000010000000101000100010011111111110010100111001111011111110100001001000000000100000000010001000100111111111100101001110111011011111101000010010000000001000000000100010001001111111111000010011101111110111011110000100101000000010000000101000100010011111111110000100111001000011110111100001001010000000100000001010001000100111111111100001001110010100111111111000010010100000001000000010100010001001111111111010010011100110001111111110000100101000000010000000101000100010011111111110000100111001110011111111100001001000000000100000001010001000100111111111100001001110110010111111111000010010000000001000000010100010001001111111111000010011101101101111111110000100100000000010000000101000100010011111111110000100111110100001111111100001001000000000100000001010001000100111111111100101001111101100010111101000010010100000001000000010100010001001111111111011010011100110101101111010000100101000000010000000101000100010011111111110010100111001111011111110100001001010000000100000000010001000100111111111100101001110100000001111101000010010100000001000000000100010001001111111111001010011101001000011111010000100100000000010000000001000100010011111111110010100111101101111111110100001001000000000100000000010001000100111111111100101001111011111111111101000010010000000001000000000100010001001111111111011010011100110101111111010000100100000000010000000001000100010011111111110000100111001111011111111100001001010000000100000001010001000100111111111100001001111100000001111111000010010100000001000000010100010001001111111111000010011111001000011111110000100101000000010000000101000100010011111111110000100111000001011111111100001001010000000100000001010001000100111111111100001001110000110111011111000010010000000001000000010100010001001111111111000010011110000111110111110000100100000000010000000101000100010011111111110000100111100011111111111100001001000000000100000001010001000100111111111101001001110011000111111111000010010000000001000000010100010001001111111111001010011100111001111111010000100101000000010000000101000100010011111111110010100111101101111111110100001001010000000100000001010001000100111111111100101001111011111111111101000010010100000001000000010100010001001111111111011010011100110101111111010000100101000000010000000101000100010011111111110010100111001111011111110100001001000000000100000001010001000100111111111100101001111110011101111101000010010000000001000000010100010001001111111111001010011111101111011111010000100100000000010000000101000100010011111111110110100111001101011111110100001001000000000100000001010001000100111111111100001001110011110111111111000010010100000001000000010100010001001111111111000010011111100101011111110000100101000000010000000101000100010011111111110000100111111011010111111100001001010000000100000001010001000100111111111101001001110011000111111111000010010100000001000000010100010001001111111111000010011100111001111111110000100100000000010000000101000100010011111111110000100111111001010111111100001001000000000100000001010001000100111111111100001001111110110101111111000010010000000001000000010100010001001111111111010010011100110001111111110000100100000000010000000101000100010011111111110010100111001110011111110100001001010000000100000001010001000100111111111100101001111110010101111101000010010100000001000000010100010001001111111111001010011111101101011111010000100101000000010000000101000100010011111111110110100111001101011111110100001001010000000100000001010001000100111111111100101001110011110111111101000010010000000001000000010100010001001111111111001010011111100000011111010000100100000000010000000101000100010011111111110010100111111010000111110100001001000000000100000001010001000100111111111100101001110000010111111101000010010000000001000000010100010001001111111111000010011100001101110111110000100101000000010000000101000100010011111111110000100111100001111101111100001001010000000100000001010001000100111111111100001001111000111111111111000010010100000001000000010100010001001111111111010010011100110001111111110000100101000000010000000101000100010011111111110000100111001110011111111100001001000000000100000000010001000100111111111100001001111010010111111111000010010000000001000000000100010001001111111111000010011110101101100111110000100100000000010000000001000100010011111111110000100111000101101101111100001001000000000100000000010001000100111111111100101001110001111011111101000010010100000001000000010100010001001111111111011010011100110101111111010000100101000000010000000101000100010011111111110010100111001111011111110100001001010000000100000001010001000100111111111100101001110110010111111101000010010100000001000000010100010001001111111111001010011101101101111111010000100100000000010000000101000100010011111111110110100111001101011111110100001001000000000100000001010001000100111111111100101001110011110111111101000010010000000001000000000100010001001111111111001010011100000101111111010000100100000000010000000001000100010011111111110000100111000011011101111100001001010000000100000001010001000100111111111100001001111000011111011111000010010100000001000000010100010001001111111111000010011110001111111111110000100101000000010000000101000100010011111111110100100111001100011111111100001001010000000100000001010001000100111111111100001001110011100111111111000010010000000001000000010100010001001111111111000010011110110111111111110000100100000000010000000101000100010011111111110000100111101111111111111100001001000000000100000001010001000100111111111101001001110011000111111111000010010000000001000000010100010001001111111111001010011100111001111111010000100101000000010000000101000100010011111111110010100111000001011111110100001001010000000100000001010001000100111111111100101001110000110111011101000010010100000001000000010100010001001111111111001010011110000111110111010000100101000000010000000101000100010011111111110010100111100011111111110100001001000000000100000001010001000100111111111101101001110011010111111101000010010000000001000000010100010001001111111111001010011100111101111111010000100100000000010000000101000100010011111111110010100111000001011111110100001001000000000100000001010001000100111111111100001001110000110111011111000010010100000001000000010100010001001111111111000010011110000111110111110000100101000000010000000101000100010011111111110000100111100011111111111100001001010000000100000001010001000100111111111101001001110011000111111111000010010100000001000000010100010001001111111111000010011100111001111111110000100100000000010000000001000100010011111111110000100111000001011111111100001001000000000100000000010001000100111111111100001001110000110111011111000010010000000001000000000100010001001111111111000010011110000111110111110000100100000000010000000001000100010011111111110010100111100011111111110100001001010000000100000001010001000100111111111101101001110011010111111101000010010100000001000000010100010001001111111111001010011100111101111111010000100101000000010000000101000100010011111111110110100111001101011111110100001001010000000100000001010001000100111111111100101001110011110111111101000010010000000001000000000100010001001111111111011010011100110101111111010000100100000000010000000001000100010011111111110010100111001111011111110100001001000000000100000000010001000100111111111101101001110011010111111101000010010000000001000000000100010001001111111111001010011100111101111111010000100101000000010000000101000100010011111111110110100111001101011111110100001001010000000100000001010001000100111111111100101001110011110111111101000010010100000001000000010100010001001111111111011010011100110101111111010000100101000000010000000101000100010011111111110010100111001111011111110100001001000000000100000000010001000100111111111100101001111010000111111101000010010000000001000000000100010001001111111111001010011110101001110111010000100100000000010000000001000100010011111111110010100111000101101001110100001001000000000100000000010001000100111111111000101001110001111011111101000010010100000001000000010000010001001111111110011010011100110101111111010000100101000000010000000100000100010011111111100010100111001111011111110100001001010000000100000001000001000100111111111000101001111110010101111101000010010100000001000000010000010001001111111110001010011111101101001111010000100100000000010000000100000100010011111111100010100111101101111111110100001001000000000100000001000001000100111111111000101001111011111111111101000010010000000001000000010000010001001111111110011010011100110101111111010000100100000000010000000100000100010011111111100010100111001111011111110100001001010000000100000001000001000100111111111000101001110111011011111101000010010100000001000000010000010001001111111110001010011101111110111011010000100101000000010000000100000100010011111111100010100111001000011110110100001001010000000100000001000001000100111111111000101001110010100111111101000010010000000001000000010000010001001111111110011010011100110101111111010000100100000000010000000100000100010011111111100010100111001111011111110100001001000000000100000001000001000100111111111000101001110110010111111101000010010000000001000000010000010001001111111110001010011101101101111111010000100101000000010000000100000100010011111111100010100111110100001111110100001001010000000100000001000001000100111111111000101001111101100010111101000010010100000001000000010000010001001111111110011010011100110101101111010000100101000000010000000100000100010011111111100010100111001111011111110100001001000000000100000000000001000100111111111000101001110100000001111101000010010000000001000000000000010001001111111110001010011101001000011111010000100100000000010000000000000100010011111111100010100111101101111111110100001001000000000100000000000001000100111111111000101001111011111111111101000010010100000001000000010000010001001111111110011010011100110101111111010000100101000000010000000100000100010011111111100010100111001111011111110100001001010000000100000001000001000100111111111000101001111100000001111101000010010100000001000000010000010001001111111110001010011111001000011111010000100100000000010000000100000100</data>
-          <extradata>1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111T111111111111111111111111111111111111111111111111111111111111111</extradata>
+          <data global_temp="1" name="log: 2013/08/05 20:51:31  #0" power_up_mode="false" sample_depth="1024" trigger_position="896">0000011011111000011101110110000111111011000111111111001100011111100111001111110000011011111000011101110110000111111011000111111111001101011111100111101111110011010111111001111011111100110101111110011110111111001101011111100111101111110011010111111001111011111110100001111111010100111011000101101001100011110111110011010111111001111011111111100101011111110110100111101101111111110111111111110011010111111001111011111101110111111110111111111111001000011111100101001100110011010110011001111011111101100101111110110110110111110101001011111011100101110011010110111001111011111101000000011110100100000000101101111000010111111111110011010111111001111011111111000000011111100100000000000001101000000001110111011000011111101100011111111100110101111110011110111111101101111111110111111111110011010111111001111011111111100111011111110111101111001101011111100111101111110011010111111001111011111100110101111110011110111111000001101111100001110111011000011111101100011111111100110101111110011110111111001101011111100111101111110001011011111000111101111100110001111110011100111111011001011111101101101101110011010110111001111011111100000110111110000111011101100001111110110001111111110011010111111001111011111110110111111111011111111111001100011111100111001111110000011011111000011101110110000111111011000111111111001101011111100111101111110000011011111000011101110110000111111011000111111111001101011111100111101111110000011011111000011101110110000111111011000111111111001100011111100111001111110011000111111001110011111100110101111110011110111111001101011111100111101111111010000111111101010011001100010110100110001111011111001100011111100111001111111110010101111111011010111110110111111111011111111111001100011111100111001111110111011111111011111111111100100001111110010100110011001101011001100111101111110110010111111011011011011111010100101111101110010111001100011011100111001111110100000001111010010000000010110111100001011111111111001101011111100111101111111100000001111110010000000000000110100000000111011101100001111110110001111111110011000111111001110011111110110111111111011111111111001100011111100111001111111110011101111111011110111100110101111110011110111111111001010111111101101011110011010111111001111011111100110101111110011110111111000001101111100001110111011000011111101100011111111100110001111110011100111111001100011111100111001111110001011011111000111101111100110101111110011110111111011001011111101101101101110011010110111001111011111100000110111110000111011101100001111110110001111111110011000111111001110011111110110111111111011111111111001101011111100111101111110000011011111000011101110110000111111011000111111111001101011111100111101111110000011011111000011101110110000111111011000111111111001101011111100111101111110000011011111000011101110110000111111011000111111111001101011111100111101111110011010111111001111011111100110101111110011110111111001101011111100111101111111010000111111101010011001100010110100110001111011111001101011111100111101111111110010101111111011010111110110111111111011111111111001101011111100111101111110111011111111011111111111100100001111110010100110011001101011001100111101111110110010111111011011011011111010100101111101110010111001101011011100111101111110100000001111010010000000010110111100001011111111111001101011111100111101111111100000001111110010000000000000110100000000111011101100001111110110001111111110011010111111001111011111110110111111111011111111111001101011111100111101111111110011101111111011110111111100101011111110110101111001101011111100111101111110011010111111001111011111100000110111110000111011101100001111110110001111111110011010111111001111011111100110101111110011110111111000101101111100011110111110011010111111001111011111101100101111110110110110111001101011011100111101111110000011011111000011101110110000111111011000111111111001101011111100111101111111011011111111101111111111100110101111110011110111111000001101111100001110111011000011111101100011111111100110101111110011110111111000001101111100001110111011000011111101100011111111100110101111110011110111111000001101111100001110111011000011111101100011111111100110101111110011110111111001101011111100111101111110011010111111001111011111100110101111110011110111111001101011111100111101111111010000111111101010011001100010110100110001111011111001101011111100111101111111110010101111111011010111110110111111111011111111111001101011111100111101111110111011111111011111111111100100001111110010100110011001101011001100111101111110110010111111011011011011111010100101111101110010111001101011011100111101111110100000001111010010000000010110111100001011111111111001101011111100111101111111100000001111110010000000000000110100000000111011101100001111110110001111111110011010111111001111011111110110111111111011111111111001101011111100111101111111110011101111111011110111100110101111110011110111111001101011111100111101111110011010111111001111011111100000110111110000111011101100001111110110001111111110011010111111001111011111100110101111110011110111111000101101111100011110111110011010111111001111011111101100101111110110110110111001101011011100111101111110000011011111000011101110110000111111011000111111111001101011111100111101111111011011111111101111111111100110101111110011110111111000001101111100001110111011000011111101100011111111100110101111110011110111111000001101111100001110111011000011111101100011111111100110101111110011110111111000001101111100001110111011000011111101100011111111100110101111110011110111111001101011111100111101111110011010111111001111011111100110101111110011110111111001101011111100111101111111010000111111101010011001100010110100110001111011111001101011111100111101111111110010101111111011010111110110111111111011111111111001101011111100111101111110111011111111011111111111100100001111110010100110011001101011001100111101111110110010111111011011011011111010100101111101110010111001101011011100111101111110100000001111010010000000010110111100001011111111111001101011111100111101111111100000001111110010000000000000110100000000111011101100001111110110001111111110011010111111001111011111110110111111111011111111111001101011111100111101111111110011101111111011110111111100101011111110110101111001101011111100111101111110011010111111001111011111100000110111110000111011101100001111110110001111111110011010111111001111011111100110101111110011110111111000101101111100011110111110011010111111001111011111101100101111110110110110111001101011011100111101111110000011011111000011101110110000111111011000111111111001101011111100111101111111011011111111101111111111100110101111110011110111111000001101111100001110111011000011111101100011111111100110101111110011110111111000001101111100001110111011000011111101100011111111100110101111110011110111111000001101111100001110111011000011111101100011111111100110101111110011110111111001101011111100111101111110011010111111001111011111100110101111110011110111111101000011111110101001100110001011010011000111101111100110101111110011110111111111001010111111101101011111011011111111101111111111100110101111110011110111111011101111111101111111111110010000111111001010011001100110101100110011110111111011001011111101101101101111101010010111110111001011100110101101110011110111111010000000111101001000000001011011110000101111111111100110101111110011110111111110000000111111001000000000000011010000000011101110110000111111011000111111111001101011111100111101111111011011111111101111111111100110101111110011110111111111001110111111101111011111110010101111111011010111100110101111110011110111111001101011111100111101111110011010111111001111011111100000110111110000111011101100001111110110001111111110011010111111001111011111100110101111110011110111111000101101111100011110111110011010111111001111011111101100101111110110110110111001101011011100111101111110000011011111000011101110110000111111011000111111111001101011111100111101111111011011111111101111111111100110101111110011110111111000001101111100001110111011000011111101100011111111100110101111110011110111111000001101111100001110111011000011111101100011111111100110101111110011110111111000001101111100001110111011000011111101100011111111100110101111110011110111111001101011111100111101111110011010111111001111011111100110101111110011110111111101000011111110101001100110001011010011000111101111100110101111110011110111111111001010111111101101011111011011111111101111111111100110101111110011110111111011101111111101111111111110010000111111001010011001100110101100110011110111111011001011111101101101101111101010010111110111001011100110101101110011110111111010000000111101001000000001011011110000101111111111100110101111110011110111111110000000111111001000000000000011010000000011101110110000111111011000111111111001101011111100111101111111011011111111101111111111100110101111110011110111111111001110111111101111011110011010111111001111011111100110101111110011110111111001101011111100111101111110000011011111000011101110110000111111011000111111111001101011111100111101111110011010111111001111011111100010110111110001111011111001101011111100111101111110110010111111011011011011100110101101110011110111111000001101111100001110111011000011111101100011111111100110101111110011110111111101101111111110111111111110011010111111001111011111100000110111110000111011101100001111110110001111111110011010111111001111011111100000110111110000111011101100001111110110001111111110011010111111001111011111100000110111110000111011101100001111110110001111111110011010111111001111011111100110101111110011110111111001101011111100111101111110011010111111001111011111100110101111110011110111111101000011111110101001100110001011010011000111101111100110101111110011110111111111001010111111101101011111011011111111101111111111100110101111110011110111111011101111111101111111111110010000111111001010011001100110101100110011110111111011001011111101101101101111101010010111110111001011100110101101110011110111111010000000111101001000000001011011110000101111111111100110101111110011110111111110000000111111001000000000000011010000000011101110110000111111011000111111111001101011111100111101111111011011111111101111111111100110101111110011110111111111001110111111101111011111110010101111111011010111100110101111110011110111111001101011111100111101111110000011011111000011101110110000111111011000111111111001101011111100111101111110011010111111001111011111100010110111110001111011111001101011111100111101111110110010111111011011011011100110101101110011110111111000001101111100001110111011000011111101100011111111100110101111110011110111111101101111111110111111111110011010111111001111011111100000110111110000111011101100001111110110001111111110011010111111001111011111100000110111110000111011101100001111110110001111111110011010111111001111011111100000110111110000111011101100001111110110001111111110011010111111001111011111100110101111110011110111111001101011111100111101111110011010111111001111011111100110101111110011110111111101000011111110101001100110001011010011000111101111100110101111110011110111111111001010111111101101011111011011111111101111111111100110101111110011110111111011101111111101111111111110010000111111001010011001100110101100110011110111111011001011111101101101101111101010010111110111001011100110101101110011110111111010000000111101001000000001011011110000101111111111100110101111110011110111111110000000111111001000000000000011010000000011101110110000111111011000111111111001101011111100111101111111011011111111101111111111100110101111110011110111111111001110111111101111011110011010111111001111011111100110101111110011110111111001101011111100111101111110000011011111000011101110110000111111011000111111111001101011111100111101111110011010111111001111011111100010110111110001111011111001101011111100111101111110110010111111011011011011100110101101110011110111111000001101111100001110111011000011111101100011111111100110101111110011110111111101101111111110111111111110011010111111001111011111100000110111110000111011101100001111110110001111111110011010111111001111011111100000110111110000111011101100001111110110001111111110011010111111001111011111100000110111110000111011101100001111110110001111111110011010111111001111011111100110101111110011110111111001101011111100111101111110011010111111001111011111110100001111111010100110011000101101001100011110111110011010111111001111011111111100101011111110110101111101101111111110111111111110011010111111001111011111101110111111110111111111111001000011111100101001100110011010110011001111011111101100101111110110110110111110101001011111011100101110011010110111001111011111101000000011110100100000000101101111000010111111111110011010111111001111011111111000000011111100100000000000001101000000001110111011000011111101100011111111100110101111110011110111111101101111111110111111111110011010111111001111011111111100111011111110111101111001101011111100111101111111110010101111111011010111100110101111110011110111111001101011111100111101111110000011011111000011101110110000111111011000111111111001101011111100111101111110011010111111001111011111100010110111110001111011111001101011111100111101111110110010111111011011011011100110101101110011110111111000001101111100001110111011000011111101100011111111100110101111110011110111111101101111111110111111111110011010111111001111011111100000110111110000111011101100001111110110001111111110011010111111001111011111100000110111110000111011101100001111110110001111111110011010111111001111011111100000110111110000111011101</data>
+          <extradata>11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111T1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111</extradata>
         </log>
       </trigger>
     </signal_set>
-    <position_info>
-      <single attribute="active tab" value="0"/>
-      <single attribute="data horizontal scroll position" value="63"/>
-      <single attribute="data vertical scroll position" value="17"/>
-      <single attribute="setup horizontal scroll position" value="0"/>
-      <single attribute="setup vertical scroll position" value="18"/>
-      <single attribute="zoom level denominator" value="1"/>
-      <single attribute="zoom level numerator" value="64"/>
-      <single attribute="zoom offset denominator" value="1"/>
-      <single attribute="zoom offset numerator" value="2032"/>
-    </position_info>
   </instance>
   <static_plugin_mnemonics/>
   <mnemonics/>
@@ -486,8 +178,9 @@
     <single attribute="hierarchy widget visible" value="1"/>
     <single attribute="instance widget visible" value="1"/>
     <single attribute="jtag widget visible" value="1"/>
-    <multi attribute="column width" size="23" value="34,34,231,74,68,70,88,88,98,98,88,88,110,101,101,101,101,101,101,101,101,107,78"/>
-    <multi attribute="frame size" size="2" value="1268,957"/>
-    <multi attribute="jtag widget size" size="2" value="384,133"/>
+    <multi attribute="column width" size="23" value="34,34,260,74,68,70,88,88,98,98,88,88,110,101,101,101,101,101,101,101,101,107,78"/>
+    <multi attribute="frame size" size="2" value="1024,719"/>
+    <multi attribute="jtag widget size" size="2" value="384,145"/>
+    <single attribute="hierarchy widget height" value="106"/>
   </global_info>
 </session>
