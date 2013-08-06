@@ -212,12 +212,6 @@ entity chameleon_io is
 -- Buttons
 		button_reset_n : out std_logic;
 		
--- Joysticks
-		joystick1 : out unsigned(5 downto 0);
-		joystick2 : out unsigned(5 downto 0);
-		joystick3 : out unsigned(5 downto 0);
-		joystick4 : out unsigned(5 downto 0);
-
 -- Keyboards
 		--  0 = col0, row0
 		--  1 = col1, row0
@@ -308,19 +302,11 @@ architecture rtl of chameleon_io is
 	signal c64_kb_we : std_logic := '1';
 	signal c64_kb_a : unsigned(15 downto 0) := (others => '0');
 	signal c64_kb_q : unsigned(7 downto 0) := (others => '1');
-	signal c64_joystick1 : unsigned(4 downto 0);
-	signal c64_joystick2 : unsigned(4 downto 0);
-	signal c64_joystick3 : unsigned(4 downto 0);
-	signal c64_joystick4 : unsigned(4 downto 0);
 	signal c64_keys : unsigned(63 downto 0);
 
 -- Docking-station
 	signal docking_station_loc : std_logic;
 	signal docking_irq : std_logic;
-	signal docking_joystick1 : unsigned(5 downto 0);
-	signal docking_joystick2 : unsigned(5 downto 0);
-	signal docking_joystick3 : unsigned(5 downto 0);
-	signal docking_joystick4 : unsigned(5 downto 0);
 	signal docking_keys : unsigned(63 downto 0);
 	signal docking_amiga_reset_n : std_logic;
 	signal docking_amiga_scancode : unsigned(7 downto 0);
@@ -352,10 +338,6 @@ begin
 	--
 	spi_q <= spi_q_reg;
 	--
-	joystick1 <= docking_joystick1 and ("1" & c64_joystick1);
-	joystick2 <= docking_joystick2 and ("1" & c64_joystick2);
-	joystick3 <= docking_joystick3 and ("1" & c64_joystick3);
-	joystick4 <= docking_joystick4 and ("1" & c64_joystick4);
 	keys <= docking_keys and c64_keys;
 
 -- -----------------------------------------------------------------------
@@ -384,20 +366,12 @@ begin
 -- Docking-station
 -- To enable set enable_docking_station to true.
 -- -----------------------------------------------------------------------
-		docking_joystick1 <= (others => '1');
-		docking_joystick2 <= (others => '1');
-		docking_joystick3 <= (others => '1');
-		docking_joystick4 <= (others => '1');
 		docking_keys <= (others => '1');
 
 -- -----------------------------------------------------------------------
 -- C64 keyboard and joystick support
 -- To enable set enable_c64_joykeyb to true.
 -- -----------------------------------------------------------------------
-		c64_joystick1 <= (others => '1');
-		c64_joystick2 <= (others => '1');
-		c64_joystick3 <= (others => '1');
-		c64_joystick4 <= (others => '1');
 		c64_keys <= (others => '1');
 		
 		c64_addr <= c64_a;

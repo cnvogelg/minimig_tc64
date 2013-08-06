@@ -4,18 +4,7 @@
   </display_tree>
   <instance entity_name="sld_signaltap" is_auto_node="yes" is_expanded="true" name="auto_signaltap_0" source_file="sld_signaltap.vhd">
     <node_ip_info instance_id="0" mfg_id="110" node_id="0" version="6"/>
-    <position_info>
-      <single attribute="active tab" value="0"/>
-      <single attribute="data horizontal scroll position" value="895"/>
-      <single attribute="data vertical scroll position" value="0"/>
-      <single attribute="setup horizontal scroll position" value="0"/>
-      <single attribute="setup vertical scroll position" value="7"/>
-      <single attribute="zoom level denominator" value="1"/>
-      <single attribute="zoom level numerator" value="256"/>
-      <single attribute="zoom offset denominator" value="1"/>
-      <single attribute="zoom offset numerator" value="508"/>
-    </position_info>
-    <signal_set global_temp="1" name="signal_set: 2013/08/05 20:37:04  #0">
+    <signal_set global_temp="1" is_expanded="true" name="signal_set: 2013/08/05 20:37:04  #0">
       <clock name="sysclk" polarity="posedge" tap_mode="classic"/>
       <config ram_type="M4K" reserved_data_nodes="0" reserved_storage_qualifier_nodes="0" reserved_trigger_nodes="0" sample_depth="1024" trigger_in_enable="no" trigger_out_enable="no"/>
       <top_entity/>
@@ -69,77 +58,76 @@
       <presentation>
         <unified_setup_data_view>
           <node name="cfide:inst3|chameleon_io:myIO|mux" order="msb_to_lsb" type="combinatorial">
-            <node data_index="3" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux[3]" storage_index="3" tap_mode="classic" trigger_index="3" type="combinatorial"/>
-            <node data_index="2" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux[2]" storage_index="2" tap_mode="classic" trigger_index="2" type="combinatorial"/>
-            <node data_index="1" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux[1]" storage_index="1" tap_mode="classic" trigger_index="1" type="combinatorial"/>
-            <node data_index="0" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux[0]" storage_index="0" tap_mode="classic" trigger_index="0" type="combinatorial"/>
+            <node data_index="3" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux[3]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="3" tap_mode="classic" trigger_index="3" type="combinatorial"/>
+            <node data_index="2" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux[2]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="2" tap_mode="classic" trigger_index="2" type="combinatorial"/>
+            <node data_index="1" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux[1]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="1" tap_mode="classic" trigger_index="1" type="combinatorial"/>
+            <node data_index="0" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux[0]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="0" tap_mode="classic" trigger_index="0" type="combinatorial"/>
           </node>
-          <node data_index="4" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_clk" storage_index="4" tap_mode="classic" trigger_index="4" type="combinatorial"/>
+          <node data_index="4" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux_clk" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="4" tap_mode="classic" trigger_index="4" type="combinatorial"/>
           <node name="cfide:inst3|chameleon_io:myIO|mux_d" order="msb_to_lsb" type="combinatorial">
-            <node data_index="8" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_d[3]" storage_index="8" tap_mode="classic" trigger_index="8" type="combinatorial"/>
-            <node data_index="7" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_d[2]" storage_index="7" tap_mode="classic" trigger_index="7" type="combinatorial"/>
-            <node data_index="6" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_d[1]" storage_index="6" tap_mode="classic" trigger_index="6" type="combinatorial"/>
-            <node data_index="5" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_d[0]" storage_index="5" tap_mode="classic" trigger_index="5" type="combinatorial"/>
+            <node data_index="8" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux_d[3]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="8" tap_mode="classic" trigger_index="8" type="combinatorial"/>
+            <node data_index="7" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux_d[2]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="7" tap_mode="classic" trigger_index="7" type="combinatorial"/>
+            <node data_index="6" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux_d[1]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="6" tap_mode="classic" trigger_index="6" type="combinatorial"/>
+            <node data_index="5" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux_d[0]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="5" tap_mode="classic" trigger_index="5" type="combinatorial"/>
           </node>
           <node name="cfide:inst3|chameleon_io:myIO|mux_q" order="msb_to_lsb" type="combinatorial">
-            <node data_index="12" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_q[3]" storage_index="12" tap_mode="classic" trigger_index="12" type="combinatorial"/>
-            <node data_index="11" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_q[2]" storage_index="11" tap_mode="classic" trigger_index="11" type="combinatorial"/>
-            <node data_index="10" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_q[1]" storage_index="10" tap_mode="classic" trigger_index="10" type="combinatorial"/>
-            <node data_index="9" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_q[0]" storage_index="9" tap_mode="classic" trigger_index="9" type="combinatorial"/>
+            <node data_index="12" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux_q[3]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="12" tap_mode="classic" trigger_index="12" type="combinatorial"/>
+            <node data_index="11" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux_q[2]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="11" tap_mode="classic" trigger_index="11" type="combinatorial"/>
+            <node data_index="10" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux_q[1]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="10" tap_mode="classic" trigger_index="10" type="combinatorial"/>
+            <node data_index="9" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux_q[0]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="9" tap_mode="classic" trigger_index="9" type="combinatorial"/>
           </node>
         </unified_setup_data_view>
         <data_view>
           <bus name="cfide:inst3|chameleon_io:myIO|mux" order="msb_to_lsb" type="combinatorial">
-            <net data_index="3" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux[3]" storage_index="3" tap_mode="classic" trigger_index="3" type="combinatorial"/>
-            <net data_index="2" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux[2]" storage_index="2" tap_mode="classic" trigger_index="2" type="combinatorial"/>
-            <net data_index="1" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux[1]" storage_index="1" tap_mode="classic" trigger_index="1" type="combinatorial"/>
-            <net data_index="0" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux[0]" storage_index="0" tap_mode="classic" trigger_index="0" type="combinatorial"/>
+            <net data_index="3" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux[3]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="3" tap_mode="classic" trigger_index="3" type="combinatorial"/>
+            <net data_index="2" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux[2]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="2" tap_mode="classic" trigger_index="2" type="combinatorial"/>
+            <net data_index="1" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux[1]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="1" tap_mode="classic" trigger_index="1" type="combinatorial"/>
+            <net data_index="0" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux[0]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="0" tap_mode="classic" trigger_index="0" type="combinatorial"/>
           </bus>
-          <net data_index="4" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_clk" storage_index="4" tap_mode="classic" trigger_index="4" type="combinatorial"/>
+          <net data_index="4" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux_clk" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="4" tap_mode="classic" trigger_index="4" type="combinatorial"/>
           <bus name="cfide:inst3|chameleon_io:myIO|mux_d" order="msb_to_lsb" type="combinatorial">
-            <net data_index="8" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_d[3]" storage_index="8" tap_mode="classic" trigger_index="8" type="combinatorial"/>
-            <net data_index="7" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_d[2]" storage_index="7" tap_mode="classic" trigger_index="7" type="combinatorial"/>
-            <net data_index="6" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_d[1]" storage_index="6" tap_mode="classic" trigger_index="6" type="combinatorial"/>
-            <net data_index="5" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_d[0]" storage_index="5" tap_mode="classic" trigger_index="5" type="combinatorial"/>
+            <net data_index="8" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux_d[3]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="8" tap_mode="classic" trigger_index="8" type="combinatorial"/>
+            <net data_index="7" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux_d[2]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="7" tap_mode="classic" trigger_index="7" type="combinatorial"/>
+            <net data_index="6" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux_d[1]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="6" tap_mode="classic" trigger_index="6" type="combinatorial"/>
+            <net data_index="5" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux_d[0]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="5" tap_mode="classic" trigger_index="5" type="combinatorial"/>
           </bus>
           <bus name="cfide:inst3|chameleon_io:myIO|mux_q" order="msb_to_lsb" type="combinatorial">
-            <net data_index="12" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_q[3]" storage_index="12" tap_mode="classic" trigger_index="12" type="combinatorial"/>
-            <net data_index="11" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_q[2]" storage_index="11" tap_mode="classic" trigger_index="11" type="combinatorial"/>
-            <net data_index="10" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_q[1]" storage_index="10" tap_mode="classic" trigger_index="10" type="combinatorial"/>
-            <net data_index="9" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_q[0]" storage_index="9" tap_mode="classic" trigger_index="9" type="combinatorial"/>
+            <net data_index="12" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux_q[3]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="12" tap_mode="classic" trigger_index="12" type="combinatorial"/>
+            <net data_index="11" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux_q[2]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="11" tap_mode="classic" trigger_index="11" type="combinatorial"/>
+            <net data_index="10" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux_q[1]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="10" tap_mode="classic" trigger_index="10" type="combinatorial"/>
+            <net data_index="9" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux_q[0]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="9" tap_mode="classic" trigger_index="9" type="combinatorial"/>
           </bus>
         </data_view>
         <setup_view>
           <bus name="cfide:inst3|chameleon_io:myIO|mux" order="msb_to_lsb" type="combinatorial">
-            <net data_index="3" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux[3]" storage_index="3" tap_mode="classic" trigger_index="3" type="combinatorial"/>
-            <net data_index="2" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux[2]" storage_index="2" tap_mode="classic" trigger_index="2" type="combinatorial"/>
-            <net data_index="1" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux[1]" storage_index="1" tap_mode="classic" trigger_index="1" type="combinatorial"/>
-            <net data_index="0" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux[0]" storage_index="0" tap_mode="classic" trigger_index="0" type="combinatorial"/>
+            <net data_index="3" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux[3]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="3" tap_mode="classic" trigger_index="3" type="combinatorial"/>
+            <net data_index="2" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux[2]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="2" tap_mode="classic" trigger_index="2" type="combinatorial"/>
+            <net data_index="1" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux[1]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="1" tap_mode="classic" trigger_index="1" type="combinatorial"/>
+            <net data_index="0" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux[0]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="0" tap_mode="classic" trigger_index="0" type="combinatorial"/>
           </bus>
-          <net data_index="4" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_clk" storage_index="4" tap_mode="classic" trigger_index="4" type="combinatorial"/>
+          <net data_index="4" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux_clk" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="4" tap_mode="classic" trigger_index="4" type="combinatorial"/>
           <bus name="cfide:inst3|chameleon_io:myIO|mux_d" order="msb_to_lsb" type="combinatorial">
-            <net data_index="8" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_d[3]" storage_index="8" tap_mode="classic" trigger_index="8" type="combinatorial"/>
-            <net data_index="7" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_d[2]" storage_index="7" tap_mode="classic" trigger_index="7" type="combinatorial"/>
-            <net data_index="6" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_d[1]" storage_index="6" tap_mode="classic" trigger_index="6" type="combinatorial"/>
-            <net data_index="5" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_d[0]" storage_index="5" tap_mode="classic" trigger_index="5" type="combinatorial"/>
+            <net data_index="8" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux_d[3]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="8" tap_mode="classic" trigger_index="8" type="combinatorial"/>
+            <net data_index="7" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux_d[2]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="7" tap_mode="classic" trigger_index="7" type="combinatorial"/>
+            <net data_index="6" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux_d[1]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="6" tap_mode="classic" trigger_index="6" type="combinatorial"/>
+            <net data_index="5" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux_d[0]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="5" tap_mode="classic" trigger_index="5" type="combinatorial"/>
           </bus>
           <bus name="cfide:inst3|chameleon_io:myIO|mux_q" order="msb_to_lsb" type="combinatorial">
-            <net data_index="12" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_q[3]" storage_index="12" tap_mode="classic" trigger_index="12" type="combinatorial"/>
-            <net data_index="11" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_q[2]" storage_index="11" tap_mode="classic" trigger_index="11" type="combinatorial"/>
-            <net data_index="10" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_q[1]" storage_index="10" tap_mode="classic" trigger_index="10" type="combinatorial"/>
-            <net data_index="9" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="cfide:inst3|chameleon_io:myIO|mux_q[0]" storage_index="9" tap_mode="classic" trigger_index="9" type="combinatorial"/>
+            <net data_index="12" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux_q[3]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="12" tap_mode="classic" trigger_index="12" type="combinatorial"/>
+            <net data_index="11" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux_q[2]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="11" tap_mode="classic" trigger_index="11" type="combinatorial"/>
+            <net data_index="10" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux_q[1]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="10" tap_mode="classic" trigger_index="10" type="combinatorial"/>
+            <net data_index="9" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" level-0="dont_care" name="cfide:inst3|chameleon_io:myIO|mux_q[0]" pwr_level-0="dont_care" pwr_storage-0="dont_care" pwr_storage-1="dont_care" pwr_storage-2="dont_care" storage-0="dont_care" storage-1="dont_care" storage-2="dont_care" storage_index="9" tap_mode="classic" trigger_index="9" type="combinatorial"/>
           </bus>
         </setup_view>
         <trigger_in_editor/>
         <trigger_out_editor/>
       </presentation>
-      <trigger CRC="B7F80B8B" attribute_mem_mode="false" gap_record="true" global_temp="1" name="trigger: 2013/08/05 20:37:04  #1" position="post" power_up_trigger_mode="false" record_data_gap="true" segment_size="256" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="false" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_type="circular">
+      <trigger CRC="B7F80B8B" attribute_mem_mode="false" gap_record="true" global_temp="1" is_expanded="true" name="trigger: 2013/08/05 20:37:04  #1" position="post" power_up_trigger_mode="false" record_data_gap="true" segment_size="256" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="true" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_type="circular">
         <power_up_trigger position="pre" storage_qualifier_disabled="no"/>
         <events use_custom_flow_control="no">
           <level enabled="yes" name="condition1" type="basic">
             <power_up enabled="yes">
-            </power_up>
-            <op_node/>
+            </power_up><op_node/>
           </level>
         </events>
         <storage_qualifier_events>
@@ -168,6 +156,17 @@
         </log>
       </trigger>
     </signal_set>
+    <position_info>
+      <single attribute="active tab" value="0"/>
+      <single attribute="data horizontal scroll position" value="895"/>
+      <single attribute="data vertical scroll position" value="0"/>
+      <single attribute="setup horizontal scroll position" value="0"/>
+      <single attribute="setup vertical scroll position" value="7"/>
+      <single attribute="zoom level denominator" value="1"/>
+      <single attribute="zoom level numerator" value="256"/>
+      <single attribute="zoom offset denominator" value="1"/>
+      <single attribute="zoom offset numerator" value="508"/>
+    </position_info>
   </instance>
   <static_plugin_mnemonics/>
   <mnemonics/>
@@ -175,12 +174,12 @@
     <single attribute="active instance" value="0"/>
     <single attribute="config widget visible" value="1"/>
     <single attribute="data log widget visible" value="1"/>
+    <single attribute="hierarchy widget height" value="106"/>
     <single attribute="hierarchy widget visible" value="1"/>
     <single attribute="instance widget visible" value="1"/>
     <single attribute="jtag widget visible" value="1"/>
     <multi attribute="column width" size="23" value="34,34,260,74,68,70,88,88,98,98,88,88,110,101,101,101,101,101,101,101,101,107,78"/>
     <multi attribute="frame size" size="2" value="1024,719"/>
     <multi attribute="jtag widget size" size="2" value="384,145"/>
-    <single attribute="hierarchy widget height" value="106"/>
   </global_info>
 </session>

@@ -218,9 +218,11 @@ end process;
 		);
 
 
--- Reverse order of direction signals.
-joystick1<=c64_joy1(5 downto 4)&c64_joy1(0)&c64_joy1(1)&c64_joy1(2)&c64_joy1(3);
-joystick2<=c64_joy2(5 downto 4)&c64_joy2(0)&c64_joy2(1)&c64_joy2(2)&c64_joy2(3);
+-- CV: disable joys
+joystick1<= (others => '1');
+joystick2<= (others => '1');
+joystick3<= (others => '1');
+joystick4<= (others => '1');
 
 -- C64 IO
 -- FIXME - re-enable RS232-over-IEC
@@ -281,12 +283,6 @@ joystick2<=c64_joy2(5 downto 4)&c64_joy2(0)&c64_joy2(1)&c64_joy2(2)&c64_joy2(3);
 
 		-- Buttons
 			button_reset_n => button_reset_n, -- present (nreset)
-
-		-- Joysticks
-			joystick1 => c64_joy1,
-			joystick2 => c64_joy2,
-			joystick3 => joystick3, 
-			joystick4 => joystick4,
 
 		-- Keyboards
 			keys => c64_keys,	-- missing - how to map?  Array, readable in software?
