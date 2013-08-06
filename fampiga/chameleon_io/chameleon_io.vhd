@@ -124,13 +124,8 @@ entity chameleon_io is
 -- Clocks
 		clk : in std_logic;
 		clk_mux : in std_logic;
-		ena_1mhz : in std_logic;
 		reset : in std_logic;
 		reset_ext : out std_logic;
-
--- Config
-		no_clock : out std_logic;
-		docking_station : out std_logic;
 
 -- Chameleon FPGA pins
 		-- C64 Clocks
@@ -149,17 +144,6 @@ entity chameleon_io is
 
 -- USB microcontroller (To RX of micro)
 		to_usb_rx : in std_logic := '1';
-
--- C64 timing (only for C64 related cores)
-		phi_mode : in std_logic := '0';
-		phi_out : out std_logic;
-		phi_cnt : out unsigned(7 downto 0);
-		phi_end_0 : out std_logic;
-		phi_end_1 : out std_logic;
-		phi_post_1 : out std_logic;
-		phi_post_2 : out std_logic;
-		phi_post_3 : out std_logic;
-		phi_post_4 : out std_logic;
 
 -- C64 bus
 		c64_irq_n : out std_logic;
@@ -226,10 +210,7 @@ end entity;
 
 architecture rtl of chameleon_io is
 -- Clocks
-	signal no_clock_loc : std_logic;
 	signal phi : std_logic;
-	signal end_of_phi_0 : std_logic;
-	signal end_of_phi_1 : std_logic;
 	
 -- State
 	signal reset_pending : std_logic := '0';
@@ -284,10 +265,6 @@ architecture rtl of chameleon_io is
 	signal c64_roms_loc : std_logic := '0';
 	signal c64_clockport_loc : std_logic := '0';
 
--- Docking-station
-	signal docking_station_loc : std_logic;
-	signal docking_irq : std_logic;
-
 -- MMC
 	signal mmc_state : unsigned(5 downto 0) := (others => '0');
 	signal spi_q_reg : unsigned(7 downto 0) := (others => '1');
@@ -303,12 +280,6 @@ architecture rtl of chameleon_io is
 	signal iec_srq_reg : std_logic := '1';
 begin
 	reset_ext <= reset_in;
-	no_clock <= no_clock_loc;
-	docking_station <= docking_station_loc;
-	--
-	phi_out <= phi;
-	phi_end_0 <= end_of_phi_0;
-	phi_end_1 <= end_of_phi_1;
 	--
 	c64_ba <= c64_ba_reg;
 	c64_q <= c64_data_reg;
@@ -322,19 +293,9 @@ begin
 		port map (
 			clk => clk,
 			phi2_n => phi2_n,
-			mode => phi_mode,
+            mode => '0',
 
-			no_clock => no_clock_loc,
-			docking_station => docking_station_loc,
-
-			phiLocal => phi,
-			phiCnt => phi_cnt,
-			phiPreHalf => end_of_phi_0,
-			phiPreEnd => end_of_phi_1,
-			phiPost1 => phi_post_1,
-			phiPost2 => phi_post_2,
-			phiPost3 => phi_post_3,
-			phiPost4 => phi_post_4
+			phiLocal => phi
 		);
 
 -- -----------------------------------------------------------------------
@@ -462,14 +423,8 @@ begin
 					else
 						reset_in <= '0';
 					end if;
-					if no_clock_loc = '1' then
-						c64_irq_n <= '1';
-					end if;
 				when X"7" =>
 					c64_ba_reg <= mux_q(1);
-					if no_clock_loc = '1' then
-						c64_ba_reg <= '1';
-					end if;
 				when X"B" =>
 					button_reset_n <= mux_q(1);
 					ir <= mux_q(3);
@@ -608,9 +563,6 @@ begin
 				when MUX_NMIIRQ1 | MUX_NMIIRQ2=>
 					mux_d_reg <= "110" & (not reset);
 					mux_reg <= X"6";
-					if docking_station_loc = '1' then
-						mux_d_reg(2) <= docking_irq;
-					end if;
 --
 -- IEC
 				when MUX_IEC1 | MUX_IEC2 | MUX_IEC3 | MUX_IEC4 =>
@@ -656,9 +608,6 @@ begin
 				when MUX_WAIT1 =>
 					-- Continue BUSVIC output at end of phi2=0, so we sample BA a few times.
 					mux_d_reg <= "0101";
-					if docking_station_loc = '1' then
-						mux_d_reg <= "1111";
-					end if;
 					mux_reg <= X"7";
 					-- Toggle between SPI/IEC and updating BUSVIC.
 					if mux_toggle = '1' then
@@ -685,9 +634,6 @@ begin
 					mux_reg <= X"5";
 				when MUX_BUSVIC =>
 					mux_d_reg <= "0101";
-					if docking_station_loc = '1' then
-						mux_d_reg <= "1111";
-					end if;
 					mux_reg <= X"7";
 				when MUX_ULTIMAX =>
 					mux_d_reg <= "1011";
@@ -700,9 +646,6 @@ begin
 					mux_reg <= X"1";
 				when MUX_END0 =>
 					mux_d_reg <= "0111";
-					if docking_station_loc = '1' then
-						mux_d_reg <= "1111";
-					end if;
 					mux_reg <= X"7";
 --
 -- PHI2  1

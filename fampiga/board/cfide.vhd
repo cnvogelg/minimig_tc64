@@ -181,9 +181,6 @@ signal slower : std_logic_vector(2 downto 0);
 
 signal button_reset_n : std_logic;
 
-signal no_clock : std_logic;
-signal docking_station : std_logic;
-
 begin
 
 -- Synchronise buttons.
@@ -229,11 +226,7 @@ joystick4<= (others => '1');
 		-- Clocks
 			clk => sysclk,	-- present
 			clk_mux => sysclk, -- present
-			ena_1mhz => ena1Mhz, -- present
 			reset => not n_reset, -- present, but inverted
-			
-			no_clock => no_clock,  -- output
-			docking_station => docking_station, -- output
 			
 		-- Chameleon FPGA pins
 			-- C64 Clocks
