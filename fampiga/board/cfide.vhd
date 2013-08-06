@@ -219,9 +219,6 @@ joystick4<= (others => '1');
 -- FIXME - re-enable RS232-over-IEC
 
 	myIO : entity work.chameleon_io
-		generic map (
-			enable_raw_spi => true
-		)
 		port map (
 		-- Clocks
 			clk => sysclk,	-- present

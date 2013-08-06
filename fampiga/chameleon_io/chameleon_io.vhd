@@ -117,7 +117,6 @@ use IEEE.numeric_std.all;
 
 entity chameleon_io is
 	generic (
-		enable_raw_spi : boolean := false;
 		enable_iec_access : boolean := false
 	);
 	port (
@@ -149,13 +148,6 @@ entity chameleon_io is
 		mmc_cs_n : in std_logic := '1';
 		flash_cs_n : in std_logic := '1';
 		rtc_cs : in std_logic := '0';
-
--- SPI controller (enable_raw_spi must be set to false)
-		spi_speed : in std_logic := '1';
-		spi_req : in std_logic := '0';
-		spi_ack : out std_logic;
-		spi_d : in unsigned(7 downto 0) := (others => '-');
-		spi_q : out unsigned(7 downto 0);
 
 -- SPI raw signals (enable_raw_spi must be set to true)
 		spi_raw_clk : in std_logic := '1';
@@ -239,14 +231,6 @@ architecture rtl of chameleon_io is
 	signal mux_reg : unsigned(mux'range) := X"F";
 	signal mux_d_mmc : unsigned(1 downto 0) := "11";
 
--- MMC
-	signal mmc_state : unsigned(5 downto 0) := (others => '0');
-	signal spi_q_reg : unsigned(7 downto 0) := (others => '1');
-	signal spi_run : std_logic := '0';
-	signal spi_sample : std_logic := '0';
-	signal mmc_shift_req : std_logic;
-	signal mmc_shift_ack : std_logic := '0';
-
 -- IEC
 	signal iec_clk_reg : std_logic := '1';
 	signal iec_dat_reg : std_logic := '1';
@@ -254,8 +238,6 @@ architecture rtl of chameleon_io is
 	signal iec_srq_reg : std_logic := '1';
 begin
 	reset_ext <= reset_in;
-	--
-	spi_q <= spi_q_reg;
 
 -- -----------------------------------------------------------------------
 -- PHI2 clock sync
@@ -398,9 +380,6 @@ begin
 				when others =>
 					null;
 				end case;
-				if spi_sample = '1' then
-					spi_q_reg <= spi_q_reg(6 downto 0) & spi_miso;
-				end if;
 			end if;
 			iec_dat_in <= iec_dat_reg;
 			iec_clk_in <= iec_clk_reg;
@@ -415,7 +394,6 @@ begin
 		if rising_edge(clk_mux) then
 			spi_raw_ack <= '0';
 			if mux_clk_reg = '1' then
-				spi_sample <= '0';
 				case mux_state is
 --
 -- RESET
@@ -425,98 +403,32 @@ begin
 --
 -- MMC
 				when MUX_MMC0L =>
-					-- Remember current state for lowspeed transfer.
-					-- Register is accessed another 15 times in
-					-- system cycle, but should not be updated when running on 250khz speed.
-					mux_d_mmc(0) <= mmc_state(1) or (not mmc_state(5));
-					mux_d_mmc(1) <= spi_d(7 - to_integer(mmc_state(4 downto 2)));
-					-- Update register
-					mux_d_reg(0) <= mmc_state(1) or (not mmc_state(5));
-					mux_d_reg(1) <= spi_d(7 - to_integer(mmc_state(4 downto 2)));
+                    -- CV: raw spi
+					mux_d_reg(0) <= spi_raw_clk;
+					mux_d_reg(1) <= spi_raw_mosi;
 					mux_d_reg(2) <= mmc_cs_n; 
 					mux_d_reg(3) <= to_usb_rx;
 					mux_reg <= X"C";
-					if mmc_state(5) = '1' then
-						if spi_speed = '0' then
-							-- Slow speed. Only toggle once in two cycles
-							mmc_state <= mmc_state + "000001";
-							if mmc_state(1 downto 0) = "11" then
-								spi_sample <= '1';
-							end if;
-						else
-							-- Fast speed. Toggle 16 times in a cycle
-							mmc_state <= mmc_state + "000010";
-							if mmc_state(1) = '1' then
-								spi_sample <= '1';
-							end if;
-						end if;
-					end if;
-					if enable_raw_spi then
-						mux_d_reg(0) <= spi_raw_clk;
-						mux_d_reg(1) <= spi_raw_mosi;
-						mux_d_reg(2) <= mmc_cs_n; 
-						mux_d_reg(3) <= to_usb_rx;
-						mux_reg <= X"C";
-						spi_raw_ack <= '1';
-					end if;
+					spi_raw_ack <= '1';
 				when MUX_MMC1L | MUX_MMC2L | MUX_MMC3L
 				   | MUX_MMC4L | MUX_MMC5L | MUX_MMC6L | MUX_MMC7L =>
-					mux_d_reg(0) <= mux_d_mmc(0);
-					mux_d_reg(1) <= mux_d_mmc(1);
-					mux_d_reg(2) <= mmc_cs_n; 
-					mux_d_reg(3) <= to_usb_rx;
-					mux_reg <= X"C";
-					-- Only update register on when running at fast speed (8Mhz).
-					if (mmc_state(5) = '1') and (spi_speed = '1') then
-						mux_d_reg(0) <= mmc_state(1);
-						mux_d_reg(1) <= spi_d(7 - to_integer(mmc_state(4 downto 2)));
-						-- Fast speed. Toggle 16 times in a cycle
-						mmc_state <= mmc_state + "000010";
-						if mmc_state(1) = '1' then
-							spi_sample <= '1';
-						end if;
-					end if;
-					if enable_raw_spi then
-						mux_d_reg(0) <= spi_raw_clk;
-						mux_d_reg(1) <= spi_raw_mosi;
-						mux_d_reg(2) <= mmc_cs_n;
-						mux_d_reg(3) <= to_usb_rx;
-						mux_reg <= X"C";
-						spi_raw_ack <= '1';
-					end if;
-
-				when MUX_MMC0H | MUX_MMC1H | MUX_MMC2H | MUX_MMC3H
-				   | MUX_MMC4H | MUX_MMC5H | MUX_MMC6H | MUX_MMC7H =>
-					mux_d_reg(0) <= mux_d_mmc(0);
-					mux_d_reg(1) <= mux_d_mmc(1);
+                   -- CV: raw spi
+					mux_d_reg(0) <= spi_raw_clk;
+					mux_d_reg(1) <= spi_raw_mosi;
 					mux_d_reg(2) <= mmc_cs_n;
 					mux_d_reg(3) <= to_usb_rx;
 					mux_reg <= X"C";
-					if (mmc_state(5) = '1') and (spi_speed = '1') then
-						-- Only update register on when running at fast speed (8Mhz).
-						mux_d_reg(0) <= mmc_state(1);
-						mux_d_reg(1) <= spi_d(7 - to_integer(mmc_state(4 downto 2)));
-						-- Fast speed. Toggle 16 times in a cycle
-						mmc_state <= mmc_state + "000010";
-						if mmc_state(1) = '1' then
-							spi_sample <= '1';
-						end if;
-					elsif enable_iec_access then
-						-- When MMC transfer is not pending use some of the MMC cycles for IEC transfers.
-						mux_d_reg(0) <= iec_dat_out;
-						mux_d_reg(1) <= iec_clk_out;
-						mux_d_reg(2) <= iec_srq_out;
-						mux_d_reg(3) <= iec_atn_out;
-						mux_reg <= X"D";
-					end if;
-					if enable_raw_spi then
-						mux_d_reg(0) <= spi_raw_clk;
-						mux_d_reg(1) <= spi_raw_mosi;
-						mux_d_reg(2) <= mmc_cs_n;
-						mux_d_reg(3) <= to_usb_rx;
-						mux_reg <= X"C";
-						spi_raw_ack <= '1';
-					end if;
+					spi_raw_ack <= '1';
+
+				when MUX_MMC0H | MUX_MMC1H | MUX_MMC2H | MUX_MMC3H
+				   | MUX_MMC4H | MUX_MMC5H | MUX_MMC6H | MUX_MMC7H =>
+                   -- CV: raw spi
+					mux_d_reg(0) <= spi_raw_clk;
+					mux_d_reg(1) <= spi_raw_mosi;
+					mux_d_reg(2) <= mmc_cs_n;
+					mux_d_reg(3) <= to_usb_rx;
+					mux_reg <= X"C";
+					spi_raw_ack <= '1';
 				when MUX_NMIIRQ1 | MUX_NMIIRQ2=>
 					mux_d_reg <= "110" & (not reset);
 					mux_reg <= X"6";
@@ -544,45 +456,26 @@ begin
 --
 -- WAITS
 				when MUX_WAIT0 =>
-					if spi_req /= spi_run then
-						spi_run <= spi_req;
-						mmc_state <= "100000";
-					end if;
 					-- Use dead time to do IEC reads/writes
-					mux_d_reg(0) <= iec_dat_out;
-					mux_d_reg(1) <= iec_clk_out;
-					mux_d_reg(2) <= iec_srq_out;
-					mux_d_reg(3) <= iec_atn_out;
-					mux_reg <= X"D";
-					if enable_raw_spi then
-						mux_d_reg(0) <= spi_raw_clk;
-						mux_d_reg(1) <= spi_raw_mosi;
-						mux_d_reg(2) <= mmc_cs_n;
-						mux_d_reg(3) <= to_usb_rx;
-						mux_reg <= X"C";
-						spi_raw_ack <= '1';
-					end if;
+                    -- CV: raw_spi
+					mux_d_reg(0) <= spi_raw_clk;
+					mux_d_reg(1) <= spi_raw_mosi;
+					mux_d_reg(2) <= mmc_cs_n;
+					mux_d_reg(3) <= to_usb_rx;
+					mux_reg <= X"C";
+					spi_raw_ack <= '1';
 				when MUX_WAIT1 =>
 					-- Continue BUSVIC output at end of phi2=0, so we sample BA a few times.
 					mux_d_reg <= "0101";
 					mux_reg <= X"7";
 					-- Toggle between SPI/IEC and updating BUSVIC.
 					if mux_toggle = '1' then
-						if enable_iec_access then
-							mux_d_reg(0) <= iec_dat_out;
-							mux_d_reg(1) <= iec_clk_out;
-							mux_d_reg(2) <= iec_srq_out;
-							mux_d_reg(3) <= iec_atn_out;
-							mux_reg <= X"D";
-						end if;
-						if enable_raw_spi then
-							mux_d_reg(0) <= spi_raw_clk;
-							mux_d_reg(1) <= spi_raw_mosi;
-							mux_d_reg(2) <= mmc_cs_n;
-							mux_d_reg(3) <= to_usb_rx;
-							mux_reg <= X"C";
-							spi_raw_ack <= '1';
-						end if;
+						mux_d_reg(0) <= spi_raw_clk;
+						mux_d_reg(1) <= spi_raw_mosi;
+						mux_d_reg(2) <= mmc_cs_n;
+						mux_d_reg(3) <= to_usb_rx;
+						mux_reg <= X"C";
+						spi_raw_ack <= '1';
 					end if;
 --
 -- PHI2  0
@@ -657,15 +550,6 @@ begin
 				when others =>
 					null;
 				end case;
-			end if;
-		end if;
-	end process;
-
-	process(clk_mux)
-	begin
-		if rising_edge(clk_mux) then
-			if mmc_state(5) = '0' then
-				spi_ack <= spi_run;
 			end if;
 		end if;
 	end process;
