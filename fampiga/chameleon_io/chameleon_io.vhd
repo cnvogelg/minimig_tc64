@@ -41,7 +41,6 @@
 -- -----------------------------------------------------------------------
 -- clk             - system clock
 -- reset           - Perform a reset of the subsystems
--- reset_ext       - Hardware reset from the cartridge-port (eg. a C64 reset button)
 -- to_usb_rx
 --
 -- led_green       - Control the green LED (0 off, 1 on). Also power LED on Amiga keyboard.
@@ -68,7 +67,6 @@ entity chameleon_io is
 		clk : in std_logic;
 		clk_mux : in std_logic;
 		reset : in std_logic;
-		reset_ext : out std_logic;
 
 -- Chameleon FPGA pins
 		-- C64 Clocks
@@ -132,10 +130,6 @@ end entity;
 -- -----------------------------------------------------------------------
 
 architecture rtl of chameleon_io is
--- State
-	signal reset_pending : std_logic := '0';
-	signal reset_in : std_logic := '0';
-
 -- MUX
 	type muxstate_t is (
 		-- Reset phase
@@ -166,11 +160,9 @@ architecture rtl of chameleon_io is
 	signal mux_state : muxstate_t;
 	signal mux_toggle : std_logic := '0';
 
-	signal mux_c128_timeout : unsigned(7 downto 0) := (others => '1');
 	signal mux_clk_reg : std_logic := '0';
 	signal mux_d_reg : unsigned(mux_d'range) := X"F";
 	signal mux_reg : unsigned(mux'range) := X"F";
-	signal mux_d_mmc : unsigned(1 downto 0) := "11";
 
 -- IEC
 	signal iec_clk_reg : std_logic := '1';
@@ -178,7 +170,6 @@ architecture rtl of chameleon_io is
 	signal iec_atn_reg : std_logic := '1';
 	signal iec_srq_reg : std_logic := '1';
 begin
-	reset_ext <= reset_in;
 
 -- -----------------------------------------------------------------------
 -- MUX CPLD
@@ -255,10 +246,6 @@ begin
 				when MUX_D1RD_2  => mux_state <= MUX_WAIT0;
 				end case;
 			end if;
-			if reset = '1' then
-				mux_c128_timeout <= (others => '1');
--- 				system_wait <= '1';
-			end if;
 		end if;
 	end process;
 
@@ -272,15 +259,15 @@ begin
 --					c64_data_reg(3 downto 0) <= mux_q;
 --				when X"1" =>
 --					c64_data_reg(7 downto 4) <= mux_q;
-				when X"6" =>
+--				when X"6" =>
 --					c64_reset_reg <= not mux_q(0);
 --					c64_irq_n <= mux_q(2);
 --					c64_nmi_n <= mux_q(3);
-					reset_pending <= reset; -- or c64_reset_reg;
+--					reset_pending <= reset; -- or c64_reset_reg;
 --					if reset_pending = '0' then
 --						reset_in <= c64_reset_reg;
 --					else
-						reset_in <= '0';
+--						reset_in <= '0';
 --					end if;
 				when X"7" =>
 --					c64_ba_reg <= mux_q(1);
