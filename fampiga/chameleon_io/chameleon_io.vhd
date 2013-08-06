@@ -145,19 +145,6 @@ entity chameleon_io is
 -- USB microcontroller (To RX of micro)
 		to_usb_rx : in std_logic := '1';
 
--- C64 bus
-		c64_irq_n : out std_logic;
-		c64_ba : out std_logic;
-
-		c64_vic : in std_logic := '0';
-		c64_cs : in std_logic := '0';
-		c64_cs_roms : in std_logic := '0';
-		c64_clockport : in std_logic := '0';
-		c64_we : in std_logic := '0';
-		c64_a : in unsigned(15 downto 0) := (others => '0');
-		c64_d : in unsigned(7 downto 0) := (others => '1');
-		c64_q : out unsigned(7 downto 0);
-
 -- SPI chip-selects
 		mmc_cs_n : in std_logic := '1';
 		flash_cs_n : in std_logic := '1';
@@ -252,19 +239,6 @@ architecture rtl of chameleon_io is
 	signal mux_reg : unsigned(mux'range) := X"F";
 	signal mux_d_mmc : unsigned(1 downto 0) := "11";
 
--- C64 bus
-	signal c64_reset_reg : std_logic := '0';
-	signal c64_ba_reg : std_logic := '1';
-	signal c64_data_reg : unsigned(7 downto 0) := (others => '1');
-	signal c64_addr : unsigned(15 downto 0) := (others => '0');
-	signal c64_to_io : unsigned(7 downto 0) := (others => '0');
-	
-	signal c64_we_loc : std_logic := '0';
-	signal c64_vic_loc : std_logic := '0';
-	signal c64_cs_loc : std_logic := '0';
-	signal c64_roms_loc : std_logic := '0';
-	signal c64_clockport_loc : std_logic := '0';
-
 -- MMC
 	signal mmc_state : unsigned(5 downto 0) := (others => '0');
 	signal spi_q_reg : unsigned(7 downto 0) := (others => '1');
@@ -281,9 +255,6 @@ architecture rtl of chameleon_io is
 begin
 	reset_ext <= reset_in;
 	--
-	c64_ba <= c64_ba_reg;
-	c64_q <= c64_data_reg;
-	--
 	spi_q <= spi_q_reg;
 
 -- -----------------------------------------------------------------------
@@ -297,20 +268,6 @@ begin
 
 			phiLocal => phi
 		);
-
--- -----------------------------------------------------------------------
--- C64 keyboard and joystick support
--- To enable set enable_c64_joykeyb to true.
--- -----------------------------------------------------------------------
-		
-		c64_addr <= c64_a;
-		c64_to_io <= c64_d;
-
-		c64_vic_loc <= c64_vic;
-		c64_cs_loc <= c64_cs;
-		c64_roms_loc <= c64_cs_roms;
-		c64_clockport_loc <= c64_clockport;
-		c64_we_loc <= c64_we;
 
 -- -----------------------------------------------------------------------
 -- MUX CPLD
@@ -409,22 +366,22 @@ begin
 		if rising_edge(clk_mux) then
 			if mux_clk_reg = '1' then
 				case mux_reg is
-				when X"0" =>
-					c64_data_reg(3 downto 0) <= mux_q;
-				when X"1" =>
-					c64_data_reg(7 downto 4) <= mux_q;
+--				when X"0" =>
+--					c64_data_reg(3 downto 0) <= mux_q;
+--				when X"1" =>
+--					c64_data_reg(7 downto 4) <= mux_q;
 				when X"6" =>
-					c64_reset_reg <= not mux_q(0);
-					c64_irq_n <= mux_q(2);
+--					c64_reset_reg <= not mux_q(0);
+--					c64_irq_n <= mux_q(2);
 --					c64_nmi_n <= mux_q(3);
-					reset_pending <= reset or c64_reset_reg;
-					if reset_pending = '0' then
-						reset_in <= c64_reset_reg;
-					else
+					reset_pending <= reset; -- or c64_reset_reg;
+--					if reset_pending = '0' then
+--						reset_in <= c64_reset_reg;
+--					else
 						reset_in <= '0';
-					end if;
+--					end if;
 				when X"7" =>
-					c64_ba_reg <= mux_q(1);
+--					c64_ba_reg <= mux_q(1);
 				when X"B" =>
 					button_reset_n <= mux_q(1);
 					ir <= mux_q(3);
@@ -639,10 +596,10 @@ begin
 					mux_d_reg <= "1011";
 					mux_reg <= X"8";
 				when MUX_D0VIC =>
-					mux_d_reg <= c64_to_io(3 downto 0);
+--					mux_d_reg <= c64_to_io(3 downto 0);
 					mux_reg <= X"0";
 				when MUX_D1VIC =>
-					mux_d_reg <= c64_to_io(7 downto 4);
+--					mux_d_reg <= c64_to_io(7 downto 4);
 					mux_reg <= X"1";
 				when MUX_END0 =>
 					mux_d_reg <= "0111";
@@ -650,52 +607,52 @@ begin
 --
 -- PHI2  1
 				when MUX_A0 =>
-					mux_d_reg <= c64_addr(3 downto 0);
+--					mux_d_reg <= c64_addr(3 downto 0);
 					mux_reg <= X"2";
 				when MUX_A1 =>
-					mux_d_reg <= c64_addr(7 downto 4);
+--					mux_d_reg <= c64_addr(7 downto 4);
 					mux_reg <= X"3";
 				when MUX_A2 =>
-					mux_d_reg <= c64_addr(11 downto 8);
+--					mux_d_reg <= c64_addr(11 downto 8);
 					mux_reg <= X"4";
 				when MUX_BUS =>
-					if c64_vic_loc = '0' then
-						if c64_cs_loc = '1' then
-							mux_d_reg <= "00" & (not c64_we_loc) & (not c64_we_loc);
-							mux_reg <= X"7";
-						end if;
-					else
+--					if c64_vic_loc = '0' then
+--						if c64_cs_loc = '1' then
+--							mux_d_reg <= "00" & (not c64_we_loc) & (not c64_we_loc);
+--							mux_reg <= X"7";
+--						end if;
+--					else
 						-- A15..12 driven, A11..0 not driven, Data driven, no write.
 						mux_d_reg <= "0101";
 						mux_reg <= X"7";
-					end if;
+--					end if;
 				when MUX_CLKPORT =>
 					-- GAME = low unless accessing roms
-					mux_d_reg <= "1" & c64_roms_loc & "11";
-					if c64_clockport_loc = '1' then
-						if c64_we_loc = '0' then
-							-- Clockport read
-							mux_d_reg <= "1010";
-						else
-							-- Clockport write
-							mux_d_reg <= "1001";
-						end if;
-					end if;
+					mux_d_reg <= "1011";
+--					if c64_clockport_loc = '1' then
+--						if c64_we_loc = '0' then
+--							-- Clockport read
+--							mux_d_reg <= "1010";
+--						else
+--							-- Clockport write
+--							mux_d_reg <= "1001";
+--						end if;
+--					end if;
 					mux_reg <= X"8";
-				when MUX_A3 =>
-					if c64_vic_loc = '0' then
-						if c64_cs_loc = '1' then
-							mux_d_reg <= c64_addr(15 downto 12);
-							mux_reg <= X"5";
-						end if;
-					end if;
+--				when MUX_A3 =>
+--					if c64_vic_loc = '0' then
+--						if c64_cs_loc = '1' then
+--							mux_d_reg <= c64_addr(15 downto 12);
+--							mux_reg <= X"5";
+--						end if;
+--					end if;
 --				when MUX_D0WR | MUX_D0WR_1 | MUX_D0WR_2 =>
 				when MUX_D0WR | MUX_D0WR_1 | MUX_D0WR_2 | MUX_D0RD_1 | MUX_D0RD_2 =>
-					mux_d_reg <= c64_to_io(3 downto 0);
+--					mux_d_reg <= c64_to_io(3 downto 0);
 					mux_reg <= X"0";
 --				when MUX_D1WR | MUX_D1WR_1 | MUX_D1WR_2 =>
 				when MUX_D1WR | MUX_D1WR_1 | MUX_D1WR_2 | MUX_D1RD_1 | MUX_D1RD_2 =>
-					mux_d_reg <= c64_to_io(7 downto 4);
+--					mux_d_reg <= c64_to_io(7 downto 4);
 					mux_reg <= X"1";
 				when others =>
 					null;
