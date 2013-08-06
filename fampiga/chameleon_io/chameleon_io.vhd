@@ -39,61 +39,10 @@
 --   - Can optionally give access to other C64 resources like the SID.
 --
 -- -----------------------------------------------------------------------
--- enable_docking_station - Enable support for the docking-station.
--- enable_c64_joykeyb     - Automatically read joystick and keyboard on the C64 bus.
---                          Take note this disables the C64 bus access feature on this entity.
--- enable_c64_4player     - Enable 4player support on the user-port of the C64.
---                          The flag enable_c64_joykeyb must be true for this to work.
--- enable_raw_spi         - SPI controller inside this entity is switched off.
---                          And the actual SPI lines are exposed. The maximum speed is limited
---                          as the signals are time multiplexed. The maximum spi speed usable
---                          is around 1/12 of clk. (One line transition each 6 clk cycles)
--- enable_iec_access      - Enables support for the IEC bus on the break-out cable.
---                          Set this to 'false' when the IEC bus is not used to save some logic.
--- -----------------------------------------------------------------------
 -- clk             - system clock
--- ena_1mhz        - Enable must be '1' one clk cycle each 1 Mhz.
 -- reset           - Perform a reset of the subsystems
 -- reset_ext       - Hardware reset from the cartridge-port (eg. a C64 reset button)
---
--- no_clock        - '0' when connected to C64 cartridge port.
---                   '1' when in standalone mode or docking-station connected.
--- docking_station - '0' standalone/cartrdige mode
---                   '1' when docking-station is connected.
---
 -- to_usb_rx
---
--- The following timing signals are only useful when writing C64 related designs.
--- They can be left unconnected in all other FPGA designs.
--- phi_mode        - Selects timing in standalone mode ('0' is PAL, '1' is NTSC).
--- phi_out         - Regenerated or synthesized phi2 clock.
--- phi_cnt         - Counting the system-clock cycles within one phi2 cycle.
--- phi_end_0       - The half of the cycle where phi_out is low ends.
--- phi_end_1       - The half of the cycle where phi_out is high ends.
--- phi_post_1      - Triggers when phi changes
--- phi_post_2      - Triggers one cycle after phi changed
--- phi_post_3      - Triggers two cycles phi changed
--- phi_post_4      - Triggers three cycles phi changed
---
--- c64_irq_n       - Status of the C64 IRQ line (cartridge mode only)
--- c64_nmi_n       - Status of the C64 NMI line
--- c64_ba          - status of the C64 BA line
---
--- The following signals should be synchronised to the phi_out signal
--- c64_vic         - When set data on c64_d is send to the VIC-II chip.
--- c64_cs          - When set it accesses the C64 databus (uses Ultimax mode, no memory is mapped)
--- c64_cs_roms     - Enables access to the C64 Kernal and Basic ROMs (disables Ultimax mode)
--- c64_clockport   - When set it accesses the clockport.
--- c64_we          - Access is a write when set (note polarity is the inverse of R/W on cartridge port)
--- c64_a           - C64 address bus
--- c64_d           - Data to the C64
--- c64_q           - Data from the C64 (only valid when phi_end_1 is set)
---
--- spi_speed       - 0 SPI bus runs at slow speed (250 Kbit), SPI bus runs at fast speed (8 Mbit)
--- spi_req         - Toggle to request SPI transfer.
--- spi_ack         - Is made equal to spi_req after transfer is complete.
--- spi_d           - Data input into SPI controller.
--- spi_q           - Data output from SPI controller.
 --
 -- led_green       - Control the green LED (0 off, 1 on). Also power LED on Amiga keyboard.
 -- led_red         - Control the red LED (0 off, 1 on). Also drive LED on Amiga keyboard.
@@ -101,11 +50,6 @@
 --
 -- ps2_*           - PS2 signals for both keyboard and mouse.
 -- button_reset_n  - Status of blue reset button (right button) on the Chameleon. Low active.
--- joystick*       - Joystick ports of both docking-station and C64.  Bits: fire2, fire1, right, left, down, up
---                   The C64 only supports one button fire1. The signals are low active
--- keys            - C64 keyboard. One bit for each key on the keyboard. Low active.
--- restore_key_n   - Trigger for restore key on docking-station.
---                   On a C64 the restore key is wired to the NMI line instead.
 -- iec_*           - IEC signals. Only valid when enable_iec_access is set to true.
 -- -----------------------------------------------------------------------
 
@@ -188,9 +132,6 @@ end entity;
 -- -----------------------------------------------------------------------
 
 architecture rtl of chameleon_io is
--- Clocks
-	signal phi : std_logic;
-	
 -- State
 	signal reset_pending : std_logic := '0';
 	signal reset_in : std_logic := '0';
@@ -240,18 +181,6 @@ begin
 	reset_ext <= reset_in;
 
 -- -----------------------------------------------------------------------
--- PHI2 clock sync
--- -----------------------------------------------------------------------
-	phiInstance : entity work.chameleon_phi_clock
-		port map (
-			clk => clk,
-			phi2_n => phi2_n,
-            mode => '0',
-
-			phiLocal => phi
-		);
-
--- -----------------------------------------------------------------------
 -- MUX CPLD
 -- -----------------------------------------------------------------------
 	-- MUX clock
@@ -270,17 +199,10 @@ begin
 				mux_toggle <= not mux_toggle;
 				case mux_state is
 				when MUX_RESET   =>
-					if phi = '1' then
-						mux_state <= MUX_WAIT0;
-					end if;
+					mux_state <= MUX_WAIT0;
 -- PHI2  0
 				when MUX_WAIT0   =>
-					if phi = '0' then
-						mux_state <= MUX_MMC0L;
-						if mux_c128_timeout /= 0 then
-							mux_c128_timeout <= mux_c128_timeout - 1;
-						end if;
-					end if;
+					mux_state <= MUX_MMC0L;
 				when MUX_MMC0L   => mux_state <= MUX_A3_C;
 				when MUX_A3_C    => mux_state <= MUX_ULTIMAX;
 				when MUX_ULTIMAX => mux_state <= MUX_MMC0H;
@@ -306,9 +228,7 @@ begin
 				when MUX_END0    => mux_state <= MUX_WAIT1;
 -- PHI2  1
 				when MUX_WAIT1 =>
-					if phi = '1' then
-						mux_state <= MUX_MMC4L;
-					end if;
+					mux_state <= MUX_MMC4L;
 				when MUX_MMC4L   => mux_state <= MUX_BUS;
 				when MUX_BUS     => mux_state <= MUX_D0WR;
 				when MUX_D0WR    => mux_state <= MUX_D1WR;
