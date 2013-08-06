@@ -183,12 +183,6 @@ signal button_reset_n : std_logic;
 
 signal no_clock : std_logic;
 signal docking_station : std_logic;
-signal c64_keys : unsigned(63 downto 0);
-signal c64_restore_key_n : std_logic;
-signal c64_nmi_n : std_logic;
-signal c64_joy1 : unsigned(5 downto 0);
-signal c64_joy2 : unsigned(5 downto 0);
-
 
 begin
 
@@ -282,12 +276,7 @@ joystick4<= (others => '1');
 			ps2_mouse_dat_in => ms_data, -- present
 
 		-- Buttons
-			button_reset_n => button_reset_n, -- present (nreset)
-
-		-- Keyboards
-			keys => c64_keys,	-- missing - how to map?  Array, readable in software?
-			restore_key_n => c64_restore_key_n, -- missing
-			c64_nmi_n => c64_nmi_n -- missing			
+			button_reset_n => button_reset_n -- present (nreset)
 		);
 
 
@@ -325,7 +314,7 @@ cpudata <=  rom_data WHEN ROM_select='1' ELSE
 part_in <= 
 			std_logic_vector(timecnt) WHEN addr(4 downto 1)="1000" ELSE	--DEE010
 			"XXXXXXXX"&"1"&"0000001" WHEN addr(4 downto 1)="1001" ELSE	--DEE012
-			"01" & not (c64_keys(63) and menu_n_r) & '0'&"00000011"&"0101";	-- Bits 3:0 -> memory size.  (1<<memsize gives the size in megabytes.)
+			"01" & not menu_n_r & '0'&"00000011"&"0101";	-- Bits 3:0 -> memory size.  (1<<memsize gives the size in megabytes.)
 			-- Yuck - but C64 joystick in port 1 interferes with keyboard scanning.
 												-- Bit  4 -> Turbo chipram supported
 												-- Bit  5 -> Reconfig supportred 

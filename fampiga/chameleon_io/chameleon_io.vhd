@@ -163,7 +163,6 @@ entity chameleon_io is
 
 -- C64 bus
 		c64_irq_n : out std_logic;
-		c64_nmi_n : out std_logic;
 		c64_ba : out std_logic;
 
 		c64_vic : in std_logic := '0';
@@ -211,17 +210,6 @@ entity chameleon_io is
 
 -- Buttons
 		button_reset_n : out std_logic;
-		
--- Keyboards
-		--  0 = col0, row0
-		--  1 = col1, row0
-		--  8 = col0, row1
-		-- 63 = col7, row7
-		keys : out unsigned(63 downto 0);
-		restore_key_n : out std_logic;
-		amiga_reset_n : out std_logic;
-		amiga_trigger : out std_logic;
-		amiga_scancode : out unsigned(7 downto 0);
 
 -- IEC bus
 		iec_clk_out : in std_logic := '1';
@@ -295,21 +283,10 @@ architecture rtl of chameleon_io is
 	signal c64_cs_loc : std_logic := '0';
 	signal c64_roms_loc : std_logic := '0';
 	signal c64_clockport_loc : std_logic := '0';
-	
--- C64 joystick/keyboard
-	signal c64_kb_req : std_logic := '0';
-	signal c64_kb_ack : std_logic := '0';
-	signal c64_kb_we : std_logic := '1';
-	signal c64_kb_a : unsigned(15 downto 0) := (others => '0');
-	signal c64_kb_q : unsigned(7 downto 0) := (others => '1');
-	signal c64_keys : unsigned(63 downto 0);
 
 -- Docking-station
 	signal docking_station_loc : std_logic;
 	signal docking_irq : std_logic;
-	signal docking_keys : unsigned(63 downto 0);
-	signal docking_amiga_reset_n : std_logic;
-	signal docking_amiga_scancode : unsigned(7 downto 0);
 
 -- MMC
 	signal mmc_state : unsigned(5 downto 0) := (others => '0');
@@ -337,8 +314,6 @@ begin
 	c64_q <= c64_data_reg;
 	--
 	spi_q <= spi_q_reg;
-	--
-	keys <= docking_keys and c64_keys;
 
 -- -----------------------------------------------------------------------
 -- PHI2 clock sync
@@ -363,16 +338,9 @@ begin
 		);
 
 -- -----------------------------------------------------------------------
--- Docking-station
--- To enable set enable_docking_station to true.
--- -----------------------------------------------------------------------
-		docking_keys <= (others => '1');
-
--- -----------------------------------------------------------------------
 -- C64 keyboard and joystick support
 -- To enable set enable_c64_joykeyb to true.
 -- -----------------------------------------------------------------------
-		c64_keys <= (others => '1');
 		
 		c64_addr <= c64_a;
 		c64_to_io <= c64_d;
@@ -487,7 +455,7 @@ begin
 				when X"6" =>
 					c64_reset_reg <= not mux_q(0);
 					c64_irq_n <= mux_q(2);
-					c64_nmi_n <= mux_q(3);
+--					c64_nmi_n <= mux_q(3);
 					reset_pending <= reset or c64_reset_reg;
 					if reset_pending = '0' then
 						reset_in <= c64_reset_reg;
