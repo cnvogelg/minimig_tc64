@@ -197,6 +197,8 @@ architecture rtl of chameleon_io is
     signal cp_addr_reg : unsigned(3 downto 0);
     signal cp_dat_d_reg : unsigned(7 downto 0);
     signal cp_dat_q_reg : unsigned(7 downto 0) := X"00";
+    
+    signal cp_ws_count : unsigned(3 downto 0);
 begin
 
     cp_ack <= cp_ack_reg;
@@ -268,8 +270,15 @@ begin
                             end if;
                         -- ----- read cycle -----
                         when CP_READ_ADDR => cp_state <= CP_READ_IOR_BEGIN;
-                        when CP_READ_IOR_BEGIN => cp_state <= CP_READ_WS;
-                        when CP_READ_WS => cp_state <= CP_READ_D03;
+                        when CP_READ_IOR_BEGIN => 
+                            cp_ws_count <= (others => '0');
+                            cp_state <= CP_READ_WS;
+                        when CP_READ_WS => 
+                            if cp_ws_count = "0100" then -- wait states (52ns per count)
+                                cp_state <= CP_READ_D03;
+                            else
+                                cp_ws_count <= cp_ws_count + 1;
+                            end if;
                         when CP_READ_D03 => cp_state <= CP_READ_D47;
                         when CP_READ_D47 => cp_state <= CP_READ_IOR_END;
                         when CP_READ_IOR_END => cp_state <= CP_IDLE_OE;
@@ -278,8 +287,15 @@ begin
                         when CP_WRITE_D03 => cp_state <= CP_WRITE_D47;
                         when CP_WRITE_D47 => cp_state <= CP_WRITE_DOUT;
                         when CP_WRITE_DOUT => cp_state <= CP_WRITE_IOW_BEGIN;
-                        when CP_WRITE_IOW_BEGIN => cp_state <= CP_WRITE_WS;
-                        when CP_WRITE_WS => cp_state <= CP_WRITE_IOW_END;
+                        when CP_WRITE_IOW_BEGIN => 
+                            cp_ws_count <= (others => '0');
+                            cp_state <= CP_WRITE_WS;
+                        when CP_WRITE_WS => 
+                            if cp_ws_count = "0100" then -- wait states (52ns per count)
+                                cp_state <= CP_WRITE_IOW_END;
+                            else
+                                cp_ws_count <= cp_ws_count + 1;
+                            end if;
                         when CP_WRITE_IOW_END => cp_state <= CP_IDLE_OE;
                     end case;
                 end if;
