@@ -181,6 +181,21 @@ signal slower : std_logic_vector(2 downto 0);
 
 signal button_reset_n : std_logic;
 
+-- Clockport
+
+signal cp_req : std_logic;
+signal cp_ack : std_logic;
+signal cp_wr : std_logic;
+signal cp_dat_d : unsigned(7 downto 0); -- cp data in
+signal cp_dat_q : unsigned(7 downto 0);
+signal cp_addr : unsigned(3 downto 0);
+
+signal cp_select : std_logic;
+signal cp_flag_ack : std_logic;
+signal cp_data_out : std_logic_vector(15 downto 0);
+signal cp_cpuena : std_logic;
+signal cp_busy : std_logic;
+
 begin
 
 -- Synchronise buttons.
@@ -266,8 +281,16 @@ joystick4<= (others => '1');
 			ps2_mouse_dat_in => ms_data, -- present
 
 		-- Buttons
-			button_reset_n => button_reset_n -- present (nreset)
-		);
+			button_reset_n => button_reset_n, -- present (nreset)
+            
+        -- Clockport
+            cp_req => cp_req,
+            cp_ack => cp_ack,
+            cp_wr => cp_wr,
+            cp_dat_d => cp_dat_d,
+            cp_dat_q => cp_dat_q,
+            cp_addr => cp_addr
+  		);
 
 
 srom: startram
@@ -299,7 +322,8 @@ memce <= slower(0) WHEN ROM_select='0' AND addr(23)='0' ELSE '1';
 
 cpudata <=  rom_data WHEN ROM_select='1' ELSE 
 			IOdata WHEN IOcpuena='1' ELSE
-			part_in WHEN PART_select='1' ELSE 
+			part_in WHEN PART_select='1' ELSE
+            cp_data_out WHEN cp_cpuena='1' ELSE
 			memdata_in;
 part_in <= 
 			std_logic_vector(timecnt) WHEN addr(4 downto 1)="1000" ELSE	--DEE010
@@ -318,7 +342,8 @@ IOdata <= sd_in;
 --			sd_in WHEN SPI_select='1' ELSE
 --			IDErd_data(7 downto 0)&IDErd_data(15 downto 8);
 cpuena <= '1' WHEN ROM_select='1' OR PART_select='1' OR state="01" ELSE
-		  IOcpuena WHEN rs232_select='1' OR SPI_select='1' ELSE 
+		  IOcpuena WHEN rs232_select='1' OR SPI_select='1' ELSE
+          cp_cpuena WHEN cp_select='1' ELSE 
 		  cpuena_in; 
 
 rs232data <= X"FFFF" WHEN txbusy='1' ELSE X"0000";
@@ -332,6 +357,9 @@ rs232_select <= '1' when addr(23 downto 12)=X"DA8" ELSE '0';
 KEY_select <= '1' when addr(23 downto 12)=X"DE0" ELSE '0';
 PART_select <= '1' when addr(23 downto 12)=X"DEE" ELSE '0';
 SPI_select <= '1' when addr(23 downto 12)=X"DA4" AND state(1)='1' ELSE '0';
+
+-- clockport:
+cp_select <= '1' when addr(23 downto 12)=X"D80" AND state(1)='1' ELSE '0';
 
 ---------------------------------
 -- Platform specific registers --
@@ -391,8 +419,7 @@ begin
 							support_state <= io_aktion;
 							IOcpuena <= '1';
 						END IF;
-					END IF;
-						
+                    END IF;	
 				WHEN io_aktion => 
 					support_state <= idle;
 					
@@ -403,108 +430,60 @@ begin
 	END IF;	
 end process; 
 
+-- ----- Clockport -----
+cp_data_out <= std_logic_vector(cp_dat_q) & X"00";
 
--- -----------------------------------------------------------------------
--- MUX CPLD
--- -----------------------------------------------------------------------
---	-- MUX clock
---	process(sysclk)
---	begin
---		if rising_edge(sysclk) then
-----			if enaWRreg = '1' then
---				mux_clk_reg <= not mux_clk_reg;
-----			end if;
---		end if;
---	end process;
---
---	-- MUX read
---	process(sysclk)
---	begin
---		if rising_edge(sysclk) then
-----			if mux_clk_reg = '1' and enaWRreg = '1' then
---			if mux_clk_reg = '1' then
---				case mux_reg is
---				when X"B" =>
-----					reset_button_n <= mux_q(1);
---					nreset <= mux_q(1);
-----					led_green <= mux_q(1);
---					ir <= mux_q(3);
---				when X"A" =>
-----					vga_id <= mux_q;
---				when X"E" =>
---					kb_data <= mux_q(0);
---					kb_clk <= mux_q(1);
---					ms_data <= mux_q(2);
---					ms_clk <= mux_q(3);
---				when X"D" =>
---					amiser_rxd <= mux_q(1); -- IEC_CLK = amiga serial rxd
---				when others =>
---					null;
---				end case;
---			end if;
---		end if;
---	end process;
---
---	-- MUX write
---	process(sysclk)
---	begin
-----		led_red <= ir;
---		if rising_edge(sysclk) then
---			if mux_clk_reg = '1' then
---				mux_reg <= X"C";
---				mux_d_reg(3) <= usart_rx;	-- AMR transmit to Chameleons uC
---				mux_d_reg(2) <= NOT scs(1);
---				mux_d_reg(1) <= sd_out(15);
---				mux_d_reg(0) <= NOT sck;
---				case mux_reg is
---					when X"6" =>
-----						mux_d_reg <= "1111";
-----						if docking_station = '1' then
-----							mux_d_reg <= "1" & docking_irq & "11";
-----						end if;
-----						mux_reg <= X"6";
-----						
-----						mux_d_regd <= "10" & led_green & led_red;
---						mux_d_regd <= "10" & led(0) & led(1);
---						mux_regd <= X"B";
---					when X"B" =>
---						mux_d_regd(2 downto 1) <= "11";
---						mux_d_regd(3) <= amiser_txd; -- CV: IEC ATN is amiga serial txd
---						mux_d_regd(0) <= not shiftout; -- CV: invert serial signal to fit USB2serial dongle
-----						mux_d_regd(0) <= '1';
---						mux_regd <= X"D";
---					when X"C" =>
-----	--					mux_d_reg <= iec_reg;
-----						mux_regd <= X"D";
---						mux_reg <= mux_regd;
---						mux_d_reg <= mux_d_regd;
---					when X"D" =>
---						mux_d_regd(0) <= kb_datai;
---						mux_d_regd(1) <= kb_clki;
---						mux_d_regd(2) <= ms_datai;
---						mux_d_regd(3) <= ms_clki;
---						mux_regd <= X"E";
---					when X"E" =>
---	--					mux_reg <= X"A";
---	--					mux_D_reg <= X"F";
-----						mux_d_regd <= "10" & led_green & led_red;
-----						mux_regd <= X"B";
---
---						mux_d_regd <= "1" & irq_d & "11";
---						mux_regd <= X"6";
---					when others =>
---						mux_regd <= X"B";
-----						mux_d_regd <= "10" & led_green & led_red;
---						mux_d_regd <= "10" & led(0) & led(1);
---				end case;
---			end if;
---		end if;
---	end process;
---	
---	mux_clk <= mux_clk_reg;
---	mux_d <= mux_d_reg;
---	mux <= mux_reg;
+process(sysclk) begin
+    if n_reset ='0' then
+        cp_req <= '0';
+        cp_wr <= '0';
+        cp_dat_d <= (others => '0');
+        cp_addr <= (others => '0');
+        cp_busy <= '0';
+    elsif (sysclk'event and sysclk='1') then
+        -- reset request after each cycle
+        cp_req <= '0';
+        if enaWRreg = '1' then
+            -- read/write to clockport register
+            if cp_select = '1' and cp_busy = '0' and cp_cpuena = '0' then
+                -- trigger a request at the clockport
+                cp_busy <= '1';
+                cp_req <= '1';
+                if state(0) = '1' then
+                    cp_wr <= '1';
+                else
+                    cp_wr <= '0';
+                end if;
+                cp_dat_d <= unsigned(cpudata_in(7 downto 0));
+                cp_addr <= unsigned(addr(4 downto 1));
+            end if;
+            -- clear busy again
+            if cp_cpuena = '1' then
+                cp_busy <= '0';
+            end if;
+        end if;
+    end if;
+end process;
 
+process(sysclk) begin
+    if n_reset ='0' then
+        cp_flag_ack <= '0';
+        cp_cpuena <= '0';
+    elsif (sysclk'event and sysclk='1') then
+        -- react on ack signal from clockport (high on one sysclk only)
+        if cp_ack = '1' then
+            cp_flag_ack <= '1';
+        end if;
+        -- toggle end of cycle
+        if enaWRreg = '1' then
+            cp_cpuena <= '0';
+            if cp_flag_ack = '1' then
+                cp_cpuena <= '1';
+                cp_flag_ack <= '0';
+            end if;
+        end if;
+    end if;
+end process;
 
 -----------------------------------------------------------------
 -- SPI-Interface
