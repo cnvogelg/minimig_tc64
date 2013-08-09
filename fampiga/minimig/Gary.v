@@ -79,7 +79,6 @@ module gary
 	output	sel_cia,				//select CIA space
 	output 	sel_cia_a,				//select cia A
 	output 	sel_cia_b, 				//select cia B
-	output	sel_rtc,				//select $DCxxxx
 	output	sel_ide,				//select $DAxxxx
 	output	sel_gayle				//select $DExxxx
 );
@@ -145,12 +144,13 @@ assign sel_xram = ((t_sel_slow[0] & (memory_config[2] | memory_config[3]))
 
 
 assign sel_rtc = (cpu_address_in[23:16]==8'b1101_1100) ? 1'b1 : 1'b0;		//RTC registers at $DC0000 - $DCFFFF	
+assign sel_spare = (cpu_address_in[23:16]==8'b1101_1000) ? 1'b1 : 1'b0;		//clockport registers at $D80000 - $D8FFFF	
 
 assign sel_ide = (hdc_ena && cpu_address_in[23:16]==8'b1101_1010) ? 1'b1 : 1'b0;		//IDE registers at $DA0000 - $DAFFFF	
 
 assign sel_gayle = (hdc_ena && cpu_address_in[23:12]==12'b1101_1110_0001) ? 1'b1 : 1'b0;		//GAYLE registers at $DE1000 - $DE1FFF
 
-assign sel_reg = (cpu_address_in[23:21]==3'b110) ? (~(sel_xram | sel_rtc | sel_ide | sel_gayle)) : 1'b0;		//chip registers at $DF0000 - $DFFFFF
+assign sel_reg = (cpu_address_in[23:21]==3'b110) ? (~(sel_xram | sel_rtc | sel_spare | sel_ide | sel_gayle)) : 1'b0;		//chip registers at $DF0000 - $DFFFFF
 
 assign sel_cia = (cpu_address_in[23:16]==8'b1011_1111) ? 1'b1 : 1'b0;
 
