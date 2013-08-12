@@ -61,7 +61,15 @@ entity TG68K is
         skipFetch     : buffer std_logic;
         cpuDMA         : buffer std_logic;
         ramlds        : out std_logic;
-        ramuds        : out std_logic
+        ramuds        : out std_logic;
+        
+        -- clockport
+        cp_req : out std_logic; 
+        cp_ack : in std_logic := '0';
+        cp_wr : out std_logic;
+        cp_dat_d : out std_logic_vector(7 downto 0);
+        cp_dat_q : in std_logic_vector(7 downto 0) := (others => '0');
+        cp_addr : out std_logic_vector(3 downto 0)
         );
 end TG68K;
 
@@ -154,6 +162,13 @@ COMPONENT TG68KdotC_Kernel
 	
    SIGNAL datatg68      : std_logic_vector(15 downto 0);
    SIGNAL ramcs	      : std_logic;
+   
+   -- clockport
+   signal cp_select : std_logic;
+   signal cp_clkena : std_logic;
+   signal cp_data_out : std_logic_vector(15 downto 0);
+   signal cp_busy : std_logic;
+   signal cp_flag_ack : std_logic;
 
 BEGIN  
 --	n_clk <= NOT clk;
@@ -166,6 +181,7 @@ BEGIN
 	datatg68 <= fromram WHEN sel_fast='1'
 		ELSE autoconfig_data&r_data(11 downto 0) when sel_autoconfig='1' and autoconfig_out="01" -- Zorro II autoconfig
 		ELSE autoconfig_data2&r_data(11 downto 0) when sel_autoconfig='1' and autoconfig_out="10" -- Zorro III autoconfig
+        ELSE cp_data_out when cp_select = '1'
 		ELSE r_data;
 
 --	toram <= data_write;
@@ -176,6 +192,9 @@ BEGIN
 
 	sel_ziiiram <='1' when cpuaddr(31 downto 24)=ziii_base and ziiiram_ena='1' else '0';
 	
+    -- clockport
+    cp_select <= '1' when cpuaddr(23 downto 16)=X"D8" else '0'; -- $D80000 - $D8FFFF
+    
 	-- FIXME - prevent TurboChip toggling while a transaction's in progress!
 	sel_fast <= '1' when state/="01" AND
 		(
@@ -249,6 +268,60 @@ pf68K_Kernel_inst: TG68KdotC_Kernel
 		skipFetch => skipFetch 		-- : out std_logic
         );
  
+-- ----- clockport -----
+cp_data_out <= X"00" & cp_dat_q;
+
+process(clk)
+begin
+    if rising_edge(clk) then
+        if reset='0' then
+            cp_req <= '0';
+            cp_wr <= '0';
+            cp_dat_d <= (others => '0');
+            cp_addr <= (others => '0');
+            cp_busy <= '0';
+        elsif enaWRreg = '1' then
+            cp_req <= '0';
+            -- clockport access
+            if cp_select = '1' and state(1) = '1' and cp_busy = '0' then
+                cp_req <= '1';
+                if state(0) = '1' then
+                    cp_wr <= '1';
+                else
+                    cp_wr <= '0';
+                end if;
+                cp_dat_d <= data_write(7 downto 0);
+                cp_addr <= addr(5 downto 2);
+                cp_busy <= '1';
+            end if;
+            if cp_clkena = '1' then
+                cp_busy <= '0';
+            end if;
+        end if;
+    end if;
+end process;
+
+process(clk) begin
+    if reset ='0' then
+        cp_flag_ack <= '0';
+        cp_clkena <= '0';
+    elsif (clk'event and clk='1') then
+        -- react on ack signal from clockport (high on one sysclk only)
+        if cp_ack = '1' then
+            cp_flag_ack <= '1';
+        end if;
+        -- toggle end of cycle
+        if enaWRreg = '1' then
+            cp_clkena <= '0';
+            if cp_flag_ack = '1' then
+                cp_clkena <= '1';
+                cp_flag_ack <= '0';
+            end if;
+        end if;
+    end if;
+end process;
+
+-- ----- auto config -----
 	PROCESS (clk)
 	BEGIN
 
@@ -377,7 +450,7 @@ pf68K_Kernel_inst: TG68KdotC_Kernel
 	BEGIN
 		state_ena <= '0';
 --		IF clkena_in='1' AND enaWRreg='1' AND (state="01" OR (ena7RDreg='1' AND clkena_e='1') OR ramready='1') THEN
-		IF clkena_in='1' and slower(0)='0' AND (state="01" OR (ena7RDreg='1' AND clkena_e='1') OR ramready='1') THEN
+		IF clkena_in='1' and slower(0)='0' AND (cp_clkena = '1' or state="01" OR (ena7RDreg='1' AND clkena_e='1') OR ramready='1') THEN
 			clkena <= '1';
 		ELSE 
 			clkena <= '0';
@@ -427,7 +500,7 @@ PROCESS (clk, reset, state, as_s, as_e, rw_s, rw_e, uds_s, uds_e, lds_s, lds_e)
 				addr_akt_s <= '0';
 				data_akt_s <= '0';
 					CASE S_state IS
-						WHEN "00" => IF state/="01" AND sel_fast='0' THEN
+						WHEN "00" => IF state/="01" AND sel_fast='0' and cp_select='0' THEN
 										 uds_s <= uds_in;
 										 lds_s <= lds_in;
 										S_state <= "01";

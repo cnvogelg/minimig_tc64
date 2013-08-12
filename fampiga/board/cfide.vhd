@@ -87,7 +87,16 @@ entity cfide is
 	joystick4 : out unsigned(5 downto 0);
 	scandoubler : out std_logic;
 	freeze_n : in std_logic;
-	menu_n : in std_logic
+	menu_n : in std_logic;
+    
+    -- clockport
+    cp_req : in std_logic := '0'; 
+    cp_ack : out std_logic;
+    cp_wr : in std_logic := '0';
+    cp_dat_d : in std_logic_vector(7 downto 0) := (others => '0');
+    cp_dat_q : out std_logic_vector(7 downto 0);
+    cp_addr : in std_logic_vector(3 downto 0) := (others => '0')
+  
    );
 
 end cfide;
@@ -181,22 +190,11 @@ signal slower : std_logic_vector(2 downto 0);
 
 signal button_reset_n : std_logic;
 
--- Clockport
-
-signal cp_req : std_logic;
-signal cp_ack : std_logic;
-signal cp_wr : std_logic;
-signal cp_dat_d : unsigned(7 downto 0); -- cp data in
-signal cp_dat_q : unsigned(7 downto 0);
-signal cp_addr : unsigned(3 downto 0);
-
-signal cp_select : std_logic;
-signal cp_flag_ack : std_logic;
-signal cp_data_out : std_logic_vector(15 downto 0);
-signal cp_cpuena : std_logic;
-signal cp_busy : std_logic;
+signal cp_dat_q_loc : unsigned(7 downto 0);
 
 begin
+
+cp_dat_q <= std_logic_vector(cp_dat_q_loc);
 
 -- Synchronise buttons.
 process(sysclk)
@@ -287,9 +285,9 @@ joystick4<= (others => '1');
             cp_req => cp_req,
             cp_ack => cp_ack,
             cp_wr => cp_wr,
-            cp_dat_d => cp_dat_d,
-            cp_dat_q => cp_dat_q,
-            cp_addr => cp_addr
+            cp_dat_d => unsigned(cp_dat_d),
+            cp_dat_q => cp_dat_q_loc,
+            cp_addr => unsigned(cp_addr)
   		);
 
 
@@ -323,7 +321,6 @@ memce <= slower(0) WHEN ROM_select='0' AND addr(23)='0' ELSE '1';
 cpudata <=  rom_data WHEN ROM_select='1' ELSE 
 			IOdata WHEN IOcpuena='1' ELSE
 			part_in WHEN PART_select='1' ELSE
-            cp_data_out WHEN cp_cpuena='1' ELSE
 			memdata_in;
 part_in <= 
 			std_logic_vector(timecnt) WHEN addr(4 downto 1)="1000" ELSE	--DEE010
@@ -343,7 +340,6 @@ IOdata <= sd_in;
 --			IDErd_data(7 downto 0)&IDErd_data(15 downto 8);
 cpuena <= '1' WHEN ROM_select='1' OR PART_select='1' OR state="01" ELSE
 		  IOcpuena WHEN rs232_select='1' OR SPI_select='1' ELSE
-          cp_cpuena WHEN cp_select='1' ELSE 
 		  cpuena_in; 
 
 rs232data <= X"FFFF" WHEN txbusy='1' ELSE X"0000";
@@ -357,9 +353,6 @@ rs232_select <= '1' when addr(23 downto 12)=X"DA8" ELSE '0';
 KEY_select <= '1' when addr(23 downto 12)=X"DE0" ELSE '0';
 PART_select <= '1' when addr(23 downto 12)=X"DEE" ELSE '0';
 SPI_select <= '1' when addr(23 downto 12)=X"DA4" AND state(1)='1' ELSE '0';
-
--- clockport:
-cp_select <= '1' when addr(23 downto 12)=X"D80" AND state(1)='1' ELSE '0';
 
 ---------------------------------
 -- Platform specific registers --
@@ -429,61 +422,6 @@ begin
 		END IF;	
 	END IF;	
 end process; 
-
--- ----- Clockport -----
-cp_data_out <= std_logic_vector(cp_dat_q) & X"00";
-
-process(sysclk) begin
-    if n_reset ='0' then
-        cp_req <= '0';
-        cp_wr <= '0';
-        cp_dat_d <= (others => '0');
-        cp_addr <= (others => '0');
-        cp_busy <= '0';
-    elsif (sysclk'event and sysclk='1') then
-        -- reset request after each cycle
-        cp_req <= '0';
-        if enaWRreg = '1' then
-            -- read/write to clockport register
-            if cp_select = '1' and cp_busy = '0' and cp_cpuena = '0' then
-                -- trigger a request at the clockport
-                cp_busy <= '1';
-                cp_req <= '1';
-                if state(0) = '1' then
-                    cp_wr <= '1';
-                else
-                    cp_wr <= '0';
-                end if;
-                cp_dat_d <= unsigned(cpudata_in(7 downto 0));
-                cp_addr <= unsigned(addr(4 downto 1));
-            end if;
-            -- clear busy again
-            if cp_cpuena = '1' then
-                cp_busy <= '0';
-            end if;
-        end if;
-    end if;
-end process;
-
-process(sysclk) begin
-    if n_reset ='0' then
-        cp_flag_ack <= '0';
-        cp_cpuena <= '0';
-    elsif (sysclk'event and sysclk='1') then
-        -- react on ack signal from clockport (high on one sysclk only)
-        if cp_ack = '1' then
-            cp_flag_ack <= '1';
-        end if;
-        -- toggle end of cycle
-        if enaWRreg = '1' then
-            cp_cpuena <= '0';
-            if cp_flag_ack = '1' then
-                cp_cpuena <= '1';
-                cp_flag_ack <= '0';
-            end if;
-        end if;
-    end if;
-end process;
 
 -----------------------------------------------------------------
 -- SPI-Interface
