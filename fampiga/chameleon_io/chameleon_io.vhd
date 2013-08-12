@@ -216,6 +216,7 @@ begin
                     cp_busy_reg <= cp_req;
                     cp_wr_reg <= cp_wr;
                     cp_dat_d_reg <= cp_dat_d;
+                    cp_addr_reg <= cp_addr;
                 else 
                     -- end of op
                     if cp_ack_reg = '1' then
