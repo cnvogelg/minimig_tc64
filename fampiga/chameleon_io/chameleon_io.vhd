@@ -158,22 +158,25 @@ architecture rtl of chameleon_io is
     
     type cpstate_t is (
         -- idle states
-        CP_IDLE_OE,
+        CP_IDLE,
         -- read sequence
         CP_READ_ADDR,
+        CP_READ_OE_BEGIN,
         CP_READ_IOR_BEGIN,
         CP_READ_WS,
         CP_READ_D03,
         CP_READ_D47,
         CP_READ_IOR_END,
+        CP_READ_OE_END,
         -- write sequence
         CP_WRITE_ADDR,
+        CP_WRITE_OE_BEGIN,
         CP_WRITE_D03,
         CP_WRITE_D47,
-        CP_WRITE_DOUT,
         CP_WRITE_IOW_BEGIN,
         CP_WRITE_WS,
-        CP_WRITE_IOW_END
+        CP_WRITE_IOW_END,
+        CP_WRITE_OE_END
     );
 
     signal mux_phase : muxphase_t;
@@ -259,8 +262,8 @@ begin
                 --- clockport stats
                 if mux_phase = MUX_CLKPORT then
                     case cp_state is
-                        when CP_IDLE_OE =>
-                            cp_state <= CP_IDLE_OE;
+                        when CP_IDLE =>
+                            cp_state <= CP_IDLE;
                             -- is a request pending?
                             if cp_busy_reg = '1' then
                                 if cp_wr_reg = '1' then
@@ -270,7 +273,8 @@ begin
                                 end if;
                             end if;
                         -- ----- read cycle -----
-                        when CP_READ_ADDR => cp_state <= CP_READ_IOR_BEGIN;
+                        when CP_READ_ADDR => cp_state <= CP_READ_OE_BEGIN;
+                        when CP_READ_OE_BEGIN => cp_state <= CP_READ_IOR_BEGIN;
                         when CP_READ_IOR_BEGIN => 
                             cp_ws_count <= (others => '0');
                             cp_state <= CP_READ_WS;
@@ -282,12 +286,13 @@ begin
                             end if;
                         when CP_READ_D03 => cp_state <= CP_READ_D47;
                         when CP_READ_D47 => cp_state <= CP_READ_IOR_END;
-                        when CP_READ_IOR_END => cp_state <= CP_IDLE_OE;
+                        when CP_READ_IOR_END => cp_state <= CP_READ_OE_END;
+                        when CP_READ_OE_END => cp_state <= CP_IDLE;
                         -- ----- write cycle -----
                         when CP_WRITE_ADDR => cp_state <= CP_WRITE_D03;
                         when CP_WRITE_D03 => cp_state <= CP_WRITE_D47;
-                        when CP_WRITE_D47 => cp_state <= CP_WRITE_DOUT;
-                        when CP_WRITE_DOUT => cp_state <= CP_WRITE_IOW_BEGIN;
+                        when CP_WRITE_D47 => cp_state <= CP_WRITE_OE_BEGIN;
+                        when CP_WRITE_OE_BEGIN => cp_state <= CP_WRITE_IOW_BEGIN;
                         when CP_WRITE_IOW_BEGIN => 
                             cp_ws_count <= (others => '0');
                             cp_state <= CP_WRITE_WS;
@@ -297,7 +302,8 @@ begin
                             else
                                 cp_ws_count <= cp_ws_count + 1;
                             end if;
-                        when CP_WRITE_IOW_END => cp_state <= CP_IDLE_OE;
+                        when CP_WRITE_IOW_END => cp_state <= CP_WRITE_OE_END;
+                        when CP_WRITE_OE_END => cp_state <= CP_IDLE;
                     end case;
                 end if;
             end if;
@@ -386,18 +392,21 @@ begin
 -- clockport
                 when MUX_CLKPORT =>
                     case cp_state is
-                        when CP_IDLE_OE =>
-                            mux_d_reg <= "1011"; -- /OE A0..A11 enable, /OE D0..D7 disable
-                            mux_reg <= X"7";
+                        when CP_IDLE =>
+                            mux_d_reg <= "----"; -- do nothing
+                            mux_reg <= X"F";
                         -- read sequence
                         when CP_READ_ADDR =>
                             mux_d_reg <= cp_addr_reg;
                             mux_reg <= X"2";
+                        when CP_READ_OE_BEGIN =>
+                            mux_d_reg <= "1011"; -- /OE A0..A11 enable, /OE D0..D7 disable
+                            mux_reg <= X"7";
                         when CP_READ_IOR_BEGIN =>
                             mux_d_reg <= "0010"; -- /IOR enable
                             mux_reg <= X"8"; 
                         when CP_READ_WS =>
-                            mux_d_reg <= (others => '-'); -- idle
+                            mux_d_reg <= "----"; -- idle
                             mux_reg <= X"F";
                         when CP_READ_D03 =>
                             mux_d_reg <= "0000"; -- dummy?
@@ -408,6 +417,9 @@ begin
                         when CP_READ_IOR_END =>
                             mux_d_reg <= "0011"; -- /IOR, /IOW disable
                             mux_reg <= X"8";
+                        when CP_READ_OE_END =>
+                            mux_d_reg <= "1111"; -- disable all /OE
+                            mux_reg <= X"7";
                             cp_ack_reg <= '1';
                         -- write sequence
                         when CP_WRITE_ADDR =>
@@ -419,18 +431,21 @@ begin
                         when CP_WRITE_D47 =>
                             mux_d_reg <= cp_dat_d_reg(7 downto 4);
                             mux_reg <= X"1"; 
-                        when CP_WRITE_DOUT =>
+                        when CP_WRITE_OE_BEGIN =>
                             mux_d_reg <= "1001"; -- /OE A0..A11 enable /OE D0..D7 enable
                             mux_reg <= X"7";
                         when CP_WRITE_IOW_BEGIN =>
                             mux_d_reg <= "0001"; -- /IOW enable
                             mux_reg <= X"8"; 
                         when CP_WRITE_WS =>
-                            mux_d_reg <= (others => '-'); -- idle
+                            mux_d_reg <= "----"; -- idle
                             mux_reg <= X"F";
                         when CP_WRITE_IOW_END =>
                             mux_d_reg <= "0011"; -- /IOR, /IOW disable
                             mux_reg <= X"8";
+                        when CP_WRITE_OE_END =>
+                            mux_d_reg <= "1111"; -- disable all /OE
+                            mux_reg <= X"7";
                             cp_ack_reg <= '1';
                     end case;
                 end case;
