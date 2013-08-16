@@ -400,7 +400,7 @@ begin
                             mux_d_reg <= cp_addr_reg;
                             mux_reg <= X"2";
                         when CP_READ_OE_BEGIN =>
-                            mux_d_reg <= "1011"; -- /OE A0..A11 enable, /OE D0..D7 disable
+                            mux_d_reg <= "0011"; -- /OE A0..A11 enable, /OE D0..D7 disable
                             mux_reg <= X"7";
                         when CP_READ_IOR_BEGIN =>
                             mux_d_reg <= "0010"; -- /IOR enable
@@ -432,7 +432,7 @@ begin
                             mux_d_reg <= cp_dat_d_reg(7 downto 4);
                             mux_reg <= X"1"; 
                         when CP_WRITE_OE_BEGIN =>
-                            mux_d_reg <= "1001"; -- /OE A0..A11 enable /OE D0..D7 enable
+                            mux_d_reg <= "0000"; -- /OE A0..A11 enable /OE D0..D7 enable
                             mux_reg <= X"7";
                         when CP_WRITE_IOW_BEGIN =>
                             mux_d_reg <= "0001"; -- /IOW enable
