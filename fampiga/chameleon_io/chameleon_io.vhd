@@ -157,6 +157,10 @@ architecture rtl of chameleon_io is
     );
     
     type cpstate_t is (
+        -- init states
+        CP_INIT1,
+        CP_INIT2,
+        CP_INIT3,
         -- idle states
         CP_IDLE,
         -- read sequence
@@ -181,7 +185,7 @@ architecture rtl of chameleon_io is
 
     signal mux_phase : muxphase_t;
     signal misc_state : miscstate_t;
-    signal cp_state : cpstate_t;
+    signal cp_state : cpstate_t := CP_INIT1;
 
     signal mux_clk_reg : std_logic := '0';
     signal mux_d_reg : unsigned(mux_d'range) := X"F";
@@ -244,12 +248,13 @@ begin
     process(clk_mux)
     begin
         if rising_edge(clk_mux) then
-            if mux_clk_reg = '1' then
+              if mux_clk_reg = '1' then
                 --- phase states
                 case mux_phase is
                     when MUX_SPI =>     mux_phase <= MUX_MISC;
                     when MUX_MISC =>    mux_phase <= MUX_CLKPORT;
                     when MUX_CLKPORT => mux_phase <= MUX_SPI;
+                    when others =>      mux_phase <= MUX_SPI;
                 end case;
                 --- misc states
                 if mux_phase = MUX_MISC then
@@ -257,11 +262,16 @@ begin
                         when MISC_PS2 => misc_state <= MISC_LED;
                         when MISC_LED => misc_state <= MISC_IEC;
                         when MISC_IEC => misc_state <= MISC_PS2;
+                        when others =>   misc_state <= MISC_PS2;
                     end case;
                 end if;
                 --- clockport stats
                 if mux_phase = MUX_CLKPORT then
                     case cp_state is
+                        when CP_INIT1 => cp_state <= CP_INIT2;
+                        when CP_INIT2 => cp_state <= CP_INIT3;
+                        when CP_INIT3 => cp_state <= CP_IDLE;
+                        -- idle
                         when CP_IDLE =>
                             cp_state <= CP_IDLE;
                             -- is a request pending?
@@ -304,6 +314,7 @@ begin
                             end if;
                         when CP_WRITE_IOW_END => cp_state <= CP_WRITE_OE_END;
                         when CP_WRITE_OE_END => cp_state <= CP_IDLE;
+                        when others =>   cp_state <= CP_INIT1;
                     end case;
                 end if;
             end if;
@@ -392,9 +403,20 @@ begin
 -- clockport
                 when MUX_CLKPORT =>
                     case cp_state is
+                        -- init
+                        when CP_INIT1 =>
+                            mux_reg <= X"3"; -- A07 .. A04
+                            mux_d_reg <= X"0";        
+                        when CP_INIT2 =>
+                            mux_reg <= X"4"; -- A11 .. A08
+                            mux_d_reg <= X"e";        
+                        when CP_INIT3 =>
+                            mux_reg <= X"5"; -- A15 .. A12
+                            mux_d_reg <= X"d";
+                        -- idle states
                         when CP_IDLE =>
-                            mux_d_reg <= "----"; -- do nothing
-                            mux_reg <= X"F";
+                            mux_d_reg <= "1101"; -- disable irq, reset, enable dma
+                            mux_reg <= X"6";
                         -- read sequence
                         when CP_READ_ADDR =>
                             mux_d_reg <= cp_addr_reg;
