@@ -185,7 +185,7 @@ architecture rtl of chameleon_io is
 
     signal mux_phase : muxphase_t;
     signal misc_state : miscstate_t;
-    signal cp_state : cpstate_t := CP_INIT1;
+    signal cp_state : cpstate_t;
 
     signal mux_clk_reg : std_logic := '0';
     signal mux_d_reg : unsigned(mux_d'range) := X"F";
@@ -248,7 +248,7 @@ begin
     process(clk_mux)
     begin
         if rising_edge(clk_mux) then
-              if mux_clk_reg = '1' then
+            if mux_clk_reg = '1' then
                 --- phase states
                 case mux_phase is
                     when MUX_SPI =>     mux_phase <= MUX_MISC;
