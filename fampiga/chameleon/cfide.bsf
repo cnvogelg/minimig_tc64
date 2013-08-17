@@ -436,6 +436,13 @@ applicable agreement for further details.
 		(text "cp_dat_q[7..0]" (rect 125 512 206 525)(font "Arial" (font_size 8)))
 		(line (pt 216 520)(pt 200 520)(color 128 0 255)(line_width 3))
 	)
+	(port
+		(pt 0 504)
+		(output)
+		(text "cp_irq" (rect 16 496 52 509)(font "Arial" (font_size 8)))
+		(text "cp_irq" (rect 16 496 52 509)(font "Arial" (font_size 8)))
+		(line (pt 0 504)(pt 8 504))
+	)
 	(drawing
 		(rectangle (rect 8 16 200 544))
 	)

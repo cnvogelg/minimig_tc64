@@ -69,7 +69,8 @@ entity TG68K is
         cp_wr : out std_logic;
         cp_dat_d : out std_logic_vector(7 downto 0);
         cp_dat_q : in std_logic_vector(7 downto 0) := (others => '0');
-        cp_addr : out std_logic_vector(3 downto 0)
+        cp_addr : out std_logic_vector(3 downto 0);
+        cp_irq : in std_logic
         );
 end TG68K;
 
@@ -169,7 +170,7 @@ COMPONENT TG68KdotC_Kernel
    signal cp_data_out : std_logic_vector(15 downto 0);
    signal cp_busy : std_logic;
    signal cp_flag_ack : std_logic;
-
+   signal cp_irq_ipl : std_logic_vector(2 downto 0);
 BEGIN  
 --	n_clk <= NOT clk;
 --	wrd <= data_akt_e OR data_akt_s;
@@ -270,6 +271,7 @@ pf68K_Kernel_inst: TG68KdotC_Kernel
  
 -- ----- clockport -----
 cp_data_out <= X"00" & cp_dat_q;
+cp_irq_ipl <= not cp_irq & "11";
 
 process(clk)
 begin
@@ -549,7 +551,7 @@ PROCESS (clk, reset, state, as_s, as_e, rw_s, rw_e, uds_s, uds_e, lds_s, lds_e)
 				data_akt_e <= '0';
 				CASE S_state IS
 					WHEN "00" => addr_akt_e <= '1';
-								 cpuIPL <= IPL;
+								 cpuIPL <= IPL and cp_irq_ipl;
 								 IF sel_fast='0' THEN
 									 IF state/="01" THEN
 										as_e <= '0';
@@ -570,7 +572,7 @@ PROCESS (clk, reset, state, as_s, as_e, rw_s, rw_e, uds_s, uds_e, lds_s, lds_e)
 					WHEN "10" => rw_e <= wr;
 								 addr_akt_e <= '1';
 								 data_akt_e <= NOT wr;
-								 cpuIPL <= IPL;
+								 cpuIPL <= IPL and cp_irq_ipl;
 								 waitm <= dtack;
 					WHEN OTHERS => --null;			
 									 clkena_e <= '1';

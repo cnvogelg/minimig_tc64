@@ -132,7 +132,8 @@ entity chameleon_io is
         cp_wr : in std_logic := '0'; -- 1=write 0=read op
         cp_dat_d : in unsigned(7 downto 0) := (others => '0'); -- cp data in
         cp_dat_q : out unsigned(7 downto 0);
-        cp_addr : in unsigned(3 downto 0) := (others => '0')
+        cp_addr : in unsigned(3 downto 0) := (others => '0');     
+        cp_irq : out std_logic -- one mux_clk 1 -> irq detect
     );
 end entity;
 -- -----------------------------------------------------------------------
@@ -331,16 +332,8 @@ begin
                     cp_dat_q_reg(3 downto 0) <= mux_q;
                 when X"1" =>
                     cp_dat_q_reg(7 downto 4) <= mux_q;
---                when X"6" =>
---                    c64_reset_reg <= not mux_q(0);
---                    c64_irq_n <= mux_q(2);
---                    c64_nmi_n <= mux_q(3);
---                    reset_pending <= reset; -- or c64_reset_reg;
---                    if reset_pending = '0' then
---                        reset_in <= c64_reset_reg;
---                    else
---                        reset_in <= '0';
---                    end if;
+                when X"6" =>
+                    cp_irq <= not mux_q(3); -- nmi_n
                 when X"B" =>
                     button_reset_n <= mux_q(1);
                     ir <= mux_q(3);

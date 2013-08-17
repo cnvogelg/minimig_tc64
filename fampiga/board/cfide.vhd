@@ -95,8 +95,8 @@ entity cfide is
     cp_wr : in std_logic := '0';
     cp_dat_d : in std_logic_vector(7 downto 0) := (others => '0');
     cp_dat_q : out std_logic_vector(7 downto 0);
-    cp_addr : in std_logic_vector(3 downto 0) := (others => '0')
-  
+    cp_addr : in std_logic_vector(3 downto 0) := (others => '0');
+    cp_irq : out std_logic
    );
 
 end cfide;
@@ -287,7 +287,8 @@ joystick4<= (others => '1');
             cp_wr => cp_wr,
             cp_dat_d => unsigned(cp_dat_d),
             cp_dat_q => cp_dat_q_loc,
-            cp_addr => unsigned(cp_addr)
+            cp_addr => unsigned(cp_addr),
+            cp_irq => cp_irq
   		);
 
 
