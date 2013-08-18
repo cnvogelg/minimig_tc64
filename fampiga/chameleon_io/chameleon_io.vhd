@@ -408,7 +408,7 @@ begin
                             mux_d_reg <= X"d";
                         -- idle states
                         when CP_IDLE =>
-                            mux_d_reg <= "1101"; -- disable irq, reset, enable dma
+                            mux_d_reg <= "110" & not reset; -- disable irq, enable dma, set reset
                             mux_reg <= X"6";
                         -- read sequence
                         when CP_READ_ADDR =>
