@@ -67,6 +67,7 @@ entity chameleon_io is
         clk : in std_logic;
         clk_mux : in std_logic;
         reset : in std_logic;
+        n_reset : in std_logic;
 
 -- Chameleon FPGA pins
         -- C64 Clocks
@@ -408,7 +409,7 @@ begin
                             mux_d_reg <= X"d";
                         -- idle states
                         when CP_IDLE =>
-                            mux_d_reg <= "110" & not reset; -- disable irq, enable dma, set reset
+                            mux_d_reg <= "110" & n_reset; -- disable irq, enable dma, set reset
                             mux_reg <= X"6";
                         -- read sequence
                         when CP_READ_ADDR =>

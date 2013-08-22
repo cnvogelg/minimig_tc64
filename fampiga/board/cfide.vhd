@@ -237,6 +237,7 @@ joystick4<= (others => '1');
 			clk => sysclk,	-- present
 			clk_mux => sysclk, -- present
 			reset => not n_reset, -- present, but inverted
+            n_reset => n_reset,
 			
 		-- Chameleon FPGA pins
 			-- C64 Clocks
