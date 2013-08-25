@@ -386,6 +386,11 @@ reg		ntsc = NTSC;			// PAL/NTSC video mode selection
 
 //--------------------------------------------------------------------------------------
 
+// clockport
+reg cp_irq_reg;
+
+always @(posedge clk)
+    cp_irq_reg = cp_irq;
 
 //--------------------------------------------------------------------------------------
 assign floppyled = disk_led;
@@ -517,7 +522,7 @@ Paula PAULA1
 	.vblint(vbl_int),
 	.int2(int2|gayle_irq),
 	.int3(int3),
-	.int6(int6),
+	.int6(int6 | cp_irq_reg),
 	._ipl(_iplx),
 	.audio_dmal(audio_dmal),
 	.audio_dmas(audio_dmas),

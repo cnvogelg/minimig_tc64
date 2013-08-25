@@ -208,9 +208,6 @@ architecture rtl of chameleon_io is
     signal cp_dat_q_reg : unsigned(7 downto 0) := X"00";
     
     signal cp_ws_count : unsigned(3 downto 0);
-    
-    signal cp_irq_i : std_logic;
-    signal cp_irq_d : std_logic;
 begin
 
     cp_ack <= cp_ack_reg;
@@ -239,15 +236,6 @@ begin
         end if;
     end process;
     
-    -- sync irq
-    cp_irq <= cp_irq_d;
-    process(clk_mux)
-    begin
-        if rising_edge(clk_mux) then
-            cp_irq_d <= cp_irq_i;
-        end if;
-    end process;
-
     -- ---- mux -----
 
     -- MUX clock
@@ -346,7 +334,7 @@ begin
                 when X"1" =>
                     cp_dat_q_reg(7 downto 4) <= mux_q;
                 when X"6" =>
-                    cp_irq_i <= not mux_q(3); -- nmi_n
+                    cp_irq <= not mux_q(3); -- nmi_n
                 when X"B" =>
                     button_reset_n <= mux_q(1);
                     ir <= mux_q(3);
