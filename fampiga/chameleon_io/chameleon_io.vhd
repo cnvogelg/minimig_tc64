@@ -422,8 +422,8 @@ begin
                             mux_d_reg <= "0010"; -- /IOR enable
                             mux_reg <= X"8"; 
                         when CP_READ_WS =>
-                            mux_d_reg <= "----"; -- idle
-                            mux_reg <= X"F";
+                            mux_d_reg <= "1101"; -- idle, sample irq
+                            mux_reg <= X"6";
                         when CP_READ_D03 =>
                             mux_d_reg <= "0000"; -- dummy?
                             mux_reg <= X"0"; 
@@ -454,8 +454,8 @@ begin
                             mux_d_reg <= "0001"; -- /IOW enable
                             mux_reg <= X"8"; 
                         when CP_WRITE_WS =>
-                            mux_d_reg <= "----"; -- idle
-                            mux_reg <= X"F";
+                            mux_d_reg <= "1101"; -- idle, sample irq
+                            mux_reg <= X"6";
                         when CP_WRITE_IOW_END =>
                             mux_d_reg <= "0011"; -- /IOR, /IOW disable
                             mux_reg <= X"8";
