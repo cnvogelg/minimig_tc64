@@ -213,7 +213,9 @@ module Minimig1
 	input	[8:0]ascancode,		// Amiga Scancode form Dockingstation
 	input	[5:0]_joy3,			// joystick 3 [fire2,fire,right,left,down,up] (joystick port)
 	input	[5:0]_joy4,			// joystick 4 [fire2,fire,right,left,down,up] (joystick port)
-	output reconfigure		// reconfigure chameleon
+	output reconfigure,		// reconfigure chameleon
+    // clockport
+    input   cp_irq         // clockport irq
 );
 
 //--------------------------------------------------------------------------------------
